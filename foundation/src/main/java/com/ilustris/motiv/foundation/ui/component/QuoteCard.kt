@@ -34,7 +34,7 @@ fun QuoteCard(quote: String, onClick: (String) -> Unit, modifier: Modifier) {
             .clickable {
                 onClick(quote)
             }
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
     ) {
 
         val brush = motivBrushes()

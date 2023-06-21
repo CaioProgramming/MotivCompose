@@ -6,7 +6,9 @@ import android.graphics.BitmapFactory
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
@@ -14,8 +16,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -73,8 +77,8 @@ fun RadioView(modifier: Modifier) {
     val expanded = remember {
         mutableStateOf(false)
     }
-    val backColor by animateColorAsState(targetValue = if (expanded.value) MaterialTheme.colorScheme.background else Color.Transparent)
-    val padding by animateDpAsState(targetValue = if (expanded.value) 16.dp else 0.dp)
+    val backColor by animateColorAsState(targetValue = if (expanded.value) MaterialTheme.colorScheme.background else Color.Transparent, tween(500, easing = LinearOutSlowInEasing))
+    val padding by animateDpAsState(targetValue = if (expanded.value) 16.dp else 0.dp, tween(500, easing = LinearEasing))
     Column(
         modifier = modifier
             .background(backColor, RoundedCornerShape(defaultRadius))
@@ -84,7 +88,7 @@ fun RadioView(modifier: Modifier) {
                 RoundedCornerShape(defaultRadius)
             )
             .padding(padding)
-            .animateContentSize(tween(500)), horizontalAlignment = Alignment.CenterHorizontally
+            .animateContentSize(tween(1500, easing = FastOutSlowInEasing)), horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
 
@@ -94,16 +98,15 @@ fun RadioView(modifier: Modifier) {
         val rotationAnimation = infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = if (!expanded.value) 360f else 0f,
-            animationSpec = infiniteRepeatable(tween(5000, easing = LinearEasing), repeatMode = RepeatMode.Reverse)
+            animationSpec = infiniteRepeatable(tween(5000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse)
         )
 
-        val blurAnimation by animateDpAsState(targetValue = if (expanded.value) 0.dp else 15.dp)
-        val size by animateDpAsState(targetValue = if (!expanded.value) 40.dp else 64.dp)
+        val blurAnimation by animateDpAsState(targetValue = if (expanded.value) 0.dp else 15.dp, tween(1000, easing = FastOutSlowInEasing))
 
         val rowModifier = if (expanded.value) {
             Modifier.fillMaxWidth().wrapContentHeight()
         } else {
-            Modifier.size(size)
+            Modifier.size(64.dp)
         }
 
 
@@ -119,7 +122,7 @@ fun RadioView(modifier: Modifier) {
                 modifier = Modifier
                     .radioIconModifier(
                         rotationValue = rotationAnimation.value,
-                        sizeValue = size
+                        sizeValue = 64.dp
                     )
                     .blur(blurAnimation)
                     .clickable {
@@ -127,7 +130,8 @@ fun RadioView(modifier: Modifier) {
                     }
             )
 
-            AnimatedVisibility(visible = expanded.value, enter = scaleIn(), exit = fadeOut(), modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            AnimatedVisibility(visible = expanded.value, enter = fadeIn() + slideInHorizontally(
+                tween(1000, easing = LinearOutSlowInEasing)), exit = fadeOut(), modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 val brushes = motivBrushes()
                 Text(text = "NightWave Plaza", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold) ,modifier = Modifier
                     .graphicsLayer(alpha = 0.99f)
