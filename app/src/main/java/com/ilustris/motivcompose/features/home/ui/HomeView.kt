@@ -67,8 +67,8 @@ fun HomeView() {
             }
         )
 
-        RadioView(modifier =Modifier
-            .padding(8.dp)
+        RadioView(modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .constrainAs(header) {
                 top.linkTo(parent.top)
                 width = Dimension.matchParent

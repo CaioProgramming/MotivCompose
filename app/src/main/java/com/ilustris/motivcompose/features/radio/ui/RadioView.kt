@@ -78,16 +78,15 @@ fun RadioView(modifier: Modifier) {
         mutableStateOf(false)
     }
     val backColor by animateColorAsState(targetValue = if (expanded.value) MaterialTheme.colorScheme.background else Color.Transparent, tween(500, easing = LinearOutSlowInEasing))
-    val padding by animateDpAsState(targetValue = if (expanded.value) 16.dp else 0.dp, tween(500, easing = LinearEasing))
     Column(
         modifier = modifier
-            .background(backColor, RoundedCornerShape(defaultRadius))
+            .background(backColor, RoundedCornerShape(defaultRadius * 2))
             .border(
                 if (expanded.value) 1.dp else 0.dp,
-                MaterialTheme.colorScheme.onBackground.copy(alpha = if (expanded.value) 0.2f else 0f),
-                RoundedCornerShape(defaultRadius)
+                MaterialTheme.colorScheme.onBackground.copy(alpha = if (expanded.value) 0.1f else 0f),
+                RoundedCornerShape(defaultRadius * 2)
             )
-            .padding(padding)
+            .padding(4.dp)
             .animateContentSize(tween(1500, easing = FastOutSlowInEasing)), horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -98,20 +97,28 @@ fun RadioView(modifier: Modifier) {
         val rotationAnimation = infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = if (!expanded.value) 360f else 0f,
-            animationSpec = infiniteRepeatable(tween(5000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse)
+            animationSpec = infiniteRepeatable(
+                tween(5000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            )
         )
 
-        val blurAnimation by animateDpAsState(targetValue = if (expanded.value) 0.dp else 15.dp, tween(1000, easing = FastOutSlowInEasing))
+        val blurAnimation by animateDpAsState(
+            targetValue = if (expanded.value) 0.dp else 15.dp,
+            tween(1000, easing = FastOutSlowInEasing)
+        )
 
-        val rowModifier = if (expanded.value) {
-            Modifier.fillMaxWidth().wrapContentHeight()
-        } else {
-            Modifier.size(64.dp)
-        }
+        val rowModifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
 
 
 
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = rowModifier,
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             GlideImage(
                 imageModel = { gifUrl },
                 glideRequestType = GlideRequestType.GIF,
@@ -130,20 +137,34 @@ fun RadioView(modifier: Modifier) {
                     }
             )
 
-            AnimatedVisibility(visible = expanded.value, enter = fadeIn() + slideInHorizontally(
-                tween(1000, easing = LinearOutSlowInEasing)), exit = fadeOut(), modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            AnimatedVisibility(
+                visible = expanded.value,
+                enter = fadeIn(tween(1500)) + slideInHorizontally(
+                    tween(
+                        500,
+                        easing = LinearOutSlowInEasing
+                    )
+                ),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
                 val brushes = motivBrushes()
-                Text(text = "NightWave Plaza", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold) ,modifier = Modifier
-                    .graphicsLayer(alpha = 0.99f)
-                    .drawWithCache {
-                        onDrawWithContent {
-                            drawContent()
-                            drawRect(
-                                brush = Brush.linearGradient(brushes),
-                                blendMode = BlendMode.SrcAtop
-                            )
-                        }
-                    })
+                Text(
+                    text = "NightWave Plaza",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier
+                        .graphicsLayer(alpha = 0.99f)
+                        .drawWithCache {
+                            onDrawWithContent {
+                                drawContent()
+                                drawRect(
+                                    brush = Brush.linearGradient(brushes),
+                                    blendMode = BlendMode.SrcAtop
+                                )
+                            }
+                        })
             }
         }
     }

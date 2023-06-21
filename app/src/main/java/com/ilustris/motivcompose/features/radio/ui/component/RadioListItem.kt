@@ -52,10 +52,11 @@ fun RadioListItem(radio: Radio, onClickRadio: (Radio) -> Unit) {
                 }
         )
 
-        val brushes = motivBrushes()
-        Text(text = "NightWave Plaza",
+        Text(
+            text = radio.name,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 
 }
