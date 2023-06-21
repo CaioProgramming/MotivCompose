@@ -66,7 +66,7 @@ fun QuoteCardPreview() {
         QuoteCard(
             "Love is the only force capable of transforming an enemy into a friend.",
             onClick = {},
-            modifier = quoteCardModifier()
+            modifier = Modifier.quoteCardModifier()
         )
     }
 }

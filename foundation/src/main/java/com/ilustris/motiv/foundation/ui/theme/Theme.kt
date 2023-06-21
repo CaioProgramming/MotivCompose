@@ -19,6 +19,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -77,14 +79,23 @@ fun MotivTheme(
         content = content
     )
 }
+
 val defaultRadius = 15.dp
+val radioRadius = 30.dp
 
 @Composable
-fun motivBrushes() = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.tertiary)
+fun motivBrushes() = listOf(
+    MaterialColor.Purple300,
+    MaterialColor.Purple600,
+    MaterialColor.Purple900
+)
 
 @Composable
-fun quoteCardModifier() = Modifier
-    .padding(vertical = 8.dp)
-    .fillMaxSize()
-    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(defaultRadius))
-    .padding(16.dp)
+fun motivGradient() = Brush.linearGradient(colors = motivBrushes())
+
+fun Modifier.quoteCardModifier() = composed {
+    padding(vertical = 8.dp)
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(defaultRadius))
+        .padding(16.dp)
+}

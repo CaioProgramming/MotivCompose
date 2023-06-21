@@ -19,6 +19,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -39,6 +41,10 @@ fun HomeView() {
         "É a solidão que inspira os poetas, cria os artistas e anima o gênio.",
         "vivi muitos abandonos,mas eu não desisti de mim.aprendi que ninguém pode(e nem deveria)me amar mais do que eu mesma."
     )
+
+    val radioExpanded = remember {
+        mutableStateOf(false)
+    }
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -63,16 +69,16 @@ fun HomeView() {
             pageContent = {
                 QuoteCard(quotes[it], onClick = { quote ->
                     Log.i(javaClass.simpleName, "HomeView: quote selected $quote")
-                }, modifier = quoteCardModifier())
+                }, modifier = Modifier.quoteCardModifier())
             }
         )
 
-        RadioView(modifier = Modifier
+        RadioView(expanded = radioExpanded.value, modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .constrainAs(header) {
                 top.linkTo(parent.top)
                 width = Dimension.matchParent
-            })
+            }) { radioExpanded.value = !radioExpanded.value }
 
     }
 

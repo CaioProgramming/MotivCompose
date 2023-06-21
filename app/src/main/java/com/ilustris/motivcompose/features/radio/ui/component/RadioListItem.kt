@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
@@ -22,7 +24,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.model.Radio
+import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
+import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motivcompose.features.radio.ui.radioIconModifier
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
@@ -31,13 +35,19 @@ import com.skydoves.landscapist.glide.GlideRequestType
 @Composable
 fun RadioListItem(radio: Radio, onClickRadio: (Radio) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clip(RoundedCornerShape(radioRadius))
+            .clickable {
+                onClickRadio(radio)
+            },
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
         GlideImage(
             imageModel = { radio.visualizer },
-            glideRequestType = GlideRequestType.GIF,
+            glideRequestType = GlideRequestType.BITMAP,
             imageOptions = ImageOptions(
                 Alignment.Center,
                 contentScale = ContentScale.Crop,
@@ -47,9 +57,7 @@ fun RadioListItem(radio: Radio, onClickRadio: (Radio) -> Unit) {
                     rotationValue = 0f,
                     sizeValue = 64.dp
                 )
-                .clickable {
-                    onClickRadio(radio)
-                }
+
         )
 
         Text(
