@@ -56,17 +56,14 @@ fun RadioListItem(radio: Radio, onClickRadio: (Radio) -> Unit) {
                 contentScale = ContentScale.Crop,
             ),
             modifier = Modifier
-                .border(
-                    2.dp,
+                .radioIconModifier(
                     brush = Brush.linearGradient(
                         listOf(
                             MaterialTheme.colorScheme.onBackground,
                             MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                             MaterialTheme.colorScheme.background
                         )
-                    ), CircleShape
-                )
-                .radioIconModifier(
+                    ),
                     rotationValue = 0f,
                     sizeValue = 64.dp
                 )

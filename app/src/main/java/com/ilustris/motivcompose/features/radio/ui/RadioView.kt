@@ -192,12 +192,9 @@ fun RadioView(
                             ),
                             modifier = Modifier
                                 .padding(8.dp)
-                                .border(
-                                    3.dp,
-                                    brush = borderBrush,
-                                    CircleShape
-                                )
+
                                 .radioIconModifier(
+                                    brush = borderBrush,
                                     rotationValue = rotationAnimation.value,
                                     sizeValue = 64.dp,
                                 )
@@ -259,8 +256,13 @@ fun RadioView(
 
 }
 
-fun Modifier.radioIconModifier(rotationValue: Float, sizeValue: Dp) = composed {
-    size(sizeValue)
+fun Modifier.radioIconModifier(rotationValue: Float, sizeValue: Dp, brush: Brush) = composed {
+    border(
+        3.dp,
+        brush = brush,
+        CircleShape
+    )
+        .size(sizeValue)
         .padding(8.dp)
         .clip(CircleShape)
         .rotate(rotationValue)

@@ -69,7 +69,7 @@ fun HomeView() {
             mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
             try {
                 mediaPlayer.setDataSource(playingRadio.url)
-                mediaPlayer.setVolume(0.3f, 0.3f)
+                mediaPlayer.setVolume(0.2f, 0.2f)
                 mediaPlayer.prepare()
                 mediaPlayer.start()
             } catch (e: Exception) {
