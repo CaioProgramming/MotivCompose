@@ -6,6 +6,8 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -17,6 +19,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
@@ -84,7 +87,7 @@ fun HomeView() {
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (header, content) = createRefs()
+        val (playerView, content) = createRefs()
 
 
         val quotes = if (quotesState is ViewModelBaseState.DataListRetrievedState) {
@@ -108,40 +111,42 @@ fun HomeView() {
                 modifier = Modifier
                     .constrainAs(content) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(parent.bottom, 16.dp)
                         width = Dimension.matchParent
                         height = Dimension.fillToConstraints
                     }
                     .blur(blurViewAnimation, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .animateContentSize(tween(1500, easing = LinearOutSlowInEasing)),
                 state = pagerState,
                 userScrollEnabled = true,
                 pageContent = { index ->
-                    QuoteCard(get(index).quote, onClick = { quote ->
+                    QuoteCard(get(index), onClick = { quote ->
                         Log.i(javaClass.simpleName, "HomeView: quote selected $quote")
                     }, modifier = Modifier.quoteCardModifier())
                 }
             )
 
             AnimatedVisibility(
-                visible = !isUserScrolling.value,
+                visible = true,
                 enter = scaleIn(),
-                exit = scaleOut()
+                exit = scaleOut(),
+                modifier = Modifier
+                    .constrainAs(playerView) {
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.matchParent
+                    }
             ) {
                 RadioView(
+                    modifier = Modifier.fillMaxWidth(),
                     expanded = radioExpanded.value,
                     playingRadio = playingRadio,
                     onSelectRadio = {
                         homeViewModel.updatePlayingRadio(it)
                     },
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .constrainAs(header) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            width = Dimension.matchParent
-                        }) { radioExpanded.value = !radioExpanded.value }
+                ) { radioExpanded.value = !radioExpanded.value }
             }
 
 
