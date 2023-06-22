@@ -3,11 +3,13 @@ package com.ilustris.motivcompose.features.radio.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +23,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.model.Radio
@@ -53,6 +56,16 @@ fun RadioListItem(radio: Radio, onClickRadio: (Radio) -> Unit) {
                 contentScale = ContentScale.Crop,
             ),
             modifier = Modifier
+                .border(
+                    2.dp,
+                    brush = Brush.linearGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.onBackground,
+                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    ), CircleShape
+                )
                 .radioIconModifier(
                     rotationValue = 0f,
                     sizeValue = 64.dp
@@ -62,8 +75,13 @@ fun RadioListItem(radio: Radio, onClickRadio: (Radio) -> Unit) {
 
         Text(
             text = radio.name,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            modifier = Modifier.fillMaxWidth()
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontStyle = FontStyle.Italic
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
         )
     }
 
