@@ -9,6 +9,9 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -49,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -78,9 +82,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.model.Radio
+import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
+import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motivcompose.features.home.presentation.RadioViewModel
 import com.ilustris.motivcompose.features.radio.ui.component.RadioListItem
@@ -105,6 +111,15 @@ fun RadioView(
         targetValue = if (expanded) MaterialTheme.colorScheme.background else Color.Transparent,
         tween(500, easing = FastOutSlowInEasing)
     )
+
+    val blurAnimation by animateDpAsState(
+        targetValue = if (expanded) 0.dp else 10.dp,
+        tween(5000, easing = EaseInBounce)
+    )
+
+    var visualizarBitmap by remember {
+        mutableStateOf<Bitmap?>(null)
+    }
 
     val radioViewModel = hiltViewModel<RadioViewModel>()
     val radios = radioViewModel.radioList.observeAsState(initial = emptyList()).value
@@ -147,30 +162,23 @@ fun RadioView(
                         initialValue = 0f,
                         targetValue = if (!expanded) 360f else 0f,
                         animationSpec = infiniteRepeatable(
-                            tween(5000, easing = FastOutSlowInEasing),
+                            tween(2500, easing = FastOutSlowInEasing),
                             repeatMode = RepeatMode.Reverse
                         )
                     )
 
-                    val blurAnimation by animateDpAsState(
-                        targetValue = if (expanded) 0.dp else 15.dp,
-                        tween(1000, easing = FastOutSlowInEasing)
-                    )
 
-                    val offsetAnimation = infiniteTransition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = (128 * 2).toFloat(),
-                        animationSpec = infiniteRepeatable(
-                            tween(3500, easing = LinearEasing),
-                            repeatMode = RepeatMode.Reverse,
-                        )
-                    )
+                    /*       val offsetAnimation = infiniteTransition.animateFloat(
+                               initialValue = 0f,
+                               targetValue = (128 * 2).toFloat(),
+                               animationSpec = infiniteRepeatable(
+                                   tween(3500, easing = LinearEasing),
+                                   repeatMode = RepeatMode.Reverse,
+                               )
+                           )*/
 
-                    val borderBrush = Brush.linearGradient(
-                        motivBrushes(),
-                        start = Offset(0f, 0f),
-                        end = Offset(offsetAnimation.value, offsetAnimation.value)
-                    )
+                    val borderBrush = visualizarBitmap?.paletteFromBitMap()?.brushsFromPalette()
+                        ?: motivGradient()
 
                     Row(
                         modifier = Modifier
@@ -185,18 +193,29 @@ fun RadioView(
                     ) {
                         GlideImage(
                             imageModel = { gifUrl },
+
                             glideRequestType = GlideRequestType.GIF,
+                            onImageStateChanged = { state ->
+                                if (state is GlideImageState.Success) {
+                                    state.imageBitmap?.let {
+                                        visualizarBitmap = it.asAndroidBitmap()
+                                    }
+                                }
+                            },
                             imageOptions = ImageOptions(
                                 Alignment.Center,
-                                contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Crop
                             ),
                             modifier = Modifier
                                 .padding(8.dp)
-
                                 .radioIconModifier(
                                     brush = borderBrush,
                                     rotationValue = rotationAnimation.value,
                                     sizeValue = 64.dp,
+                                )
+                                .background(
+                                    borderBrush,
+                                    CircleShape
                                 )
                                 .animateContentSize(tween(1000))
                                 .blur(blurAnimation)
@@ -263,7 +282,7 @@ fun Modifier.radioIconModifier(rotationValue: Float, sizeValue: Dp, brush: Brush
         CircleShape
     )
         .size(sizeValue)
-        .padding(8.dp)
+        .padding(4.dp)
         .clip(CircleShape)
         .rotate(rotationValue)
 }
