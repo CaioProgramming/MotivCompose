@@ -2,8 +2,10 @@ package com.ilustris.motiv.foundation.ui.theme
 
 import ai.atick.material.MaterialColor
 import android.app.Activity
+import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,11 +21,19 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.palette.graphics.Palette
+import com.ilustris.motiv.foundation.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = MaterialColor.DeepPurple300,
@@ -77,14 +87,64 @@ fun MotivTheme(
         content = content
     )
 }
+
 val defaultRadius = 15.dp
+val radioRadius = 30.dp
+
+val fontProvider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
 
 @Composable
-fun motivBrushes() = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.tertiary)
+fun motivBrushes() = listOf(
+    MaterialColor.Purple300,
+    MaterialColor.Purple600,
+    MaterialColor.Purple900
+)
 
 @Composable
-fun quoteCardModifier() = Modifier
-    .padding(vertical = 8.dp)
-    .fillMaxSize()
-    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(defaultRadius))
-    .padding(16.dp)
+fun motivGradient() = Brush.linearGradient(colors = motivBrushes())
+
+@Composable
+fun getDeviceWidth() = LocalConfiguration.current.screenWidthDp
+
+@Composable
+fun getDeviceHeight() = LocalConfiguration.current.screenHeightDp
+
+@Composable
+fun Bitmap.paletteFromBitMap() = Palette.from(this).generate()
+
+fun Palette.brushsFromPalette(): Brush {
+    val dominantSwatch = try {
+        Color(this.dominantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Purple800
+    }
+
+    val vibrantSwatch = try {
+        Color(this.vibrantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.PurpleA700
+    }
+
+    val mutedSwatch = try {
+        Color(this.mutedSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.DeepPurpleA200
+    }
+
+    return Brush.linearGradient(listOf(dominantSwatch, vibrantSwatch, mutedSwatch))
+}
+
+
+fun Modifier.quoteCardModifier() = composed {
+    padding(16.dp)
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(defaultRadius))
+        .clip(RoundedCornerShape(defaultRadius))
+
+}
+
+

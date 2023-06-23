@@ -1,0 +1,52 @@
+package com.ilustris.motiv.foundation.utils
+
+import android.content.Context
+import android.graphics.Typeface
+import android.os.Handler
+import android.os.HandlerThread
+import android.util.Log
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.core.provider.FontRequest
+import androidx.core.provider.FontsContractCompat
+import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.ui.theme.fontProvider
+import kotlinx.coroutines.coroutineScope
+
+object FontUtils {
+    fun getFontFamily(fontName: String) = FontFamily(
+        Font(
+            googleFont = GoogleFont(fontName),
+            fontProvider = fontProvider,
+            weight = FontWeight.Normal
+        ),
+        Font(
+            googleFont = GoogleFont(fontName),
+            fontProvider = fontProvider,
+            weight = FontWeight.Bold
+        ),
+        Font(
+            googleFont = GoogleFont(fontName),
+            fontProvider = fontProvider,
+            style = FontStyle.Italic
+        ),
+        androidx.compose.ui.text.font.Font(R.font.pathway_variable)
+    )
+
+
+    fun getFamily(context: Context, index: Int): String {
+        val array = context.resources.getStringArray(R.array.family_names)
+        return try {
+            array[index]
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e(javaClass.simpleName, "getFamily: Error getting font family ${e.message}")
+            array.first()
+        }
+    }
+
+    fun getFamilies(context: Context) = context.resources.getStringArray(R.array.family_names)
+}
