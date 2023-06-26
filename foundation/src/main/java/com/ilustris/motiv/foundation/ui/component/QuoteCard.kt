@@ -200,6 +200,7 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
                 color = textColor,
                 textAlign = textAlign,
                 fontFamily = defaultFont,
+                textStyle = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
@@ -248,20 +249,24 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
             }
 
             val blurInfoAnimation by animateDpAsState(
-                targetValue = if (infoExpanded) 0.dp else 10.dp,
+                targetValue = if (infoExpanded) 0.dp else defaultRadius,
                 tween(500)
+            )
+
+            val iconAlphaAnimation by animateFloatAsState(
+                targetValue = if (infoExpanded) 1f else 0.7f,
+                tween(1500)
             )
 
 
             Row(
                 modifier = Modifier
                     .background(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.5f), RoundedCornerShape(
-                            radioRadius
-                        )
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
+                        RoundedCornerShape(radioRadius)
                     )
                     .clip(RoundedCornerShape(radioRadius))
-                    .animateContentSize(tween(500, easing = FastOutLinearInEasing)),
+                    .animateContentSize(tween(250, easing = LinearEasing)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
@@ -277,10 +282,9 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
                     ),
                     modifier = Modifier
                         .size(50.dp)
-                        .blur(blurInfoAnimation)
+                        .blur(blurInfoAnimation, edgeTreatment = BlurredEdgeTreatment.Unbounded)
                         .clip(CircleShape)
-                        .border(1.dp, MaterialTheme.colorScheme.onBackground, CircleShape)
-                        .background(MaterialTheme.colorScheme.surface, CircleShape)
+                        .border(2.dp, brush = brush, CircleShape)
                         .clickable {
                             infoExpanded = !infoExpanded
                             showInfo = infoExpanded
@@ -295,7 +299,7 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
                     exit = fadeOut()
                 ) {
                     Column(modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(8.dp)
                         .clickable {
 
                         }) {

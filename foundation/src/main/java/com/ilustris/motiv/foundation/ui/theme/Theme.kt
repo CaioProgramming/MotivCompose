@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -23,13 +25,18 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.palette.graphics.Palette
@@ -100,13 +107,25 @@ val fontProvider = GoogleFont.Provider(
 
 @Composable
 fun motivBrushes() = listOf(
-    MaterialColor.Purple300,
-    MaterialColor.Purple600,
-    MaterialColor.Purple900
+    MaterialColor.DeepPurple500,
+    MaterialColor.PinkA200,
+    MaterialColor.Purple500,
+    MaterialColor.PurpleA700,
+    MaterialColor.Pink500,
 )
 
 @Composable
 fun motivGradient() = Brush.linearGradient(colors = motivBrushes())
+
+@Composable
+fun grayGradients() = Brush.linearGradient(
+    colors = listOf(
+        MaterialColor.Gray300,
+        MaterialColor.Gray500,
+        MaterialColor.Gray700,
+        Color.Transparent
+    )
+)
 
 @Composable
 fun getDeviceWidth() = LocalConfiguration.current.screenWidthDp
@@ -141,11 +160,37 @@ fun Palette.brushsFromPalette(): Brush {
 
 
 fun Modifier.quoteCardModifier() = composed {
-    padding(16.dp)
-        .fillMaxSize()
+    fillMaxSize()
         .background(MaterialTheme.colorScheme.background, RoundedCornerShape(defaultRadius))
         .clip(RoundedCornerShape(defaultRadius))
 
 }
+
+fun Modifier.gradientFill(brush: Brush) =
+    graphicsLayer(alpha = 0.99f)
+        .drawWithCache {
+            onDrawWithContent {
+                drawContent()
+                drawRect(brush, blendMode = BlendMode.SrcAtop)
+            }
+        }
+
+fun Modifier.radioIconModifier(
+    rotationValue: Float,
+    sizeValue: Dp,
+    brush: Brush,
+    borderWidth: Dp = 3.dp
+) = composed {
+    border(
+        borderWidth,
+        brush = brush,
+        CircleShape
+    )
+        .size(sizeValue)
+        .padding(4.dp)
+        .clip(CircleShape)
+        .rotate(rotationValue)
+}
+
 
 

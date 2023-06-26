@@ -1,7 +1,7 @@
 package com.ilustris.motivcompose.ui.navigation
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -11,11 +11,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -24,25 +25,36 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.ilustris.motiv.foundation.ui.theme.gradientFill
+import com.ilustris.motiv.foundation.ui.theme.grayGradients
+import com.ilustris.motiv.foundation.ui.theme.motivBrushes
+import com.ilustris.motiv.foundation.ui.theme.motivGradient
+import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motivcompose.features.home.ui.HomeView
+import com.ilustris.motivcompose.features.post.ui.QuotePostView
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
+import com.skydoves.landscapist.glide.GlideRequestType
 
 @Composable
-fun MotivNavigationGraph(navHostController: NavHostController, padding: Dp) {
+fun MotivNavigationGraph(navHostController: NavHostController, padding: PaddingValues) {
     NavHost(
         navController = navHostController,
         startDestination = AppNavigation.HOME.route,
-        modifier = Modifier.padding(bottom = padding)
+        modifier = Modifier
+            .padding(padding)
+            .padding(top = padding.calculateTopPadding())
     ) {
         AppNavigation.values().forEach { item ->
             composable(route = item.route) {
-                getRouteScreen(navigationItem = item)
+                GetRouteScreen(navigationItem = item, navHostController)
             }
         }
     }
 }
 
 @Composable
-fun MotivBottomNavigation(navController: NavController) {
+fun MotivBottomNavigation(navController: NavController, userProfilePic: String? = null) {
 
     fun navigateToScreen(route: String) {
         navController.navigate(route) {
@@ -68,20 +80,41 @@ fun MotivBottomNavigation(navController: NavController) {
                     alpha = 0.5f
                 )
 
+            val selectedBrush = if (isSelected) motivGradient() else grayGradients()
+
             BottomNavigationItem(
-                selected = true,
-                selectedContentColor = MaterialTheme.colorScheme.onBackground,
-                unselectedContentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                selected = isSelected,
                 onClick = { navigateToScreen(item.route) },
                 icon = {
-                    Image(
-                        painterResource(item.icon),
-                        contentDescription = item.title,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape),
-                        colorFilter = ColorFilter.tint(itemColor)
-                    )
+                    if (item == AppNavigation.PROFILE && userProfilePic != null) {
+                        GlideImage(
+                            imageModel = { userProfilePic },
+                            glideRequestType = GlideRequestType.BITMAP,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .radioIconModifier(
+                                    0f,
+                                    borderWidth = 1.dp,
+                                    sizeValue = 24.dp,
+                                    brush = selectedBrush
+                                ),
+                            imageOptions = ImageOptions(
+                                Alignment.Center,
+                                contentScale = ContentScale.Crop
+                            )
+                        )
+                    } else {
+                        Image(
+                            painterResource(item.icon),
+                            contentDescription = item.title,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .gradientFill(brush = selectedBrush)
+                                .clip(CircleShape),
+
+                            )
+                    }
+
                 })
         }
     }
@@ -89,10 +122,10 @@ fun MotivBottomNavigation(navController: NavController) {
 
 
 @Composable
-fun getRouteScreen(navigationItem: AppNavigation) {
+fun GetRouteScreen(navigationItem: AppNavigation, navController: NavController) {
     when (navigationItem) {
         AppNavigation.HOME -> {
-           HomeView()
+            HomeView()
         }
 
         AppNavigation.PROFILE -> {
@@ -100,7 +133,7 @@ fun getRouteScreen(navigationItem: AppNavigation) {
         }
 
         AppNavigation.POST -> {
-            Text(text = "Post")
+            QuotePostView(navController)
         }
     }
 }

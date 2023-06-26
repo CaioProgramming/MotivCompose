@@ -27,10 +27,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.model.Radio
-import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.motivBrushes
+import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
-import com.ilustris.motivcompose.features.radio.ui.radioIconModifier
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType
