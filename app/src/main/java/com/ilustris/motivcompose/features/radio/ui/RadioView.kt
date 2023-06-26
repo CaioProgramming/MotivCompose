@@ -87,6 +87,7 @@ import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
+import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motivcompose.features.home.presentation.RadioViewModel
 import com.ilustris.motivcompose.features.radio.ui.component.RadioListItem
@@ -113,7 +114,7 @@ fun RadioView(
     )
 
     val blurAnimation by animateDpAsState(
-        targetValue = if (expanded) 0.dp else 10.dp,
+        targetValue = if (expanded) 0.dp else defaultRadius,
         tween(5000, easing = EaseInBounce)
     )
 
@@ -124,7 +125,6 @@ fun RadioView(
     val radioViewModel = hiltViewModel<RadioViewModel>()
     val radios = radioViewModel.radioList.observeAsState(initial = emptyList()).value
 
-    val state = radioViewModel.viewModelState.observeAsState().value
 
     LaunchedEffect(Unit) {
         radioViewModel.getAllData()
@@ -193,7 +193,6 @@ fun RadioView(
                     ) {
                         GlideImage(
                             imageModel = { gifUrl },
-
                             glideRequestType = GlideRequestType.GIF,
                             onImageStateChanged = { state ->
                                 if (state is GlideImageState.Success) {
@@ -275,17 +274,6 @@ fun RadioView(
 
 }
 
-fun Modifier.radioIconModifier(rotationValue: Float, sizeValue: Dp, brush: Brush) = composed {
-    border(
-        3.dp,
-        brush = brush,
-        CircleShape
-    )
-        .size(sizeValue)
-        .padding(4.dp)
-        .clip(CircleShape)
-        .rotate(rotationValue)
-}
 
 
 @Preview()

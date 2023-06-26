@@ -11,8 +11,12 @@ class QuoteService : BaseService() {
     override var requireAuth = true
 
     override fun deserializeDataSnapshot(dataSnapshot: DocumentSnapshot): BaseBean? =
-        dataSnapshot.toObject(Quote::class.java)
+        dataSnapshot.toObject(Quote::class.java).apply {
+            this?.id = dataSnapshot.id
+        }
 
     override fun deserializeDataSnapshot(dataSnapshot: QueryDocumentSnapshot): BaseBean =
-        dataSnapshot.toObject(Quote::class.java)
+        dataSnapshot.toObject(Quote::class.java).apply {
+            this.id = dataSnapshot.id
+        }
 }

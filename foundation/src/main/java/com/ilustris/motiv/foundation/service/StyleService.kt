@@ -10,8 +10,12 @@ class StyleService : BaseService() {
 
     override val dataPath = "Styles"
     override fun deserializeDataSnapshot(dataSnapshot: DocumentSnapshot): Style? =
-        dataSnapshot.toObject(Style::class.java)
+        dataSnapshot.toObject(Style::class.java).apply {
+            this?.id = dataSnapshot.id
+        }
 
     override fun deserializeDataSnapshot(dataSnapshot: QueryDocumentSnapshot): Style =
-        dataSnapshot.toObject(Style::class.java)
+        dataSnapshot.toObject(Style::class.java).apply {
+            this.id = dataSnapshot.id
+        }
 }

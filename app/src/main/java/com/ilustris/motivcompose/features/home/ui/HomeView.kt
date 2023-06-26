@@ -132,7 +132,9 @@ fun HomeView() {
                     quotes.let {
                         QuoteCard(
                             it[index],
-                            modifier = Modifier.quoteCardModifier()
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .quoteCardModifier()
                         )
                     }
 
