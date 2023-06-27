@@ -35,6 +35,10 @@ class MainViewModel @Inject constructor(
 
     fun fetchUser() {
         viewModelScope.launch(Dispatchers.IO) {
+            if (service.currentUser() == null) {
+                updateViewState(ViewModelBaseState.RequireAuth)
+                return@launch
+            }
             val userRequest = service.getSingleData(service.currentUser()?.uid ?: "")
             if (userRequest is ServiceResult.Success) {
                 currentUser.postValue(userRequest.data as User)
