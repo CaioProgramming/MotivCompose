@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
 import com.ilustris.motiv.foundation.ui.theme.MotivTheme
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
@@ -48,7 +49,7 @@ import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.delayedFunction
 
 @Composable
-fun HomeView() {
+fun HomeView(navController: NavController) {
 
     val mediaPlayer = MediaPlayer()
     val context = LocalContext.current
@@ -66,8 +67,11 @@ fun HomeView() {
 
         delayedFunction(500) {
             playingRadio?.run {
-                mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
                 try {
+                    mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
+                    if (mediaPlayer.isPlaying) {
+                        mediaPlayer.stop()
+                    }
                     mediaPlayer.setDataSource(playingRadio.url)
                     mediaPlayer.prepareAsync()
                     mediaPlayer.setOnPreparedListener {
@@ -134,7 +138,13 @@ fun HomeView() {
                             it[index],
                             modifier = Modifier
                                 .padding(16.dp)
-                                .quoteCardModifier()
+                                .quoteCardModifier(),
+                            onClickUser = {
+                                navController.navigate("profile/$it")
+                            },
+                            onDelete = {},
+                            onLike = {},
+                            onShare = {}
                         )
                     }
 
@@ -178,12 +188,4 @@ fun HomeView() {
     }
 
 
-}
-
-@Preview(showBackground = true, showSystemUi = true, name = "Home View", uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun HomeViewPreview() {
-    MotivTheme(true) {
-        HomeView()
-    }
 }

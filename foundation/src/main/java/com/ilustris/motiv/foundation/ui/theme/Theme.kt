@@ -128,6 +128,17 @@ fun grayGradients() = Brush.linearGradient(
 )
 
 @Composable
+fun transparentFadeGradient() = Brush.linearGradient(
+    colors = listOf(
+        MaterialColor.Gray900,
+        MaterialColor.Gray800,
+        MaterialColor.Black,
+        Color.Transparent,
+
+        )
+)
+
+@Composable
 fun getDeviceWidth() = LocalConfiguration.current.screenWidthDp
 
 @Composable
@@ -180,7 +191,7 @@ fun Modifier.radioIconModifier(
     sizeValue: Dp,
     brush: Brush,
     borderWidth: Dp = 3.dp
-) = composed {
+) =
     border(
         borderWidth,
         brush = brush,
@@ -190,7 +201,7 @@ fun Modifier.radioIconModifier(
         .padding(4.dp)
         .clip(CircleShape)
         .rotate(rotationValue)
-}
+
 
 
 

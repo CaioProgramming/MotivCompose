@@ -13,6 +13,7 @@ import kotlinx.coroutines.tasks.await
 
 class UserService : BaseService() {
     override val dataPath: String = "Users"
+    override var requireAuth = true
 
     override fun deserializeDataSnapshot(dataSnapshot: DocumentSnapshot): User? =
         dataSnapshot.toObject(

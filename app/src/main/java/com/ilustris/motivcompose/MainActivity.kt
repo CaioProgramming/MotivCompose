@@ -39,7 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
-import com.ilustris.motiv.foundation.ui.component.TypeWriterText
+import com.ilustris.motiv.foundation.ui.component.AnimatedText
 import com.ilustris.motiv.foundation.ui.theme.MotivTheme
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                     .build()
 
                 AnimatedVisibility(
-                    visible = currentUser == null,
+                    visible = currentUser == null && viewModelState.value == ViewModelBaseState.RequireAuth,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         MotivLoader(modifier = Modifier.size(100.dp))
 
-                        TypeWriterText(
+                        AnimatedText(
                             text = "Faça login para explorar o ${getString(com.ilustris.motiv.foundation.R.string.app_name)}",
                             shadow = null,
                             color = MaterialTheme.colorScheme.secondary,
@@ -142,6 +142,7 @@ class MainActivity : ComponentActivity() {
                             navHostController = navController,
                             padding = it
                         )
+
                     }
                 }
 

@@ -4,6 +4,7 @@ package com.ilustris.motiv.foundation.ui.component
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInOutBounce
 import androidx.compose.animation.core.animateDpAsState
@@ -44,7 +45,7 @@ import com.skydoves.landscapist.glide.GlideRequestType
 import kotlin.random.Random
 
 @Composable
-fun TypeWriterText(
+fun AnimatedText(
     text: String,
     shadow: Shadow?,
     color: Color,
@@ -52,19 +53,31 @@ fun TypeWriterText(
     fontFamily: FontFamily,
     modifier: Modifier,
     textStyle: TextStyle,
+    animationEnabled: Boolean = true,
     onCompleteType: (() -> Unit)? = null
 ) {
 
 
     var textIndex by remember { mutableIntStateOf(0) }
-    val textPart = text.substring(0, textIndex)
-    val headlineMedium = textStyle.copy(shadow = shadow)
-    var textStyle by remember { mutableStateOf(headlineMedium) }
+    val textPart = if (!animationEnabled) text else text.substring(0, textIndex)
+
+    fun isAnimationComplete() = textIndex == text.length
+
+    val colorAnimation by animateColorAsState(targetValue = if (isAnimationComplete()) color else MaterialTheme.colorScheme.onBackground)
+
+    val headlineStyle = textStyle.copy(
+        shadow = shadow,
+        textAlign = textAlign,
+        color = colorAnimation,
+        fontFamily = fontFamily
+    )
+    var style by remember { mutableStateOf(headlineStyle) }
+
 
     LaunchedEffect(textIndex) {
-        val delay = (50 * Random.nextInt(1, 2)).toLong()
+        val delay = (25 * Random.nextInt(1, 2)).toLong()
         delayedFunction(delay) {
-            if (textIndex < text.length) {
+            if (textIndex < text.length && animationEnabled) {
                 textIndex++
             } else {
                 onCompleteType?.invoke()
@@ -74,9 +87,12 @@ fun TypeWriterText(
     }
 
     LaunchedEffect(Unit) {
-        delayedFunction(500) {
-            textIndex++
+        if (animationEnabled) {
+            delayedFunction(500) {
+                textIndex++
+            }
         }
+
     }
 
     Text(
@@ -84,11 +100,11 @@ fun TypeWriterText(
         style = textStyle,
         textAlign = textAlign,
         modifier = modifier.animateContentSize(tween(500, easing = EaseInOutBounce)),
-        color = color,
+        color = colorAnimation,
         fontFamily = fontFamily,
         onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowHeight && textPart == text) {
-                textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.8)
+            if (textLayoutResult.didOverflowHeight && textPart == text && animationEnabled) {
+                style = textStyle.copy(fontSize = textStyle.fontSize * 0.7)
             }
         }
     )

@@ -3,8 +3,6 @@ package com.ilustris.motiv.foundation.ui.component
 import ai.atick.material.MaterialColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.EaseInOutBounce
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -19,13 +17,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
@@ -46,9 +44,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -64,14 +60,11 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.palette.graphics.Palette
-import com.google.android.play.integrity.internal.t
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.model.TextAlignment
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.getDeviceHeight
-import com.ilustris.motiv.foundation.ui.theme.getDeviceWidth
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motiv.foundation.utils.FontUtils
@@ -80,9 +73,19 @@ import com.silent.ilustriscore.core.utilities.format
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
+import com.skydoves.landscapist.glide.GlideRequestType
 
 @Composable
-fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
+fun QuoteCard(
+    quoteDataModel: QuoteDataModel,
+    modifier: Modifier,
+    loadAsGif: Boolean = true,
+    animationEnabled: Boolean = true,
+    onClickUser: (String) -> Unit,
+    onLike: (QuoteDataModel) -> Unit,
+    onShare: (QuoteDataModel) -> Unit,
+    onDelete: (QuoteDataModel) -> Unit
+) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
     val defaultFont =
@@ -103,10 +106,17 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
         mutableStateOf(false)
     }
 
+
+
     LaunchedEffect(backgroundBitmap) {
         backgroundBitmap?.let {
             if (palette == null) palette = Palette.Builder(it.asAndroidBitmap()).generate()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!animationEnabled) animationCompleted = true
+
     }
 
     val brush = if (animationCompleted) palette?.brushsFromPalette()
@@ -121,13 +131,15 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
     )
 
     ConstraintLayout(
-        modifier = modifier.border(
-            width = borderAnimation,
-            brush = brush,
-            shape = RoundedCornerShape(
-                defaultRadius
+        modifier = modifier
+            .fillMaxSize()
+            .border(
+                width = borderAnimation,
+                brush = brush,
+                shape = RoundedCornerShape(
+                    defaultRadius
+                )
             )
-        )
     ) {
 
         val (
@@ -159,6 +171,7 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
 
         GlideImage(
             imageModel = { style?.backgroundURL },
+            glideRequestType = if (!loadAsGif) GlideRequestType.BITMAP else GlideRequestType.GIF,
             modifier = Modifier
                 .constrainAs(
                     background
@@ -184,7 +197,7 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
             modifier = Modifier
                 .constrainAs(quoteText) {
                     top.linkTo(quoteInfo.bottom)
-                    bottom.linkTo(quoteAuthor.top)
+                    bottom.linkTo(actionsRow.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.matchParent
@@ -194,8 +207,9 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TypeWriterText(
+            AnimatedText(
                 text = quote.quote,
+                animationEnabled = animationEnabled,
                 shadow = shadowStyle,
                 color = textColor,
                 textAlign = textAlign,
@@ -207,29 +221,22 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
             ) {
                 animationCompleted = true
             }
+
+            Text(
+                text = quote.author, modifier = Modifier
+                    .padding(16.dp)
+                    .graphicsLayer(alpha = imageAlpha),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    shadow = shadowStyle,
+                    color = textColor,
+                    textAlign = textAlign,
+                    fontFamily = defaultFont
+                ),
+                fontStyle = FontStyle.Italic,
+                softWrap = true
+            )
         }
-
-
-        Text(text = quote.author, modifier = Modifier
-            .constrainAs(quoteAuthor) {
-                bottom.linkTo(actionsRow.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                width = Dimension.fillToConstraints
-                height = Dimension.wrapContent
-            }
-            .padding(16.dp)
-            .graphicsLayer(alpha = imageAlpha),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                shadow = shadowStyle,
-                color = textColor,
-                textAlign = textAlign,
-                fontFamily = defaultFont
-            ),
-            fontStyle = FontStyle.Italic,
-            softWrap = true
-        )
 
         AnimatedVisibility(
             visible = quoteDataModel.user != null,
@@ -262,7 +269,7 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
             Row(
                 modifier = Modifier
                     .background(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
                         RoundedCornerShape(radioRadius)
                     )
                     .clip(RoundedCornerShape(radioRadius))
@@ -301,7 +308,7 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
                     Column(modifier = Modifier
                         .padding(8.dp)
                         .clickable {
-
+                            quoteDataModel.user?.id?.let { onClickUser(it) }
                         }) {
                         Text(
                             text = (quoteDataModel.user?.name) ?: "".trimEnd(),

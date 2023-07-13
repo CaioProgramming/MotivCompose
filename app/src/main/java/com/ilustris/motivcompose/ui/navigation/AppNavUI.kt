@@ -1,5 +1,6 @@
 package com.ilustris.motivcompose.ui.navigation
 
+import android.os.Bundle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -8,13 +9,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -22,16 +21,18 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
-import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motivcompose.features.home.ui.HomeView
 import com.ilustris.motivcompose.features.post.ui.QuotePostView
+import com.ilustris.motivcompose.features.profile.ui.ProfileView
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -41,13 +42,12 @@ fun MotivNavigationGraph(navHostController: NavHostController, padding: PaddingV
     NavHost(
         navController = navHostController,
         startDestination = AppNavigation.HOME.route,
-        modifier = Modifier
-            .padding(padding)
-            .padding(top = padding.calculateTopPadding())
+        modifier = Modifier.padding(padding)
     ) {
         AppNavigation.values().forEach { item ->
-            composable(route = item.route) {
-                GetRouteScreen(navigationItem = item, navHostController)
+            val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }
+            composable(route = item.route, arguments = args) {
+                GetRouteScreen(navigationItem = item, navHostController, it.arguments)
             }
         }
     }
@@ -122,14 +122,19 @@ fun MotivBottomNavigation(navController: NavController, userProfilePic: String? 
 
 
 @Composable
-fun GetRouteScreen(navigationItem: AppNavigation, navController: NavController) {
+fun GetRouteScreen(
+    navigationItem: AppNavigation,
+    navController: NavController,
+    arguments: Bundle?
+) {
     when (navigationItem) {
         AppNavigation.HOME -> {
-            HomeView()
+            HomeView(navController)
         }
 
         AppNavigation.PROFILE -> {
-            Text(text = "Profile")
+            val userID = arguments?.getString("userId")
+            ProfileView(userID, navController = navController)
         }
 
         AppNavigation.POST -> {
