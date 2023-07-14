@@ -61,7 +61,7 @@ fun AnimatedText(
     var textIndex by remember { mutableIntStateOf(0) }
     val textPart = if (!animationEnabled) text else text.substring(0, textIndex)
 
-    fun isAnimationComplete() = textIndex == text.length
+    fun isAnimationComplete() = textIndex == text.length || !animationEnabled
 
     val colorAnimation by animateColorAsState(targetValue = if (isAnimationComplete()) color else MaterialTheme.colorScheme.onBackground)
 

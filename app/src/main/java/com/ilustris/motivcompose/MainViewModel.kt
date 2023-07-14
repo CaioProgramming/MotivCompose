@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.model.Radio
 import com.ilustris.motiv.foundation.model.User
 import com.ilustris.motiv.foundation.service.IconService
 import com.ilustris.motiv.foundation.service.UserService
@@ -28,6 +29,7 @@ class MainViewModel @Inject constructor(
 ) {
 
     val currentUser = MutableLiveData<User?>(null)
+    val playingRadio = MutableLiveData<Radio>(null)
 
     fun validateAuth() {
         if (!isAuthenticated()) updateViewState(ViewModelBaseState.RequireAuth)
@@ -71,6 +73,10 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun updatePlayingRadio(radio: Radio?) {
+        playingRadio.postValue(radio)
     }
 
 

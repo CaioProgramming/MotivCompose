@@ -51,41 +51,15 @@ import com.silent.ilustriscore.core.utilities.delayedFunction
 @Composable
 fun HomeView(navController: NavController) {
 
-    val mediaPlayer = MediaPlayer()
-    val context = LocalContext.current
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val quotes = homeViewModel.quotes
     val state = homeViewModel.viewModelState.observeAsState().value
-    val playingRadio = homeViewModel.playingRadio.observeAsState().value
 
     val radioExpanded = remember {
         mutableStateOf(false)
     }
 
 
-    fun playRadio() {
-
-        delayedFunction(500) {
-            playingRadio?.run {
-                try {
-                    mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
-                    if (mediaPlayer.isPlaying) {
-                        mediaPlayer.stop()
-                    }
-                    mediaPlayer.setDataSource(playingRadio.url)
-                    mediaPlayer.prepareAsync()
-                    mediaPlayer.setOnPreparedListener {
-                        mediaPlayer.setVolume(0.3f, 0.3f)
-                        mediaPlayer.start()
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Log.e(javaClass.simpleName, "playRadio: Error playing radio ${e.message}")
-                    homeViewModel.updatePlayingRadio(null)
-                }
-            }
-        }
-    }
 
 
     ConstraintLayout(
@@ -137,7 +111,7 @@ fun HomeView(navController: NavController) {
                         QuoteCard(
                             it[index],
                             modifier = Modifier
-                                .padding(16.dp)
+                                .fillMaxSize()
                                 .quoteCardModifier(),
                             onClickUser = {
                                 navController.navigate("profile/$it")
@@ -151,41 +125,10 @@ fun HomeView(navController: NavController) {
                 }
             )
         }
-
-
-
-        AnimatedVisibility(
-            visible = true,
-            enter = scaleIn(),
-            exit = scaleOut(),
-            modifier = Modifier
-                .constrainAs(playerView) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.matchParent
-                }
-        ) {
-            RadioView(
-                modifier = Modifier.fillMaxWidth(),
-                expanded = radioExpanded.value,
-                playingRadio = playingRadio,
-                onSelectRadio = {
-                    homeViewModel.updatePlayingRadio(it)
-                },
-            ) { radioExpanded.value = !radioExpanded.value }
-        }
     }
 
     LaunchedEffect(Unit) {
         homeViewModel.getAllData()
     }
-
-    LaunchedEffect(playingRadio) {
-        if (playingRadio != null) {
-            playRadio()
-        }
-    }
-
 
 }

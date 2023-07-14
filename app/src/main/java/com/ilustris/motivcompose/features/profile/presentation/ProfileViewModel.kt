@@ -30,6 +30,8 @@ class ProfileViewModel @Inject constructor(
 
     val user = MutableLiveData<User>(null)
     val userQuotes = mutableStateListOf<QuoteDataModel>()
+    val postsCount = MutableLiveData<Int>(0)
+    val favoriteCount = MutableLiveData<Int>(0)
 
 
     fun fetchUser(uid: String? = service.currentUser()?.uid) {
@@ -39,6 +41,8 @@ class ProfileViewModel @Inject constructor(
                 val userRequest = service.getSingleData(it)
                 if (userRequest.isSuccess) {
                     user.postValue(userRequest.success.data as User)
+                    getUserQuotes(uid!!)
+                    getUserFavorites(uid)
                 } else {
                     sendErrorState(userRequest.error.errorException)
                 }
@@ -53,6 +57,7 @@ class ProfileViewModel @Inject constructor(
             quoteService.query(uid, "userID").run {
                 if (isSuccess) {
                     val quotes = (success.data as List<Quote>).sortedByDescending { it.data }
+                    postsCount.postValue(quotes.size)
                     loadQuoteListExtras(quotes)
                 } else {
                     sendErrorState(error.errorException)
@@ -66,6 +71,7 @@ class ProfileViewModel @Inject constructor(
             quoteService.getFavorites(uid).run {
                 if (isSuccess) {
                     val quotes = (success.data as List<Quote>).sortedByDescending { it.data }
+                    favoriteCount.postValue(quotes.size)
                     loadQuoteListExtras(quotes)
                 } else {
                     sendErrorState(error.errorException)

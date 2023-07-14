@@ -38,11 +38,15 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType
 
 @Composable
-fun MotivNavigationGraph(navHostController: NavHostController, padding: PaddingValues) {
+fun MotivNavigationGraph(
+    navHostController: NavHostController,
+    padding: PaddingValues,
+    modifier: Modifier
+) {
     NavHost(
         navController = navHostController,
         startDestination = AppNavigation.HOME.route,
-        modifier = Modifier.padding(padding)
+        modifier = modifier.padding(padding)
     ) {
         AppNavigation.values().forEach { item ->
             val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }
