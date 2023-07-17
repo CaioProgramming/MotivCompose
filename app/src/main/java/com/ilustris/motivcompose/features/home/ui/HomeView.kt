@@ -118,7 +118,8 @@ fun HomeView(navController: NavController) {
                             },
                             onDelete = {},
                             onLike = {},
-                            onShare = {}
+                            onShare = {},
+                            onEdit = {}
                         )
                     }
 

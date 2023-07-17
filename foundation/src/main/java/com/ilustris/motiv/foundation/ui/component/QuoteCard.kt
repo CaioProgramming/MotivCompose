@@ -30,8 +30,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +60,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
@@ -64,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.palette.graphics.Palette
+import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.model.TextAlignment
@@ -88,7 +93,8 @@ fun QuoteCard(
     onClickUser: (String) -> Unit,
     onLike: (QuoteDataModel) -> Unit,
     onShare: (QuoteDataModel) -> Unit,
-    onDelete: (QuoteDataModel) -> Unit
+    onDelete: (QuoteDataModel) -> Unit,
+    onEdit: (QuoteDataModel) -> Unit
 ) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
@@ -152,6 +158,12 @@ fun QuoteCard(
         tween(1500)
     )
 
+    var dropDownState by remember {
+        mutableStateOf(false)
+    }
+    val dropDownOptions =
+        if (quoteDataModel.isUserQuote) listOf("Excluir", "Editar") else listOf("Denunciar")
+
     Column(
         modifier = modifier.wrapContentSize()
     ) {
@@ -160,46 +172,105 @@ fun QuoteCard(
         AnimatedVisibility(
             visible = quoteDataModel.user != null,
             modifier = Modifier
-                .padding(16.dp)
+                .padding(8.dp)
                 .graphicsLayer(alpha = imageAlpha)
                 .animateContentSize(tween(1000))
         ) {
 
 
-            Row(
-                modifier = Modifier.animateContentSize(tween(250, easing = LinearEasing)),
-                verticalAlignment = Alignment.CenterVertically
+            ConstraintLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .animateContentSize(tween(250, easing = LinearEasing)),
             ) {
 
-                GlideImage(
-                    imageModel = {
-                        quoteDataModel.user?.picurl ?: ""
-                    },
-                    imageOptions = ImageOptions(
-                        requestSize = IntSize(52, 52),
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                    ),
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, color = MaterialTheme.colorScheme.onBackground, CircleShape)
+                val (userInfo, options) = createRefs()
 
-                )
-                Column(modifier = Modifier
-                    .padding(8.dp)
-                    .clickable {
-                        quoteDataModel.user?.id?.let { onClickUser(it) }
-                    }) {
-                    Text(
-                        text = (quoteDataModel.user?.name) ?: "".trimEnd(),
-                        maxLines = 1,
-                        style = MaterialTheme.typography.bodySmall
+
+                Row(modifier = Modifier.constrainAs(userInfo) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(options.start)
+                    width = Dimension.fillToConstraints
+                }, horizontalArrangement = Arrangement.Start) {
+                    GlideImage(
+                        imageModel = {
+                            quoteDataModel.user?.picurl ?: ""
+                        },
+                        imageOptions = ImageOptions(
+                            requestSize = IntSize(52, 52),
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center,
+                        ),
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                            .border(
+                                1.dp,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                CircleShape
+                            )
+
                     )
-                    Text(
-                        text = quote.data.format(DateFormats.DD_OF_MM_FROM_YYYY),
-                        style = MaterialTheme.typography.labelSmall
+                    Column(modifier = Modifier
+                        .clickable {
+                            quoteDataModel.user?.id?.let { onClickUser(it) }
+                        }
+                        .padding(8.dp)
+                    ) {
+                        Text(
+                            text = (quoteDataModel.user?.name) ?: "".trimEnd(),
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = quote.data.format(DateFormats.DD_OF_MM_FROM_YYYY),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+
+
+
+                IconButton(modifier = Modifier.constrainAs(options) {
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }, onClick = {
+                    dropDownState = !dropDownState
+                }) {
+                    Icon(
+                        Icons.Rounded.MoreVert,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = "Opções"
                     )
+
+                    DropdownMenu(expanded = dropDownState,
+                        onDismissRequest = {
+                            dropDownState = false
+                        }) {
+                        dropDownOptions.forEach { option ->
+                            DropdownMenuItem(text = {
+                                androidx.compose.material.Text(
+                                    text = option,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(8.dp),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }, onClick = {
+                                when (option) {
+                                    "Excluir" -> onDelete(quoteDataModel)
+                                    "Editar" -> {
+                                        onEdit(quoteDataModel)
+                                    }
+                                }
+                                dropDownState = false
+
+                            })
+                        }
+                    }
                 }
             }
         }
@@ -218,7 +289,10 @@ fun QuoteCard(
                     .clip(RoundedCornerShape(defaultRadius))
                     .matchParentSize()
                     .alpha(imageAlpha)
-                    .blur(imageBlur),
+                    .blur(imageBlur)
+                    .clickable {
+                        onClickUser(quoteDataModel.user?.id ?: "")
+                    },
                 onImageStateChanged = {
                     imageLoaded = it is GlideImageState.Success
                     if (it is GlideImageState.Success) {
@@ -273,9 +347,7 @@ fun QuoteCard(
 
             IconButton(
                 onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .graphicsLayer(alpha = imageAlpha)
+                modifier = Modifier.padding(4.dp)
             ) {
                 val isFavorite = quoteDataModel.isFavorite
                 val color =
@@ -288,30 +360,14 @@ fun QuoteCard(
                 )
             }
 
-            AnimatedVisibility(
-                visible = quoteDataModel.isUserQuote,
-                enter = scaleIn(),
-                exit = scaleOut()
-            ) {
-                IconButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Icon(
-                        Icons.Rounded.Edit,
-                        contentDescription = "Editar",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            }
-
             IconButton(
-                onClick = { /*TODO*/ }, modifier = Modifier.padding(8.dp)
+                onClick = { /*TODO*/ }, modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
-                    Icons.Rounded.Send,
+                    painterResource(id = R.drawable.share),
                     contentDescription = "Compartilhar",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 

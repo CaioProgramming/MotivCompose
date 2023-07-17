@@ -88,7 +88,7 @@ fun RadioView(
 ) {
 
     val backColor by animateColorAsState(
-        targetValue = if (expanded) MaterialTheme.colorScheme.background else Color.Transparent,
+        targetValue = MaterialTheme.colorScheme.background,
         tween(500, easing = FastOutSlowInEasing)
     )
 
@@ -122,12 +122,11 @@ fun RadioView(
             modifier = Modifier
                 .background(backColor, RoundedCornerShape(radioRadius))
                 .border(
-                    if (expanded) 1.dp else 0.dp,
-                    MaterialTheme.colorScheme.surface.copy(alpha = if (expanded) 0.5f else 0f),
+                    if (expanded) 2.dp else 1.dp,
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                     RoundedCornerShape(radioRadius)
                 )
-                .padding(4.dp)
-                .animateContentSize(tween(1500, easing = FastOutSlowInEasing)),
+                .animateContentSize(tween(1000, easing = FastOutSlowInEasing)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -147,16 +146,15 @@ fun RadioView(
                             repeatMode = RepeatMode.Reverse
                         )
                     )
+                    val scaleAnimation = animateDpAsState(
+                        targetValue = if (!expanded) 32.dp else 64.dp,
+                        tween(1500, easing = FastOutSlowInEasing)
+                    )
+                    val borderAnimation = animateDpAsState(
+                        targetValue = if (!expanded) 2.dp else 4.dp,
+                        tween(1500, easing = EaseInBounce)
+                    )
 
-
-                    /*       val offsetAnimation = infiniteTransition.animateFloat(
-                               initialValue = 0f,
-                               targetValue = (128 * 2).toFloat(),
-                               animationSpec = infiniteRepeatable(
-                                   tween(3500, easing = LinearEasing),
-                                   repeatMode = RepeatMode.Reverse,
-                               )
-                           )*/
 
                     val borderBrush = visualizarBitmap?.paletteFromBitMap()?.brushsFromPalette()
                         ?: motivGradient()
@@ -176,13 +174,12 @@ fun RadioView(
 
                     Row(
                         modifier = Modifier
-                            .wrapContentSize()
+                            .fillMaxWidth()
                             .clip(RoundedCornerShape(radioRadius))
                             .clickable {
                                 onExpand()
                             }
-                            .animateContentSize(tween(1000, easing = FastOutSlowInEasing)),
-                        horizontalArrangement = Arrangement.SpaceAround,
+                            .animateContentSize(tween(500, easing = LinearOutSlowInEasing)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         GlideImage(
@@ -204,48 +201,34 @@ fun RadioView(
                                 .radioIconModifier(
                                     brush = borderBrush,
                                     rotationValue = rotationAnimation.value,
-                                    sizeValue = 64.dp,
+                                    sizeValue = scaleAnimation.value,
+                                    borderWidth = borderAnimation.value
                                 )
                                 .background(
                                     borderBrush,
                                     CircleShape
                                 )
-                                .animateContentSize(tween(1000))
-                                .blur(blurAnimation)
-
+                                .clip(CircleShape)
+                                .animateContentSize(tween(100))
                         )
 
-                        AnimatedVisibility(
-                            visible = expanded,
-                            enter = fadeIn(tween(1500)) + slideInHorizontally(
-                                tween(
-                                    500,
-                                    easing = LinearOutSlowInEasing
-                                )
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontStyle = FontStyle.Italic
                             ),
-                            exit = fadeOut(),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = name,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontStyle = FontStyle.Italic
-                                ),
-                                modifier = Modifier
-                                    .graphicsLayer(alpha = 0.99f)
-                                    .drawWithCache {
-                                        onDrawWithContent {
-                                            drawContent()
-                                            drawRect(
-                                                brush = borderBrush,
-                                                blendMode = BlendMode.SrcAtop
-                                            )
-                                        }
-                                    })
-                        }
+                                .graphicsLayer(alpha = 0.99f)
+                                .drawWithCache {
+                                    onDrawWithContent {
+                                        drawContent()
+                                        drawRect(
+                                            brush = borderBrush,
+                                            blendMode = BlendMode.SrcAtop
+                                        )
+                                    }
+                                })
                     }
                 }
 

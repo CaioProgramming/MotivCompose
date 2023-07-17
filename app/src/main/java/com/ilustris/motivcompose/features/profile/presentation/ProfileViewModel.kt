@@ -13,6 +13,7 @@ import com.ilustris.motiv.foundation.service.QuoteService
 import com.ilustris.motiv.foundation.service.UserService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel
+import com.silent.ilustriscore.core.model.ViewModelBaseState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,19 +31,24 @@ class ProfileViewModel @Inject constructor(
 
     val user = MutableLiveData<User>(null)
     val userQuotes = mutableStateListOf<QuoteDataModel>()
+    val userFavorites = mutableStateListOf<QuoteDataModel>()
     val postsCount = MutableLiveData<Int>(0)
     val favoriteCount = MutableLiveData<Int>(0)
 
+    val isOwnUser = MutableLiveData<Boolean>(false)
+
 
     fun fetchUser(uid: String? = service.currentUser()?.uid) {
+        viewModelState.postValue(ViewModelBaseState.LoadingState)
         viewModelScope.launch(Dispatchers.IO) {
             val id = if (uid.isNullOrBlank()) service.currentUser()?.uid else uid
             id?.let {
                 val userRequest = service.getSingleData(it)
                 if (userRequest.isSuccess) {
                     user.postValue(userRequest.success.data as User)
-                    getUserQuotes(uid!!)
-                    getUserFavorites(uid)
+                    isOwnUser.postValue(it == service.currentUser()?.uid)
+                    getUserQuotes(it)
+                    getUserFavorites(it)
                 } else {
                     sendErrorState(userRequest.error.errorException)
                 }
@@ -70,26 +76,32 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             quoteService.getFavorites(uid).run {
                 if (isSuccess) {
-                    val quotes = (success.data as List<Quote>).sortedByDescending { it.data }
-                    favoriteCount.postValue(quotes.size)
-                    loadQuoteListExtras(quotes)
+                    val favoriteQuotes =
+                        (success.data as List<Quote>).sortedByDescending { it.data }
+                    favoriteCount.postValue(favoriteQuotes.size)
+                    loadQuoteListExtras(favoriteQuotes, true)
                 } else {
                     sendErrorState(error.errorException)
                 }
             }
+            viewModelState.postValue(ViewModelBaseState.LoadCompleteState)
         }
     }
 
-    private fun loadQuoteListExtras(quotesDataList: List<Quote>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            quotesDataList.forEach {
-                quoteHelper.mapQuoteToQuoteDataModel(it).run {
-                    if (isSuccess) {
-                        userQuotes.add(success.data)
-                    }
+    private suspend fun loadQuoteListExtras(
+        quotesDataList: List<Quote>,
+        isFavorite: Boolean = false
+    ) {
+        quoteHelper.mapQuoteToQuoteDataModel(quotesDataList).run {
+            if (this.isSuccess) {
+                if (!isFavorite) {
+                    userQuotes.clear()
+                    userQuotes.addAll(success.data)
+                } else {
+                    userFavorites.clear()
+                    userFavorites.addAll(success.data)
                 }
             }
-
         }
     }
 

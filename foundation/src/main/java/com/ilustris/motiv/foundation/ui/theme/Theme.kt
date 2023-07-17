@@ -217,9 +217,9 @@ fun Modifier.radioIconModifier(
         brush = brush,
         CircleShape
     )
-        .size(sizeValue)
         .padding(4.dp)
         .clip(CircleShape)
+        .size(sizeValue)
         .rotate(rotationValue)
 
 

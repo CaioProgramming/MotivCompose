@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
                 val playingRadio = viewModel.playingRadio.observeAsState().value
                 val mediaPlayer = MediaPlayer()
                 var showRadio by remember { mutableStateOf(true) }
+                val radioExpanded = remember { mutableStateOf(false) }
 
                 val signInLauncher = rememberLauncherForActivityResult(
                     FirebaseAuthUIActivityResultContract()
@@ -143,7 +144,6 @@ class MainActivity : ComponentActivity() {
                 }
 
                 AnimatedVisibility(visible = currentUser != null) {
-                    val radioExpanded = remember { mutableStateOf(false) }
 
                     fun playRadio(radio: Radio) {
                         try {
@@ -154,6 +154,7 @@ class MainActivity : ComponentActivity() {
                             mediaPlayer.setDataSource(radio.url)
                             mediaPlayer.prepareAsync()
                             mediaPlayer.setOnPreparedListener {
+
                                 mediaPlayer.setVolume(0.3f, 0.3f)
                                 mediaPlayer.start()
                                 viewModel.updatePlayingRadio(radio)
@@ -225,8 +226,8 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(navController) {
                     viewModel.validateAuth()
                     navController.currentBackStackEntryFlow.collect { backStackEntry ->
-                        showRadio = backStackEntry.destination.route == AppNavigation.HOME.route
-
+                        showRadio = backStackEntry.destination.route != AppNavigation.POST.route
+                        radioExpanded.value = false
                     }
                 }
             }

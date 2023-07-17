@@ -15,16 +15,25 @@ class QuoteHelper @Inject constructor(
 
     suspend fun mapQuoteToQuoteDataModel(quote: Quote): ServiceResult<DataException, QuoteDataModel> {
         return try {
-            val uid = userService.currentUser()?.uid ?: ""
-            val user = userService.getSingleData(quote.userID).success.data as User
-            val style = styleService.getSingleData(quote.style).success.data as Style
+            val uid = userService.currentUser()?.uid
+            val user = try {
+                userService.getSingleData(quote.userID).success.data as User
+            } catch (e: Exception) {
+                null
+            }
+            val style = try {
+                styleService.getSingleData(quote.style).success.data as Style
+            } catch (e: Exception) {
+                null
+            }
+
             ServiceResult.Success(
                 QuoteDataModel(
                     quote,
                     user,
                     style,
-                    isUserQuote = quote.userID == uid,
-                    isFavorite = quote.likes.contains(uid)
+                    isFavorite = quote.likes.contains(user?.uid),
+                    isUserQuote = quote.userID == uid
                 )
             )
         } catch (e: Exception) {
@@ -39,9 +48,23 @@ class QuoteHelper @Inject constructor(
 
         return try {
             val quoteModels = quotes.map { quote ->
-                val user = userService.getSingleData(quote.userID).success.data as User
-                val style = styleService.getSingleData(quote.style).success.data as Style
-                QuoteDataModel(quote, user, style)
+                val user = try {
+                    userService.getSingleData(quote.userID).success.data as User
+                } catch (e: Exception) {
+                    null
+                }
+                val style = try {
+                    styleService.getSingleData(quote.style).success.data as Style
+                } catch (e: Exception) {
+                    null
+                }
+                QuoteDataModel(
+                    quote,
+                    user,
+                    style,
+                    isFavorite = quote.likes.contains(user?.uid),
+                    isUserQuote = quote.userID == userService.currentUser()?.uid
+                )
             }
             ServiceResult.Success(quoteModels)
         } catch (e: Exception) {

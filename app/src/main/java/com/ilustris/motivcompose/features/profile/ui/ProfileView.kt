@@ -2,41 +2,40 @@
 
 package com.ilustris.motivcompose.features.profile.ui
 
-import ai.atick.material.MaterialColor
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,23 +46,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.ui.component.CardBackground
@@ -76,9 +68,10 @@ import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
-import com.ilustris.motiv.foundation.ui.theme.transparentFadeGradient
 import com.ilustris.motivcompose.features.profile.presentation.ProfileViewModel
-import com.skydoves.landscapist.ImageOptions
+import com.ilustris.motivcompose.features.profile.ui.component.CounterLabel
+import com.ilustris.motivcompose.features.profile.ui.component.ProfileTab
+import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -89,8 +82,13 @@ fun ProfileView(userID: String? = null, navController: NavController) {
 
     val viewModel = hiltViewModel<ProfileViewModel>()
     val user = viewModel.user.observeAsState().value
-    val userQuotes = viewModel.userQuotes
-
+    var currentFilter by remember {
+        mutableStateOf("Posts")
+    }
+    val isOwnUser = viewModel.isOwnUser.observeAsState()
+    val userQuotes = if (currentFilter == "Posts") viewModel.userQuotes else viewModel.userFavorites
+    val viewModelState = viewModel.viewModelState.observeAsState()
+    val listState = rememberLazyListState()
     var profileBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
@@ -98,19 +96,23 @@ fun ProfileView(userID: String? = null, navController: NavController) {
         mutableStateOf<ImageBitmap?>(null)
     }
 
+    fun canShowData() = userQuotes.isNotEmpty()
+
     val postsCount = viewModel.postsCount.value ?: 0
     val favoriteCount = viewModel.favoriteCount.value ?: 0
-
-    val coverAlpha = animateFloatAsState(targetValue = if (profileBitmap != null) 1f else 0f)
+    val coverAlpha = animateFloatAsState(
+        targetValue = if (canShowData()) 1f else 0f,
+        tween(2000, easing = FastOutSlowInEasing)
+    )
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState() {
         userQuotes.size
     }
 
+    fun showUserTitle() = listState.firstVisibleItemIndex > 1
+
     val borderBrush = profileBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.brushsFromPalette()
         ?: grayGradients()
-
-
 
     LaunchedEffect(userQuotes) {
         Log.i("Profile view", "ProfileView: showing ${userQuotes.size} quotes")
@@ -136,10 +138,11 @@ fun ProfileView(userID: String? = null, navController: NavController) {
     }
 
     LazyColumn(
+        state = listState,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .animateContentSize(tween(1000))
+            .animateContentSize(tween(1500, easing = FastOutSlowInEasing))
     ) {
 
         if (user != null) {
@@ -149,7 +152,8 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                     CardBackground(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(avatarSize),
+                            .height(avatarSize)
+                            .alpha(coverAlpha.value),
                         backgroundImage = user.cover
                     ) {
                         coverBitmap = it
@@ -159,7 +163,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .wrapContentHeight()
-                            .padding(horizontal = 16.dp, vertical = 50.dp),
+                            .padding(start = 16.dp, end = 16.dp, top = 75.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
@@ -185,35 +189,19 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(4.dp)
+                                .alpha(coverAlpha.value)
                         )
 
                         Row(
                             modifier = Modifier
                                 .wrapContentSize()
-                                .padding(2.dp),
+                                .padding(2.dp)
+                                .alpha(coverAlpha.value),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
 
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(8.dp)
-                            ) {
-                                Text(
-                                    text = "Publicações",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier
-                                        .padding(vertical = 4.dp)
-                                        .graphicsLayer(alpha = 0.6f)
-                                )
-
-                                Text(
-                                    text = postsCount.toString(),
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    fontWeight = FontWeight.Black
-                                )
-
-                            }
+                            CounterLabel(label = "Publicações", count = postsCount)
 
                             Divider(
                                 modifier = Modifier
@@ -225,45 +213,127 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                                 thickness = 1.dp
                             )
 
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(8.dp)
-                            ) {
-                                Text(
-                                    text = "Favoritos",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                )
-                                Text(
-                                    text = favoriteCount.toString(),
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    fontWeight = FontWeight.Black
-                                )
+                            CounterLabel(label = "Favoritos", count = favoriteCount)
+                        }
+                    }
 
-                            }
+                    IconButton(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .alpha(coverAlpha.value)
+                    ) {
+                        Icon(Icons.Rounded.KeyboardArrowLeft, contentDescription = "Voltar")
+                    }
+
+                    AnimatedVisibility(
+                        visible = isOwnUser.value == true,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .alpha(coverAlpha.value)
+                    ) {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(Icons.Rounded.Settings, contentDescription = "Configurações")
+                        }
+                    }
+
+                }
+            }
+
+            stickyHeader {
+
+                AnimatedVisibility(
+                    visible = canShowData() && showUserTitle(),
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut()
+                ) {
+                    Text(
+                        text = user.name, style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(16.dp)
+                            .gradientFill(borderBrush)
+                    )
+                }
+
+                AnimatedVisibility(visible = canShowData(), enter = fadeIn(), exit = fadeOut()) {
+
+
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
+
+                        ProfileTab(
+                            buttonText = "Publicações",
+                            isSelected = currentFilter == "Posts"
+                        ) {
+                            currentFilter = "Posts"
+                        }
+                        ProfileTab(
+                            buttonText = "Favoritos",
+                            isSelected = currentFilter == "Favorites"
+                        ) {
+                            currentFilter = "Favorites"
                         }
                     }
                 }
+
+                Divider(
+                    Modifier
+                        .fillMaxWidth()
+                        .alpha(coverAlpha.value),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    thickness = 1.dp
+                )
+
+            }
+        }
+
+        items(userQuotes.size) {
+            AnimatedVisibility(
+                visible = viewModelState.value != ViewModelBaseState.LoadingState,
+                enter = scaleIn() + fadeIn(
+                    tween(1500)
+                ),
+                exit = fadeOut()
+            ) {
+                QuoteCard(
+                    loadAsGif = true,
+                    animationEnabled = false,
+                    quoteDataModel = userQuotes[it],
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .quoteCardModifier(),
+                    onClickUser = {
+                        if (it != user?.uid) {
+                            navController.navigate("profile/{userId}".replace("{userId}", it))
+                        }
+                    },
+                    onShare = {},
+                    onLike = {},
+                    onDelete = {},
+                    onEdit = {}
+                )
             }
 
         }
 
-        items(userQuotes.size) {
-            QuoteCard(
-                loadAsGif = true,
-                animationEnabled = false,
-                quoteDataModel = userQuotes[it],
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .quoteCardModifier(),
-                onClickUser = {
-                    navController.navigate("profile/{userId}".replace("{userId}", it))
-                },
-                onShare = {},
-                onLike = {},
-                onDelete = {}
-            )
-        }
-
     }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect {
+                Log.i("ListState", "ProfileView: first visible item $it")
+            }
+    }
+
+
 }
