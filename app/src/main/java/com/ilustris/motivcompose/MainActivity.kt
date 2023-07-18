@@ -3,8 +3,10 @@
 package com.ilustris.motivcompose
 
 import ai.atick.material.MaterialColor
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -15,6 +17,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.rememberScaffoldState
@@ -41,7 +45,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +60,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.ilustris.motiv.foundation.model.Radio
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.ilustris.motiv.foundation.ui.component.AnimatedText
+import com.ilustris.motiv.foundation.ui.component.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.MotivTheme
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
@@ -71,6 +78,10 @@ import kotlinx.coroutines.flow.collectIndexed
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val mediaPlayer = MediaPlayer()
+        mediaPlayer.setAudioAttributes(
+            AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+        )
         setContent {
             MotivTheme {
                 val navController = rememberNavController()
@@ -78,7 +89,7 @@ class MainActivity : ComponentActivity() {
                 val currentUser = viewModel.currentUser.observeAsState().value
                 val viewModelState = viewModel.viewModelState.observeAsState()
                 val playingRadio = viewModel.playingRadio.observeAsState().value
-                val mediaPlayer = MediaPlayer()
+
                 var showRadio by remember { mutableStateOf(true) }
                 val radioExpanded = remember { mutableStateOf(false) }
 
@@ -103,61 +114,37 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.background)
+                            .gradientFill(gradientAnimation())
                     ) {
-                        MotivLoader(modifier = Modifier.size(100.dp))
-
-                        AnimatedText(
-                            text = "Faça login para explorar o ${getString(com.ilustris.motiv.foundation.R.string.app_name)}",
-                            shadow = null,
-                            color = MaterialTheme.colorScheme.secondary,
-                            textAlign = TextAlign.Center,
-                            textStyle = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
-                            fontFamily = MaterialTheme.typography.headlineMedium.fontFamily!!,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Button(
-                            onClick = { signInLauncher.launch(signInIntent) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.onBackground,
-                                contentColor = MaterialTheme.colorScheme.background
-                            ),
-                            shape = RoundedCornerShape(defaultRadius),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth()
-                                .wrapContentHeight(align = Alignment.CenterVertically)
-                        ) {
-                            Text(
-                                text = "Login",
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.background,
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .fillMaxWidth()
-                            )
-                        }
+                        MotivLoader(modifier = Modifier
+                            .size(100.dp)
+                            .clickable { signInLauncher.launch(signInIntent) }
+                            .padding(8.dp)
+                            .clip(
+                                CircleShape
+                            ))
                     }
-
-
                 }
 
-                AnimatedVisibility(visible = currentUser != null) {
+                AnimatedVisibility(
+                    visible = currentUser != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    val context = LocalContext.current
 
                     fun playRadio(radio: Radio) {
                         try {
-                            mediaPlayer.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC)
                             if (mediaPlayer.isPlaying) {
-                                mediaPlayer.stop()
+                                mediaPlayer.reset()
                             }
-                            mediaPlayer.setDataSource(radio.url)
+                            mediaPlayer.setDataSource(context, Uri.parse(radio.url))
                             mediaPlayer.prepareAsync()
                             mediaPlayer.setOnPreparedListener {
-
                                 mediaPlayer.setVolume(0.3f, 0.3f)
                                 mediaPlayer.start()
                                 viewModel.updatePlayingRadio(radio)
+
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -166,18 +153,16 @@ class MainActivity : ComponentActivity() {
                                 "playRadio: Error playing radio(${radio.name}) ${e.message}"
                             )
                             viewModel.updatePlayingRadio(null)
+                            mediaPlayer.stop()
                         }
                     }
+
                     Scaffold(
                         bottomBar = {
-                            Column {
-
-
-                                MotivBottomNavigation(
-                                    navController = navController,
-                                    userProfilePic = currentUser?.picurl
-                                )
-                            }
+                            MotivBottomNavigation(
+                                navController = navController,
+                                userProfilePic = currentUser?.picurl
+                            )
                         }) {
                         ConstraintLayout(
                             modifier = Modifier
@@ -221,6 +206,12 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     viewModel.fetchUser()
+                }
+
+                LaunchedEffect(viewModelState.value) {
+                    if (currentUser == null && viewModelState.value == ViewModelBaseState.RequireAuth) {
+                        signInLauncher.launch(signInIntent)
+                    }
                 }
 
                 LaunchedEffect(navController) {

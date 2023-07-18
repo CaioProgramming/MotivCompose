@@ -3,6 +3,7 @@ package com.ilustris.motiv.foundation.ui.component
 import ai.atick.material.MaterialColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseInExpo
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -140,8 +141,8 @@ fun QuoteCard(
 
 
     val borderAnimation by animateDpAsState(
-        targetValue = if (animationCompleted) 3.dp else 0.dp,
-        tween(500)
+        targetValue = if (animationCompleted) 2.dp else 0.dp,
+        tween(1500, easing = EaseInExpo)
     )
 
     var imageLoaded by remember {
@@ -165,7 +166,7 @@ fun QuoteCard(
         if (quoteDataModel.isUserQuote) listOf("Excluir", "Editar") else listOf("Denunciar")
 
     Column(
-        modifier = modifier.wrapContentSize()
+        modifier = modifier
     ) {
 
 
@@ -313,10 +314,13 @@ fun QuoteCard(
                     text = quote.quote,
                     animationEnabled = animationEnabled,
                     shadow = shadowStyle,
-                    color = textColor,
-                    textAlign = textAlign,
                     fontFamily = defaultFont,
-                    textStyle = MaterialTheme.typography.headlineLarge,
+                    textStyle = MaterialTheme.typography.headlineLarge.copy(
+                        shadow = shadowStyle,
+                        color = textColor,
+                        textAlign = textAlign,
+                        fontFamily = defaultFont
+                    ),
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth()

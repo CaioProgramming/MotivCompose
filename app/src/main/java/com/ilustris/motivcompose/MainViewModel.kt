@@ -2,7 +2,6 @@ package com.ilustris.motivcompose
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.ilustris.motiv.foundation.model.Icon
@@ -63,7 +62,7 @@ class MainViewModel @Inject constructor(
                     val icons = iconService.getAllData()
                     if (icons is ServiceResult.Success) {
                         val iconList = icons.data as List<Icon>
-                        val newUserResult = service.saveUser(iconList.random().uri)
+                        val newUserResult = service.saveNewUser(iconList.random().uri)
                         if (newUserResult is ServiceResult.Success) {
                             currentUser.postValue(newUserResult.data as User)
                         } else {

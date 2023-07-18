@@ -8,7 +8,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.core.EaseInElastic
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -123,10 +126,10 @@ fun RadioView(
                 .background(backColor, RoundedCornerShape(radioRadius))
                 .border(
                     if (expanded) 2.dp else 1.dp,
-                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
                     RoundedCornerShape(radioRadius)
                 )
-                .animateContentSize(tween(1000, easing = FastOutSlowInEasing)),
+                .animateContentSize(tween(500, easing = FastOutSlowInEasing)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -142,17 +145,17 @@ fun RadioView(
                         initialValue = 0f,
                         targetValue = if (!expanded) 360f else 0f,
                         animationSpec = infiniteRepeatable(
-                            tween(2500, easing = FastOutSlowInEasing),
+                            tween(1500, easing = EaseInCubic),
                             repeatMode = RepeatMode.Reverse
                         )
                     )
                     val scaleAnimation = animateDpAsState(
                         targetValue = if (!expanded) 32.dp else 64.dp,
-                        tween(1500, easing = FastOutSlowInEasing)
+                        tween(500, easing = LinearEasing)
                     )
                     val borderAnimation = animateDpAsState(
                         targetValue = if (!expanded) 2.dp else 4.dp,
-                        tween(1500, easing = EaseInBounce)
+                        tween(500, easing = EaseInElastic)
                     )
 
 
@@ -246,8 +249,11 @@ fun RadioView(
             }
 
         }
-        if (playingRadio == null) {
-            onSelectRadio(radios.random())
+
+        LaunchedEffect(radios) {
+            if (radios.isNotEmpty() && playingRadio == null) {
+                onSelectRadio(radios.random())
+            }
         }
     }
 

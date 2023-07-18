@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.silent.ilustriscore.core.utilities.delayedFunction
@@ -48,8 +47,6 @@ import kotlin.random.Random
 fun AnimatedText(
     text: String,
     shadow: Shadow?,
-    color: Color,
-    textAlign: TextAlign,
     fontFamily: FontFamily,
     modifier: Modifier,
     textStyle: TextStyle,
@@ -63,15 +60,8 @@ fun AnimatedText(
 
     fun isAnimationComplete() = textIndex == text.length || !animationEnabled
 
-    val colorAnimation by animateColorAsState(targetValue = if (isAnimationComplete()) color else MaterialTheme.colorScheme.onBackground)
 
-    val headlineStyle = textStyle.copy(
-        shadow = shadow,
-        textAlign = textAlign,
-        color = colorAnimation,
-        fontFamily = fontFamily
-    )
-    var style by remember { mutableStateOf(headlineStyle) }
+    var style by remember { mutableStateOf(textStyle) }
 
 
     LaunchedEffect(textIndex) {
@@ -98,9 +88,7 @@ fun AnimatedText(
     Text(
         text = textPart,
         style = textStyle,
-        textAlign = textAlign,
         modifier = modifier.animateContentSize(tween(500, easing = EaseInOutBounce)),
-        color = colorAnimation,
         fontFamily = fontFamily,
         onTextLayout = { textLayoutResult ->
             if (textLayoutResult.didOverflowHeight && textPart == text && animationEnabled) {

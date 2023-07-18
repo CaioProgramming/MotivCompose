@@ -95,12 +95,12 @@ class ProfileViewModel @Inject constructor(
         quoteHelper.mapQuoteToQuoteDataModel(quotesDataList).run {
             if (this.isSuccess) {
                 if (!isFavorite) {
-                    userQuotes.clear()
                     userQuotes.addAll(success.data)
                 } else {
-                    userFavorites.clear()
                     userFavorites.addAll(success.data)
                 }
+            } else {
+                sendErrorState(error.errorException)
             }
         }
     }

@@ -25,7 +25,7 @@ class UserService : BaseService() {
             User::class.java
         )
 
-    suspend fun saveUser(icon: String): ServiceResult<DataException, BaseBean> {
+    suspend fun saveNewUser(icon: String): ServiceResult<DataException, BaseBean> {
         currentUser()!!.run {
             val profileChangeRequest =
                 UserProfileChangeRequest.Builder().setPhotoUri(Uri.parse(icon)).build()
@@ -36,6 +36,20 @@ class UserService : BaseService() {
                 name = displayName ?: "",
             )
             return addData(newUser)
+        }
+    }
+
+    suspend fun updateUserName(name: String): ServiceResult<DataException, String> {
+        try {
+            currentUser()!!.run {
+                val profileChangeRequest =
+                    UserProfileChangeRequest.Builder().setDisplayName(name).build()
+                this.updateProfile(profileChangeRequest).await()
+                return editField("name", uid, name)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ServiceResult.Error(DataException.UNKNOWN)
         }
     }
 }

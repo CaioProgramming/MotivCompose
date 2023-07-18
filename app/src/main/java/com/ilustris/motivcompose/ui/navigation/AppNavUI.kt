@@ -1,6 +1,7 @@
 package com.ilustris.motivcompose.ui.navigation
 
 import android.os.Bundle
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motivcompose.features.home.ui.HomeView
 import com.ilustris.motivcompose.features.post.ui.QuotePostView
 import com.ilustris.motivcompose.features.profile.ui.ProfileView
+import com.ilustris.motivcompose.features.settings.ui.SettingsView
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -50,7 +52,7 @@ fun MotivNavigationGraph(
     ) {
         AppNavigation.values().forEach { item ->
             val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }
-            composable(route = item.route, arguments = args) {
+            composable(route = item.route, arguments = args, enterTransition = { fadeIn() }) {
                 GetRouteScreen(navigationItem = item, navHostController, it.arguments)
             }
         }
@@ -77,7 +79,7 @@ fun MotivBottomNavigation(navController: NavController, userProfilePic: String? 
         backgroundColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        AppNavigation.values().forEach { item ->
+        AppNavigation.values().filter { it.showOnNavigation }.forEach { item ->
             val isSelected = currentRoute?.hierarchy?.any { it.route == item.route } == true
             val itemColor =
                 if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
@@ -143,6 +145,10 @@ fun GetRouteScreen(
 
         AppNavigation.POST -> {
             QuotePostView(navController)
+        }
+
+        AppNavigation.SETTINGS -> {
+            SettingsView(navController)
         }
     }
 }

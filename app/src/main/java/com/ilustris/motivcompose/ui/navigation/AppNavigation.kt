@@ -12,8 +12,10 @@ enum class AppNavigation(
     val route: String,
     @DrawableRes val icon: Int,
     val arguments: List<String> = emptyList(),
+    val showOnNavigation: Boolean = true,
 ) {
     HOME("Home", HOME_ROUTE, R.drawable.round_home_24),
     POST("Publicar", POST_ROUTE, R.drawable.round_add_24),
     PROFILE("Eu", PROFILE_ROUTE, R.drawable.round_person_24, arguments = listOf("userId")),
+    SETTINGS("Configurações", "settings", R.drawable.round_settings_24, showOnNavigation = false),
 }

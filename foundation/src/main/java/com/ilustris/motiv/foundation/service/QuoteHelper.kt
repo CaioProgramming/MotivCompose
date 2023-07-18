@@ -4,6 +4,7 @@ import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.model.User
+import com.ilustris.motiv.foundation.model.quoteList
 import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ServiceResult
 import javax.inject.Inject
@@ -47,6 +48,9 @@ class QuoteHelper @Inject constructor(
     suspend fun mapQuoteToQuoteDataModel(quotes: List<Quote>): ServiceResult<DataException, List<QuoteDataModel>> {
 
         return try {
+            if (quotes.isEmpty()) {
+                return ServiceResult.Error(DataException.NOTFOUND)
+            }
             val quoteModels = quotes.map { quote ->
                 val user = try {
                     userService.getSingleData(quote.userID).success.data as User

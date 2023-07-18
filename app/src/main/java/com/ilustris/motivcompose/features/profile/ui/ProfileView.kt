@@ -60,17 +60,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
+import com.ilustris.motiv.foundation.ui.component.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
+import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.gradientOverlay
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
+import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motivcompose.features.profile.presentation.ProfileViewModel
 import com.ilustris.motivcompose.features.profile.ui.component.CounterLabel
 import com.ilustris.motivcompose.features.profile.ui.component.ProfileTab
+import com.ilustris.motivcompose.ui.navigation.AppNavigation
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
@@ -111,8 +115,8 @@ fun ProfileView(userID: String? = null, navController: NavController) {
 
     fun showUserTitle() = listState.firstVisibleItemIndex > 1
 
-    val borderBrush = profileBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.brushsFromPalette()
-        ?: grayGradients()
+    val borderBrush = profileBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.colorsFromPalette()
+        ?: motivBrushes()
 
     LaunchedEffect(userQuotes) {
         Log.i("Profile view", "ProfileView: showing ${userQuotes.size} quotes")
@@ -176,7 +180,12 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                                 }
                             },
                             modifier = Modifier
-                                .radioIconModifier(0f, avatarSize, borderBrush, 4.dp)
+                                .radioIconModifier(
+                                    0f,
+                                    avatarSize,
+                                    gradientAnimation(borderBrush),
+                                    4.dp
+                                )
                                 .clickable {
                                     moveToPage(0)
                                 }
@@ -234,7 +243,9 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                             .align(Alignment.TopEnd)
                             .alpha(coverAlpha.value)
                     ) {
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = {
+                            navController.navigate(AppNavigation.SETTINGS.route)
+                        }) {
                             Icon(Icons.Rounded.Settings, contentDescription = "Configurações")
                         }
                     }
@@ -256,7 +267,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                             .padding(16.dp)
-                            .gradientFill(borderBrush)
+                            .gradientFill(gradientAnimation(borderBrush))
                     )
                 }
 
@@ -311,6 +322,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                     quoteDataModel = userQuotes[it],
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .wrapContentSize()
                         .quoteCardModifier(),
                     onClickUser = {
                         if (it != user?.uid) {

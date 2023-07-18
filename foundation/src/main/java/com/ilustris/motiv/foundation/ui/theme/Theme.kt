@@ -184,6 +184,28 @@ fun Palette.brushsFromPalette(): Brush {
     return Brush.linearGradient(listOf(dominantSwatch, vibrantSwatch, mutedSwatch))
 }
 
+fun Palette.colorsFromPalette(): List<Color> {
+    val dominantSwatch = try {
+        Color(this.dominantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray900
+    }
+
+    val vibrantSwatch = try {
+        Color(this.vibrantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray500
+    }
+
+    val mutedSwatch = try {
+        Color(this.mutedSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray300
+    }
+
+    return listOf(dominantSwatch, vibrantSwatch, mutedSwatch)
+}
+
 
 fun Modifier.quoteCardModifier() = clip(RoundedCornerShape(defaultRadius))
 
@@ -210,7 +232,7 @@ fun Modifier.radioIconModifier(
     rotationValue: Float,
     sizeValue: Dp,
     brush: Brush,
-    borderWidth: Dp = 3.dp
+    borderWidth: Dp = 3.dp,
 ) =
     border(
         borderWidth,

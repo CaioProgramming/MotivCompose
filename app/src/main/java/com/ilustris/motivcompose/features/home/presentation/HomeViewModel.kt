@@ -17,6 +17,7 @@ import com.ilustris.motiv.foundation.service.StyleService
 import com.ilustris.motiv.foundation.service.UserService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel
+import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ServiceResult
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,19 +51,24 @@ class HomeViewModel @Inject constructor(
                 val list = result.success.data as List<Quote>
                 dataQuotes = list
                 loadQuoteListExtras(list)
-                indexLimit = minOf(10, list.size)
             } else sendErrorState(result.error.errorException)
         }
     }
 
     private fun loadQuoteListExtras(quotesDataList: List<Quote>) {
         viewModelScope.launch(Dispatchers.IO) {
-            quotesDataList.forEach {
-                quoteHelper.mapQuoteToQuoteDataModel(it).run {
-                    if (isSuccess) {
-                        quotes.add(success.data)
+            try {
+                quotes.clear()
+                quotesDataList.forEach {
+                    quoteHelper.mapQuoteToQuoteDataModel(it).run {
+                        if (isSuccess) {
+                            quotes.add(success.data)
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                sendErrorState(DataException.UNKNOWN)
             }
         }
     }
@@ -81,5 +87,16 @@ class HomeViewModel @Inject constructor(
             }
         }
 
+    }
+
+    fun searchQuote(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (query.isNotEmpty()) {
+                val queryQuotes = dataQuotes.filter {
+                    it.quote.contains(query, true) || it.author.contains(query, true)
+                }
+                loadQuoteListExtras(queryQuotes)
+            }
+        }
     }
 }
