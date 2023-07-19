@@ -122,16 +122,19 @@ fun motivBrushes() = listOf(
 )
 
 @Composable
+fun grayBrushes() = listOf(
+    MaterialColor.Gray700,
+    MaterialColor.Gray500,
+    MaterialColor.Gray900,
+    Color.Transparent
+)
+
+@Composable
 fun motivGradient() = Brush.linearGradient(colors = motivBrushes())
 
 @Composable
 fun grayGradients() = Brush.linearGradient(
-    colors = listOf(
-        MaterialColor.Gray300,
-        MaterialColor.Gray500,
-        MaterialColor.Gray800,
-        Color.Transparent
-    )
+    colors = grayBrushes()
 )
 
 @Composable
@@ -182,6 +185,27 @@ fun Palette.brushsFromPalette(): Brush {
     }
 
     return Brush.linearGradient(listOf(dominantSwatch, vibrantSwatch, mutedSwatch))
+}
+
+fun Palette.palleteColors(): List<Color> {
+    val dominantSwatch = try {
+        Color(this.dominantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray900
+    }
+
+    val vibrantSwatch = try {
+        Color(this.vibrantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray500
+    }
+
+    val mutedSwatch = try {
+        Color(this.mutedSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray300
+    }
+    return listOf(dominantSwatch, vibrantSwatch, mutedSwatch)
 }
 
 fun Palette.colorsFromPalette(): List<Color> {

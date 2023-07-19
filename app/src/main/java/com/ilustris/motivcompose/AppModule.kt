@@ -2,6 +2,7 @@ package com.ilustris.motivcompose
 
 import android.content.Context
 import com.firebase.ui.auth.AuthUI
+import com.ilustris.motiv.foundation.service.CoverService
 import com.ilustris.motiv.foundation.service.QuoteHelper
 import com.ilustris.motiv.foundation.service.IconService
 import com.ilustris.motiv.foundation.service.QuoteService
@@ -29,6 +30,9 @@ object AppModule {
 
     @Provides
     fun providesIconService() = IconService()
+
+    @Provides
+    fun providesCoverService() = CoverService()
 
     @Provides
     fun providesStyleService() = StyleService()

@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.ilustris.motiv.foundation.model.Cover
+import com.ilustris.motiv.foundation.model.Icon
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.User
@@ -14,6 +16,7 @@ import com.ilustris.motiv.foundation.service.UserService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel
 import com.silent.ilustriscore.core.model.ViewModelBaseState
+import com.silent.ilustriscore.core.utilities.delayedFunction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,10 +35,9 @@ class ProfileViewModel @Inject constructor(
     val user = MutableLiveData<User>(null)
     val userQuotes = mutableStateListOf<QuoteDataModel>()
     val userFavorites = mutableStateListOf<QuoteDataModel>()
-    val postsCount = MutableLiveData<Int>(0)
-    val favoriteCount = MutableLiveData<Int>(0)
-
-    val isOwnUser = MutableLiveData<Boolean>(false)
+    val postsCount = MutableLiveData(0)
+    val favoriteCount = MutableLiveData(0)
+    val isOwnUser = MutableLiveData(false)
 
 
     fun fetchUser(uid: String? = service.currentUser()?.uid) {
@@ -47,8 +49,6 @@ class ProfileViewModel @Inject constructor(
                 if (userRequest.isSuccess) {
                     user.postValue(userRequest.success.data as User)
                     isOwnUser.postValue(it == service.currentUser()?.uid)
-                    getUserQuotes(it)
-                    getUserFavorites(it)
                 } else {
                     sendErrorState(userRequest.error.errorException)
                 }
@@ -84,7 +84,6 @@ class ProfileViewModel @Inject constructor(
                     sendErrorState(error.errorException)
                 }
             }
-            viewModelState.postValue(ViewModelBaseState.LoadCompleteState)
         }
     }
 
@@ -92,15 +91,51 @@ class ProfileViewModel @Inject constructor(
         quotesDataList: List<Quote>,
         isFavorite: Boolean = false
     ) {
-        quoteHelper.mapQuoteToQuoteDataModel(quotesDataList).run {
-            if (this.isSuccess) {
-                if (!isFavorite) {
-                    userQuotes.addAll(success.data)
+        quotesDataList.map {
+            quoteHelper.mapQuoteToQuoteDataModel(it).run {
+                if (this.isSuccess) {
+                    if (!isFavorite) {
+                        userQuotes.add(success.data)
+                    } else {
+                        userFavorites.add(success.data)
+                    }
                 } else {
-                    userFavorites.addAll(success.data)
+                    sendErrorState(error.errorException)
                 }
-            } else {
-                sendErrorState(error.errorException)
+            }
+        }
+    }
+
+    fun updateUserIcon(icon: Icon) {
+        viewModelState.postValue(ViewModelBaseState.LoadingState)
+        viewModelScope.launch(Dispatchers.IO) {
+            service.editField(icon.uri, service.currentUser()?.uid ?: "", "picurl").run {
+                if (isSuccess) {
+                    refreshUser()
+                } else {
+                    sendErrorState(error.errorException)
+                }
+            }
+        }
+    }
+
+    private fun refreshUser() {
+        viewModelState.postValue(ViewModelBaseState.LoadingState)
+        user.postValue(null)
+        delayedFunction(500) {
+            fetchUser()
+        }
+    }
+
+    fun updateUserCover(cover: Cover) {
+        viewModelState.postValue(ViewModelBaseState.LoadingState)
+        viewModelScope.launch(Dispatchers.IO) {
+            service.editField(cover.url, service.currentUser()?.uid ?: "", "cover").run {
+                if (isSuccess) {
+                    refreshUser()
+                } else {
+                    sendErrorState(error.errorException)
+                }
             }
         }
     }

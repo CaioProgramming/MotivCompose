@@ -1,10 +1,12 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 
 package com.ilustris.motivcompose.features.profile.ui
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -30,9 +32,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.text.font.FontWeight
@@ -59,14 +66,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.ui.component.CardBackground
+import com.ilustris.motiv.foundation.ui.component.CoverSheet
+import com.ilustris.motiv.foundation.ui.component.IconSheet
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
 import com.ilustris.motiv.foundation.ui.component.gradientAnimation
-import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
-import com.ilustris.motiv.foundation.ui.theme.gradientOverlay
-import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
@@ -87,17 +93,21 @@ fun ProfileView(userID: String? = null, navController: NavController) {
     val viewModel = hiltViewModel<ProfileViewModel>()
     val user = viewModel.user.observeAsState().value
     var currentFilter by remember {
-        mutableStateOf("Posts")
+        mutableStateOf(ProfileFilter.POSTS)
     }
+
     val isOwnUser = viewModel.isOwnUser.observeAsState()
-    val userQuotes = if (currentFilter == "Posts") viewModel.userQuotes else viewModel.userFavorites
-    val viewModelState = viewModel.viewModelState.observeAsState()
+    val userQuotes =
+        if (currentFilter == ProfileFilter.POSTS) viewModel.userQuotes else viewModel.userFavorites
     val listState = rememberLazyListState()
     var profileBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
     var coverBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
+    }
+    val currentSheet = remember {
+        mutableStateOf<ProfileSheet?>(null)
     }
 
     fun canShowData() = userQuotes.isNotEmpty()
@@ -108,10 +118,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
         targetValue = if (canShowData()) 1f else 0f,
         tween(2000, easing = FastOutSlowInEasing)
     )
-    val coroutineScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState() {
-        userQuotes.size
-    }
+
 
     fun showUserTitle() = listState.firstVisibleItemIndex > 1
 
@@ -127,19 +134,14 @@ fun ProfileView(userID: String? = null, navController: NavController) {
     }
 
     LaunchedEffect(user) {
-        user?.let {
-            if (userQuotes.isEmpty()) {
-                viewModel.getUserQuotes(it.uid)
-                viewModel.getUserFavorites(it.uid)
-            }
+        if (user != null && postsCount == 0) {
+            viewModel.getUserQuotes(user.uid)
+            viewModel.getUserFavorites(user.uid)
         }
     }
 
-    fun moveToPage(position: Int) {
-        coroutineScope.launch {
-            pagerState.animateScrollToPage(position)
-        }
-    }
+
+
 
     LazyColumn(
         state = listState,
@@ -184,15 +186,12 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                                     0f,
                                     avatarSize,
                                     gradientAnimation(borderBrush),
-                                    4.dp
+                                    2.dp
                                 )
-                                .clickable {
-                                    moveToPage(0)
-                                }
                         )
 
                         Text(
-                            text = user.name,
+                            text = user.name ?: "",
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
                             modifier = Modifier
@@ -271,7 +270,11 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                     )
                 }
 
-                AnimatedVisibility(visible = canShowData(), enter = fadeIn(), exit = fadeOut()) {
+                AnimatedVisibility(
+                    visible = canShowData(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
 
 
                     Row(
@@ -282,17 +285,13 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                             .background(MaterialTheme.colorScheme.background)
                     ) {
 
-                        ProfileTab(
-                            buttonText = "Publicações",
-                            isSelected = currentFilter == "Posts"
-                        ) {
-                            currentFilter = "Posts"
-                        }
-                        ProfileTab(
-                            buttonText = "Favoritos",
-                            isSelected = currentFilter == "Favorites"
-                        ) {
-                            currentFilter = "Favorites"
+                        ProfileFilter.values().forEach {
+                            ProfileTab(
+                                buttonText = it.title,
+                                isSelected = it == currentFilter
+                            ) {
+                                currentFilter = it
+                            }
                         }
                     }
                 }
@@ -310,7 +309,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
 
         items(userQuotes.size) {
             AnimatedVisibility(
-                visible = viewModelState.value != ViewModelBaseState.LoadingState,
+                visible = true,
                 enter = scaleIn() + fadeIn(
                     tween(1500)
                 ),
@@ -340,6 +339,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
 
     }
 
+
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .collect {
@@ -348,4 +348,12 @@ fun ProfileView(userID: String? = null, navController: NavController) {
     }
 
 
+}
+
+enum class ProfileSheet {
+    ICONS, COVERS
+}
+
+enum class ProfileFilter(val title: String) {
+    POSTS("Posts"), FAVORITES("Favoritos")
 }

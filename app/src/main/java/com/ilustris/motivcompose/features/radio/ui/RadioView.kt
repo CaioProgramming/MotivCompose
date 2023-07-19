@@ -203,7 +203,7 @@ fun RadioView(
                                 .padding(8.dp)
                                 .radioIconModifier(
                                     brush = borderBrush,
-                                    rotationValue = rotationAnimation.value,
+                                    rotationValue = 0f,
                                     sizeValue = scaleAnimation.value,
                                     borderWidth = borderAnimation.value
                                 )
