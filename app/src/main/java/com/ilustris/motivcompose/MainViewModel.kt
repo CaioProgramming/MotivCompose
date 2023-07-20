@@ -2,10 +2,10 @@ package com.ilustris.motivcompose
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.model.Radio
 import com.ilustris.motiv.foundation.model.User
 import com.ilustris.motiv.foundation.service.IconService
 import com.ilustris.motiv.foundation.service.UserService
@@ -28,6 +28,7 @@ class MainViewModel @Inject constructor(
 ) {
 
     val currentUser = MutableLiveData<User?>(null)
+    val playingRadio = MutableLiveData<Radio>(null)
 
     fun validateAuth() {
         if (!isAuthenticated()) updateViewState(ViewModelBaseState.RequireAuth)
@@ -35,15 +36,17 @@ class MainViewModel @Inject constructor(
 
     fun fetchUser() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (service.currentUser() == null) {
+
+            try {
+                val userRequest = service.getSingleData(service.currentUser()?.uid ?: "")
+                if (userRequest is ServiceResult.Success) {
+                    currentUser.postValue(userRequest.data as User)
+                } else {
+                    sendErrorState(userRequest.error.errorException)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
                 updateViewState(ViewModelBaseState.RequireAuth)
-                return@launch
-            }
-            val userRequest = service.getSingleData(service.currentUser()?.uid ?: "")
-            if (userRequest is ServiceResult.Success) {
-                currentUser.postValue(userRequest.data as User)
-            } else {
-                updateViewState(ViewModelBaseState.ErrorState(userRequest.error.errorException))
             }
         }
     }
@@ -61,7 +64,7 @@ class MainViewModel @Inject constructor(
                     val icons = iconService.getAllData()
                     if (icons is ServiceResult.Success) {
                         val iconList = icons.data as List<Icon>
-                        val newUserResult = service.saveUser(iconList.random().uri)
+                        val newUserResult = service.saveNewUser(iconList.random().uri)
                         if (newUserResult is ServiceResult.Success) {
                             currentUser.postValue(newUserResult.data as User)
                         } else {
@@ -71,6 +74,10 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun updatePlayingRadio(radio: Radio?) {
+        playingRadio.postValue(radio)
     }
 
 

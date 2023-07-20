@@ -1,6 +1,7 @@
 package com.ilustris.motiv.foundation.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -23,6 +24,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
+
+
+@Composable
+fun gradientAnimation(gradientColors: List<Color> = motivBrushes()): Brush {
+    val infiniteTransition = rememberInfiniteTransition()
+    val offsetAnimation = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            tween(5000, easing = EaseInCubic),
+            repeatMode = RepeatMode.Reverse,
+        )
+    )
+    return Brush.linearGradient(
+        gradientColors,
+        start = Offset(offsetAnimation.value, offsetAnimation.value),
+        end = Offset(x = offsetAnimation.value * 2, y = offsetAnimation.value * 3)
+    )
+}
 
 @Composable
 fun MotivLoader(

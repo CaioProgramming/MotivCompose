@@ -4,6 +4,7 @@ import ai.atick.material.MaterialColor
 import android.app.Activity
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -23,13 +24,15 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
@@ -41,6 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.R
+import java.lang.Math.PI
+import java.lang.Math.cos
+import java.lang.Math.sin
+import java.lang.Math.sqrt
 
 private val DarkColorScheme = darkColorScheme(
     primary = MaterialColor.DeepPurple300,
@@ -115,17 +122,39 @@ fun motivBrushes() = listOf(
 )
 
 @Composable
+fun grayBrushes() = listOf(
+    MaterialColor.Gray700,
+    MaterialColor.Gray500,
+    MaterialColor.Gray900,
+    Color.Transparent
+)
+
+@Composable
 fun motivGradient() = Brush.linearGradient(colors = motivBrushes())
 
 @Composable
 fun grayGradients() = Brush.linearGradient(
-    colors = listOf(
-        MaterialColor.Gray300,
-        MaterialColor.Gray500,
-        MaterialColor.Gray700,
-        Color.Transparent
-    )
+    colors = grayBrushes()
 )
+
+@Composable
+fun transparentFadeGradient(): Brush {
+
+
+    val mainColor = MaterialTheme.colorScheme.background
+
+    val blackColors = listOf(
+        Color.Transparent,
+        mainColor.copy(alpha = 1f),
+    )
+
+
+    return Brush.verticalGradient(
+        1f to Color.Transparent,
+        0.5f to mainColor,
+        endY = 750f
+    )
+}
 
 @Composable
 fun getDeviceWidth() = LocalConfiguration.current.screenWidthDp
@@ -140,31 +169,70 @@ fun Palette.brushsFromPalette(): Brush {
     val dominantSwatch = try {
         Color(this.dominantSwatch!!.rgb)
     } catch (e: Exception) {
-        MaterialColor.Purple800
+        MaterialColor.Gray900
     }
 
     val vibrantSwatch = try {
         Color(this.vibrantSwatch!!.rgb)
     } catch (e: Exception) {
-        MaterialColor.PurpleA700
+        MaterialColor.Gray500
     }
 
     val mutedSwatch = try {
         Color(this.mutedSwatch!!.rgb)
     } catch (e: Exception) {
-        MaterialColor.DeepPurpleA200
+        MaterialColor.Gray300
     }
 
     return Brush.linearGradient(listOf(dominantSwatch, vibrantSwatch, mutedSwatch))
 }
 
+fun Palette.palleteColors(): List<Color> {
+    val dominantSwatch = try {
+        Color(this.dominantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray900
+    }
 
-fun Modifier.quoteCardModifier() = composed {
-    fillMaxSize()
-        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(defaultRadius))
-        .clip(RoundedCornerShape(defaultRadius))
+    val vibrantSwatch = try {
+        Color(this.vibrantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray500
+    }
 
+    val mutedSwatch = try {
+        Color(this.mutedSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray300
+    }
+    return listOf(dominantSwatch, vibrantSwatch, mutedSwatch)
 }
+
+fun Palette.colorsFromPalette(): List<Color> {
+    val dominantSwatch = try {
+        Color(this.dominantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray900
+    }
+
+    val vibrantSwatch = try {
+        Color(this.vibrantSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray500
+    }
+
+    val mutedSwatch = try {
+        Color(this.mutedSwatch!!.rgb)
+    } catch (e: Exception) {
+        MaterialColor.Gray300
+    }
+
+    return listOf(dominantSwatch, vibrantSwatch, mutedSwatch)
+}
+
+
+fun Modifier.quoteCardModifier() = clip(RoundedCornerShape(defaultRadius))
+
 
 fun Modifier.gradientFill(brush: Brush) =
     graphicsLayer(alpha = 0.99f)
@@ -175,22 +243,31 @@ fun Modifier.gradientFill(brush: Brush) =
             }
         }
 
+fun Modifier.gradientOverlay(brush: Brush) =
+    graphicsLayer()
+        .drawWithCache {
+            onDrawWithContent {
+                drawContent()
+                drawRect(brush, blendMode = BlendMode.Darken)
+            }
+        }
+
 fun Modifier.radioIconModifier(
     rotationValue: Float,
     sizeValue: Dp,
     brush: Brush,
-    borderWidth: Dp = 3.dp
-) = composed {
+    borderWidth: Dp = 3.dp,
+) =
     border(
         borderWidth,
         brush = brush,
         CircleShape
     )
-        .size(sizeValue)
         .padding(4.dp)
         .clip(CircleShape)
+        .size(sizeValue)
         .rotate(rotationValue)
-}
+
 
 
 

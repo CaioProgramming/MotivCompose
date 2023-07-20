@@ -1,24 +1,21 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 
 package com.ilustris.motivcompose.features.radio.ui
 
-import ai.atick.material.MaterialColor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInBounce
-import androidx.compose.animation.core.EaseOutBounce
-import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.core.EaseInElastic
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -32,18 +29,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,46 +50,32 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.model.Radio
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
-import com.ilustris.motivcompose.features.home.presentation.RadioViewModel
+import com.ilustris.motivcompose.features.radio.presentation.RadioViewModel
 import com.ilustris.motivcompose.features.radio.ui.component.RadioListItem
-import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.ImageState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -109,7 +91,7 @@ fun RadioView(
 ) {
 
     val backColor by animateColorAsState(
-        targetValue = if (expanded) MaterialTheme.colorScheme.background else Color.Transparent,
+        targetValue = MaterialTheme.colorScheme.background,
         tween(500, easing = FastOutSlowInEasing)
     )
 
@@ -136,21 +118,22 @@ fun RadioView(
         visible = radios.isNotEmpty(),
         enter = scaleIn(),
         exit = scaleOut(),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
 
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .background(backColor, RoundedCornerShape(radioRadius))
                 .border(
-                    if (expanded) 1.dp else 0.dp,
-                    MaterialTheme.colorScheme.surface.copy(alpha = if (expanded) 0.5f else 0f),
+                    if (expanded) 2.dp else 1.dp,
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
                     RoundedCornerShape(radioRadius)
                 )
-                .padding(4.dp)
-                .animateContentSize(tween(1500, easing = FastOutSlowInEasing)),
+                .animateContentSize(tween(500, easing = FastOutSlowInEasing)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+
             playingRadio?.run {
                 stickyHeader {
 
@@ -162,33 +145,44 @@ fun RadioView(
                         initialValue = 0f,
                         targetValue = if (!expanded) 360f else 0f,
                         animationSpec = infiniteRepeatable(
-                            tween(2500, easing = FastOutSlowInEasing),
+                            tween(1500, easing = EaseInCubic),
                             repeatMode = RepeatMode.Reverse
                         )
                     )
+                    val scaleAnimation = animateDpAsState(
+                        targetValue = if (!expanded) 32.dp else 64.dp,
+                        tween(500, easing = LinearEasing)
+                    )
+                    val borderAnimation = animateDpAsState(
+                        targetValue = if (!expanded) 2.dp else 4.dp,
+                        tween(500, easing = EaseInElastic)
+                    )
 
-
-                    /*       val offsetAnimation = infiniteTransition.animateFloat(
-                               initialValue = 0f,
-                               targetValue = (128 * 2).toFloat(),
-                               animationSpec = infiniteRepeatable(
-                                   tween(3500, easing = LinearEasing),
-                                   repeatMode = RepeatMode.Reverse,
-                               )
-                           )*/
 
                     val borderBrush = visualizarBitmap?.paletteFromBitMap()?.brushsFromPalette()
                         ?: motivGradient()
 
+                    if (expanded) {
+                        Divider(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth(0.2f)
+                                .clip(RoundedCornerShape(defaultRadius))
+                                .wrapContentHeight()
+                                .clickable { onExpand() },
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            thickness = 5.dp
+                        )
+                    }
+
                     Row(
                         modifier = Modifier
-                            .wrapContentSize()
+                            .fillMaxWidth()
                             .clip(RoundedCornerShape(radioRadius))
                             .clickable {
                                 onExpand()
                             }
-                            .animateContentSize(tween(1000, easing = FastOutSlowInEasing)),
-                        horizontalArrangement = Arrangement.SpaceAround,
+                            .animateContentSize(tween(500, easing = LinearOutSlowInEasing)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         GlideImage(
@@ -209,49 +203,35 @@ fun RadioView(
                                 .padding(8.dp)
                                 .radioIconModifier(
                                     brush = borderBrush,
-                                    rotationValue = rotationAnimation.value,
-                                    sizeValue = 64.dp,
+                                    rotationValue = 0f,
+                                    sizeValue = scaleAnimation.value,
+                                    borderWidth = borderAnimation.value
                                 )
                                 .background(
                                     borderBrush,
                                     CircleShape
                                 )
-                                .animateContentSize(tween(1000))
-                                .blur(blurAnimation)
-
+                                .clip(CircleShape)
+                                .animateContentSize(tween(100))
                         )
 
-                        AnimatedVisibility(
-                            visible = expanded,
-                            enter = fadeIn(tween(1500)) + slideInHorizontally(
-                                tween(
-                                    500,
-                                    easing = LinearOutSlowInEasing
-                                )
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontStyle = FontStyle.Italic
                             ),
-                            exit = fadeOut(),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = name,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontStyle = FontStyle.Italic
-                                ),
-                                modifier = Modifier
-                                    .graphicsLayer(alpha = 0.99f)
-                                    .drawWithCache {
-                                        onDrawWithContent {
-                                            drawContent()
-                                            drawRect(
-                                                brush = borderBrush,
-                                                blendMode = BlendMode.SrcAtop
-                                            )
-                                        }
-                                    })
-                        }
+                                .graphicsLayer(alpha = 0.99f)
+                                .drawWithCache {
+                                    onDrawWithContent {
+                                        drawContent()
+                                        drawRect(
+                                            brush = borderBrush,
+                                            blendMode = BlendMode.SrcAtop
+                                        )
+                                    }
+                                })
                     }
                 }
 
@@ -259,6 +239,8 @@ fun RadioView(
             if (expanded) {
                 val currentRadios =
                     if (playingRadio == null) radios else radios.filter { it.id != playingRadio.id }
+
+
                 items(currentRadios) {
                     RadioListItem(radio = it, onClickRadio = { radio ->
                         onSelectRadio(radio)
@@ -267,13 +249,15 @@ fun RadioView(
             }
 
         }
-        if (playingRadio == null) {
-            onSelectRadio(radios.random())
+
+        LaunchedEffect(radios) {
+            if (radios.isNotEmpty() && playingRadio == null) {
+                onSelectRadio(radios.random())
+            }
         }
     }
 
 }
-
 
 
 @Preview()

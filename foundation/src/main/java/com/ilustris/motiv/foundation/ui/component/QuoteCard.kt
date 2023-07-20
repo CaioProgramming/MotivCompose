@@ -3,8 +3,7 @@ package com.ilustris.motiv.foundation.ui.component
 import ai.atick.material.MaterialColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.EaseInOutBounce
-import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.EaseInExpo
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -17,19 +16,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,9 +52,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -57,21 +61,21 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.palette.graphics.Palette
-import com.google.android.play.integrity.internal.t
+import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.model.TextAlignment
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.getDeviceHeight
-import com.ilustris.motiv.foundation.ui.theme.getDeviceWidth
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motiv.foundation.utils.FontUtils
@@ -80,9 +84,20 @@ import com.silent.ilustriscore.core.utilities.format
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
+import com.skydoves.landscapist.glide.GlideRequestType
 
 @Composable
-fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
+fun QuoteCard(
+    quoteDataModel: QuoteDataModel,
+    modifier: Modifier,
+    loadAsGif: Boolean = true,
+    animationEnabled: Boolean = true,
+    onClickUser: (String) -> Unit,
+    onLike: (QuoteDataModel) -> Unit,
+    onShare: (QuoteDataModel) -> Unit,
+    onDelete: (QuoteDataModel) -> Unit,
+    onEdit: (QuoteDataModel) -> Unit
+) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
     val defaultFont =
@@ -103,10 +118,21 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
         mutableStateOf(false)
     }
 
+    val style = quoteDataModel.style
+    val shadowStyle = style.buildStyleShadow()
+    val textAlign = style.getTextAlign()
+    val textColor = style?.textColor.buildTextColor()
+
+
     LaunchedEffect(backgroundBitmap) {
         backgroundBitmap?.let {
             if (palette == null) palette = Palette.Builder(it.asAndroidBitmap()).generate()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!animationEnabled) animationCompleted = true
+
     }
 
     val brush = if (animationCompleted) palette?.brushsFromPalette()
@@ -116,274 +142,239 @@ fun QuoteCard(quoteDataModel: QuoteDataModel, modifier: Modifier) {
 
 
     val borderAnimation by animateDpAsState(
-        targetValue = if (animationCompleted) 3.dp else 0.dp,
-        tween(500)
+        targetValue = if (animationCompleted) 2.dp else 0.dp,
+        tween(1500, easing = EaseInExpo)
     )
 
-    ConstraintLayout(
-        modifier = modifier.border(
-            width = borderAnimation,
-            brush = brush,
-            shape = RoundedCornerShape(
-                defaultRadius
-            )
-        )
+    var imageLoaded by remember {
+        mutableStateOf(false)
+    }
+
+    val imageBlur by animateDpAsState(
+        targetValue = if (imageLoaded) 0.dp else 50.dp,
+        tween(1500)
+    )
+
+    val imageAlpha by animateFloatAsState(
+        targetValue = if (imageLoaded && animationCompleted) 1f else 0f,
+        tween(1500)
+    )
+
+    var dropDownState by remember {
+        mutableStateOf(false)
+    }
+    val dropDownOptions =
+        if (quoteDataModel.isUserQuote) listOf("Excluir", "Editar") else listOf("Denunciar")
+
+    Column(
+        modifier = modifier
     ) {
 
-        val (
-            background,
-            quoteInfo,
-            quoteText,
-            quoteAuthor,
-            likeButton,
-            actionsRow) = createRefs()
-
-        val style = quoteDataModel.style
-        val shadowStyle = style.buildStyleShadow()
-        val textAlign = style.getTextAlign()
-        val textColor = style?.textColor.buildTextColor()
-        var imageLoaded by remember {
-            mutableStateOf(false)
-        }
-
-
-        val imageBlur by animateDpAsState(
-            targetValue = if (imageLoaded) 0.dp else 50.dp,
-            tween(1500)
-        )
-
-        val imageAlpha by animateFloatAsState(
-            targetValue = if (imageLoaded && animationCompleted) 1f else 0f,
-            tween(1500)
-        )
-
-        GlideImage(
-            imageModel = { style?.backgroundURL },
-            modifier = Modifier
-                .constrainAs(
-                    background
-                ) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(actionsRow.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
-                }
-                .alpha(imageAlpha)
-                .blur(imageBlur),
-            onImageStateChanged = {
-                imageLoaded = it is GlideImageState.Success
-                if (it is GlideImageState.Success) {
-                    backgroundBitmap = it.imageBitmap
-                }
-            },
-        )
-
-        Column(
-            modifier = Modifier
-                .constrainAs(quoteText) {
-                    top.linkTo(quoteInfo.bottom)
-                    bottom.linkTo(quoteAuthor.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.matchParent
-                    height = Dimension.fillToConstraints
-                }
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TypeWriterText(
-                text = quote.quote,
-                shadow = shadowStyle,
-                color = textColor,
-                textAlign = textAlign,
-                fontFamily = defaultFont,
-                textStyle = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            ) {
-                animationCompleted = true
-            }
-        }
-
-
-        Text(text = quote.author, modifier = Modifier
-            .constrainAs(quoteAuthor) {
-                bottom.linkTo(actionsRow.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                width = Dimension.fillToConstraints
-                height = Dimension.wrapContent
-            }
-            .padding(16.dp)
-            .graphicsLayer(alpha = imageAlpha),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                shadow = shadowStyle,
-                color = textColor,
-                textAlign = textAlign,
-                fontFamily = defaultFont
-            ),
-            fontStyle = FontStyle.Italic,
-            softWrap = true
-        )
 
         AnimatedVisibility(
             visible = quoteDataModel.user != null,
             modifier = Modifier
-                .constrainAs(quoteInfo) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
-                }
-                .padding(16.dp)
+                .padding(8.dp)
                 .graphicsLayer(alpha = imageAlpha)
-                .animateContentSize(tween(1000))) {
-
-            var infoExpanded by remember {
-                mutableStateOf(false)
-            }
-
-            val blurInfoAnimation by animateDpAsState(
-                targetValue = if (infoExpanded) 0.dp else defaultRadius,
-                tween(500)
-            )
-
-            val iconAlphaAnimation by animateFloatAsState(
-                targetValue = if (infoExpanded) 1f else 0.7f,
-                tween(1500)
-            )
+                .animateContentSize(tween(1000))
+        ) {
 
 
-            Row(
+            ConstraintLayout(
                 modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
-                        RoundedCornerShape(radioRadius)
-                    )
-                    .clip(RoundedCornerShape(radioRadius))
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
                     .animateContentSize(tween(250, easing = LinearEasing)),
-                verticalAlignment = Alignment.CenterVertically
             ) {
 
-
-                GlideImage(
-                    imageModel = {
-                        quoteDataModel.user?.picurl ?: ""
-                    },
-                    imageOptions = ImageOptions(
-                        requestSize = IntSize(52, 52),
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                    ),
-                    modifier = Modifier
-                        .size(50.dp)
-                        .blur(blurInfoAnimation, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                        .clip(CircleShape)
-                        .border(2.dp, brush = brush, CircleShape)
-                        .clickable {
-                            infoExpanded = !infoExpanded
-                            showInfo = infoExpanded
-                        }
-                )
+                val (userInfo, options) = createRefs()
 
 
+                Row(modifier = Modifier.constrainAs(userInfo) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(options.start)
+                    width = Dimension.fillToConstraints
+                }, horizontalArrangement = Arrangement.Start) {
+                    GlideImage(
+                        imageModel = {
+                            quoteDataModel.user?.picurl ?: ""
+                        },
+                        imageOptions = ImageOptions(
+                            requestSize = IntSize(52, 52),
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center,
+                        ),
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                            .border(
+                                1.dp,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                CircleShape
+                            )
 
-                AnimatedVisibility(
-                    visible = showInfo && infoExpanded,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
+                    )
                     Column(modifier = Modifier
-                        .padding(8.dp)
                         .clickable {
-
-                        }) {
+                            quoteDataModel.user?.id?.let { onClickUser(it) }
+                        }
+                        .padding(8.dp)
+                    ) {
                         Text(
                             text = (quoteDataModel.user?.name) ?: "".trimEnd(),
                             maxLines = 1,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = quote.data.format(DateFormats.DD_OF_MM_FROM_YYYY),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Light
                         )
+                    }
+                }
+
+
+
+                IconButton(modifier = Modifier.constrainAs(options) {
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }, onClick = {
+                    dropDownState = !dropDownState
+                }) {
+                    Icon(
+                        Icons.Rounded.MoreVert,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = "Opções"
+                    )
+
+                    DropdownMenu(expanded = dropDownState,
+                        onDismissRequest = {
+                            dropDownState = false
+                        }) {
+                        dropDownOptions.forEach { option ->
+                            DropdownMenuItem(text = {
+                                androidx.compose.material.Text(
+                                    text = option,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(8.dp),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }, onClick = {
+                                when (option) {
+                                    "Excluir" -> onDelete(quoteDataModel)
+                                    "Editar" -> {
+                                        onEdit(quoteDataModel)
+                                    }
+                                }
+                                dropDownState = false
+
+                            })
+                        }
                     }
                 }
             }
         }
 
+        Box {
 
-        IconButton(onClick = { /*TODO*/ }, modifier = Modifier
-            .padding(8.dp)
-            .background(
-                MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                CircleShape
+            GlideImage(
+                imageModel = { style?.backgroundURL },
+                glideRequestType = if (!loadAsGif) GlideRequestType.BITMAP else GlideRequestType.GIF,
+                modifier = Modifier
+                    .border(
+                        width = borderAnimation,
+                        brush = brush,
+                        shape = RoundedCornerShape(defaultRadius)
+                    )
+                    .clip(RoundedCornerShape(defaultRadius))
+                    .matchParentSize()
+                    .alpha(imageAlpha)
+                    .blur(imageBlur)
+                    .clickable {
+                        onClickUser(quoteDataModel.user?.id ?: "")
+                    },
+                onImageStateChanged = {
+                    imageLoaded = it is GlideImageState.Success
+                    if (it is GlideImageState.Success) {
+                        backgroundBitmap = it.imageBitmap
+                    }
+                },
             )
-            .constrainAs(likeButton) {
-                bottom.linkTo(parent.bottom)
-                end.linkTo(parent.end)
-                top.linkTo(actionsRow.top)
-                bottom.linkTo(actionsRow.bottom)
-            }
-            .graphicsLayer(alpha = imageAlpha)) {
-            val isFavorite = quoteDataModel.isFavorite
-            val color =
-                if (isFavorite) MaterialColor.Red500 else MaterialTheme.colorScheme.onBackground
-            val icon = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder
-            Icon(
-                icon,
-                contentDescription = "Curtir",
-                tint = color,
-            )
-        }
 
-        Row(modifier = Modifier
-            .constrainAs(actionsRow) {
-                bottom.linkTo(parent.bottom)
-                start.linkTo(parent.start)
-            }
-            .graphicsLayer(alpha = imageAlpha)) {
-
-
-            AnimatedVisibility(
-                visible = quoteDataModel.isUserQuote,
-                enter = scaleIn(),
-                exit = scaleOut()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                IconButton(
-                    onClick = { /*TODO*/ },
+                AnimatedText(
+                    text = quote.quote,
+                    animationEnabled = animationEnabled,
+                    shadow = shadowStyle,
+                    fontFamily = defaultFont,
+                    textStyle = MaterialTheme.typography.headlineLarge.copy(
+                        shadow = shadowStyle,
+                        color = textColor,
+                        textAlign = textAlign,
+                        fontFamily = defaultFont
+                    ),
                     modifier = Modifier
                         .padding(8.dp)
-                        .background(
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                            CircleShape
-                        )
+                        .fillMaxWidth()
                 ) {
-                    Icon(
-                        Icons.Rounded.Edit,
-                        contentDescription = "Editar",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
+                    animationCompleted = true
                 }
+
+                Text(
+                    text = quote.author, modifier = Modifier
+                        .padding(16.dp)
+                        .graphicsLayer(alpha = imageAlpha),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        shadow = shadowStyle,
+                        color = textColor,
+                        textAlign = textAlign,
+                        fontFamily = defaultFont
+                    ),
+                    fontStyle = FontStyle.Italic,
+                    softWrap = true
+                )
+            }
+
+        }
+
+        Row(modifier = Modifier.graphicsLayer(alpha = imageAlpha)) {
+
+
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier.padding(4.dp)
+            ) {
+                val isFavorite = quoteDataModel.isFavorite
+                val color =
+                    if (isFavorite) MaterialColor.Red500 else MaterialTheme.colorScheme.onBackground
+                val icon = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder
+                Icon(
+                    icon,
+                    contentDescription = "Curtir",
+                    tint = color,
+                )
             }
 
             IconButton(
-                onClick = { /*TODO*/ }, modifier = Modifier
-                    .padding(8.dp)
-                    .background(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                        CircleShape
-                    )
+                onClick = { /*TODO*/ }, modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
-                    Icons.Rounded.Send,
+                    painterResource(id = R.drawable.share),
                     contentDescription = "Compartilhar",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
