@@ -36,15 +36,17 @@ class MainViewModel @Inject constructor(
 
     fun fetchUser() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (service.currentUser() == null) {
+
+            try {
+                val userRequest = service.getSingleData(service.currentUser()?.uid ?: "")
+                if (userRequest is ServiceResult.Success) {
+                    currentUser.postValue(userRequest.data as User)
+                } else {
+                    sendErrorState(userRequest.error.errorException)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
                 updateViewState(ViewModelBaseState.RequireAuth)
-                return@launch
-            }
-            val userRequest = service.getSingleData(service.currentUser()?.uid ?: "")
-            if (userRequest is ServiceResult.Success) {
-                currentUser.postValue(userRequest.data as User)
-            } else {
-                updateViewState(ViewModelBaseState.ErrorState(userRequest.error.errorException))
             }
         }
     }

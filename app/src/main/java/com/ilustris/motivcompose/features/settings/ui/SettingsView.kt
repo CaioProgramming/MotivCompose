@@ -150,7 +150,7 @@ fun SettingsView(navController: NavController) {
     val coverBackColor = animateColorAsState(
         animationSpec = tween(1000),
         targetValue = coverBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.colorsFromPalette()
-            ?.get(0) ?: MaterialTheme.colorScheme.background
+            ?.first() ?: MaterialTheme.colorScheme.surface
     )
 
     val context = LocalContext.current
@@ -362,6 +362,9 @@ fun SettingsView(navController: NavController) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .clickable {
+                                            navController.navigate("admin")
+                                        }
                                         .padding(rowPadding),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -394,9 +397,6 @@ fun SettingsView(navController: NavController) {
                                         fontStyle = FontStyle.Italic,
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier
-                                            .clickable {
-
-                                            }
                                             .padding(horizontal = textPadding)
                                             .gradientFill(managerBrush)
 

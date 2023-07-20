@@ -69,6 +69,7 @@ import com.ilustris.motivcompose.features.radio.ui.RadioView
 import com.ilustris.motivcompose.ui.navigation.AppNavigation
 import com.ilustris.motivcompose.ui.navigation.MotivBottomNavigation
 import com.ilustris.motivcompose.ui.navigation.MotivNavigationGraph
+import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.delayedFunction
 import dagger.hilt.android.AndroidEntryPoint
@@ -209,8 +210,12 @@ class MainActivity : ComponentActivity() {
                 }
 
                 LaunchedEffect(viewModelState.value) {
-                    if (currentUser == null && viewModelState.value == ViewModelBaseState.RequireAuth) {
+                    if (viewModelState.value == ViewModelBaseState.RequireAuth) {
                         signInLauncher.launch(signInIntent)
+                    } else if (viewModelState.value is ViewModelBaseState.ErrorState) {
+                        if ((viewModelState.value as ViewModelBaseState.ErrorState).dataException == DataException.AUTH) {
+                            signInLauncher.launch(signInIntent)
+                        }
                     }
                 }
 
