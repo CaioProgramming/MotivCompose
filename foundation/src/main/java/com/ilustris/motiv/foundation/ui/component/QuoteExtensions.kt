@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseInElastic
 import androidx.compose.animation.core.EaseInOutBounce
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -56,9 +57,13 @@ fun AnimatedText(
 
 
     var textIndex by remember { mutableIntStateOf(0) }
-    val textPart = if (!animationEnabled) text else text.substring(0, textIndex)
+    val textPart = try {
+        if (!animationEnabled) text else text.substring(0, textIndex)
+    } catch (e: Exception) {
+        text
+    }
 
-    fun isAnimationComplete() = textIndex == text.length || !animationEnabled
+    fun isAnimationComplete() = textPart == text || !animationEnabled
 
 
     var style by remember { mutableStateOf(textStyle) }
@@ -88,10 +93,10 @@ fun AnimatedText(
     Text(
         text = textPart,
         style = textStyle,
-        modifier = modifier.animateContentSize(tween(500, easing = EaseInOutBounce)),
+        modifier = modifier.animateContentSize(tween(100)),
         fontFamily = fontFamily,
         onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowHeight && textPart == text && animationEnabled) {
+            if (textLayoutResult.didOverflowHeight && isAnimationComplete()) {
                 style = textStyle.copy(fontSize = textStyle.fontSize * 0.7)
             }
         }

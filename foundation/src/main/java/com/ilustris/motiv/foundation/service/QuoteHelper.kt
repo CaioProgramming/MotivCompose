@@ -1,5 +1,11 @@
 package com.ilustris.motiv.foundation.service
 
+import android.app.Application
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
+import android.util.Log
+import androidx.core.content.FileProvider
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.Style
@@ -7,6 +13,8 @@ import com.ilustris.motiv.foundation.model.User
 import com.ilustris.motiv.foundation.model.quoteList
 import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ServiceResult
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 class QuoteHelper @Inject constructor(
@@ -20,11 +28,13 @@ class QuoteHelper @Inject constructor(
             val user = try {
                 userService.getSingleData(quote.userID).success.data as User
             } catch (e: Exception) {
+                e.printStackTrace()
                 null
             }
             val style = try {
                 styleService.getSingleData(quote.style).success.data as Style
             } catch (e: Exception) {
+                e.printStackTrace()
                 null
             }
 
@@ -33,7 +43,7 @@ class QuoteHelper @Inject constructor(
                     quote,
                     user,
                     style,
-                    isFavorite = quote.likes.contains(user?.uid),
+                    isFavorite = quote.likes.contains(uid),
                     isUserQuote = quote.userID == uid
                 )
             )
@@ -76,4 +86,40 @@ class QuoteHelper @Inject constructor(
             ServiceResult.Error(DataException.UNKNOWN)
         }
     }
+
+    suspend fun generateQuoteImage(
+        context: Context,
+        quote: Quote,
+        bitmap: Bitmap
+    ): ServiceResult<DataException, Uri> {
+        return try {
+            val shareFile = generateBitmapFile(quote, bitmap, context)
+            val uri = FileProvider.getUriForFile(
+                context,
+                context.packageName + ".fileprovider",
+                shareFile
+            )
+            ServiceResult.Success(uri)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e(javaClass.simpleName, "handleShare: Error generating file ${e.message}")
+            ServiceResult.Error(DataException.UNKNOWN)
+        }
+
+    }
+
+    private fun generateBitmapFile(quote: Quote, bitmap: Bitmap, context: Context): File {
+        val cachePath = context.cacheDir.path + "/shared_quotes/"
+        val cacheFile = File(cachePath)
+        if (!cacheFile.exists()) {
+            cacheFile.mkdirs()
+        }
+        val stream = FileOutputStream(cachePath + "motiv_${quote.id}.png")
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        stream.close()
+        val file = File(cachePath + "motiv_${quote.id}.png")
+        Log.i(javaClass.simpleName, "generateCardImage: file saved ${file.absolutePath}")
+        return file
+    }
+
 }

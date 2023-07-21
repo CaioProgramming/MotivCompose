@@ -74,6 +74,7 @@ import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.model.TextAlignment
+import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
@@ -85,6 +86,8 @@ import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
+import dev.shreyaspatil.capturable.Capturable
+import dev.shreyaspatil.capturable.controller.rememberCaptureController
 
 @Composable
 fun QuoteCard(
@@ -92,11 +95,7 @@ fun QuoteCard(
     modifier: Modifier,
     loadAsGif: Boolean = true,
     animationEnabled: Boolean = true,
-    onClickUser: (String) -> Unit,
-    onLike: (QuoteDataModel) -> Unit,
-    onShare: (QuoteDataModel) -> Unit,
-    onDelete: (QuoteDataModel) -> Unit,
-    onEdit: (QuoteDataModel) -> Unit
+    quoteActions: QuoteActions
 ) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
@@ -140,6 +139,7 @@ fun QuoteCard(
         listOf(MaterialTheme.colorScheme.background, Color.Transparent)
     )
 
+    val captureController = rememberCaptureController()
 
     val borderAnimation by animateDpAsState(
         targetValue = if (animationCompleted) 2.dp else 0.dp,
@@ -202,13 +202,15 @@ fun QuoteCard(
                             quoteDataModel.user?.picurl ?: ""
                         },
                         imageOptions = ImageOptions(
-                            requestSize = IntSize(52, 52),
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
                         ),
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
+                            .clickable {
+                                quoteDataModel.user?.id?.let { quoteActions.onClickUser(it) }
+                            }
                             .border(
                                 1.dp,
                                 color = MaterialTheme.colorScheme.onBackground,
@@ -217,19 +219,21 @@ fun QuoteCard(
 
                     )
                     Column(modifier = Modifier
-                        .clickable {
-                            quoteDataModel.user?.id?.let { onClickUser(it) }
-                        }
+
                         .padding(8.dp)
                     ) {
                         Text(
                             text = (quoteDataModel.user?.name) ?: "".trimEnd(),
                             maxLines = 1,
                             style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.clickable {
+                                quoteDataModel.user?.id?.let { quoteActions.onClickUser(it) }
+                            }
                         )
                         Text(
-                            text = quote.data.format(DateFormats.DD_OF_MM_FROM_YYYY),
+                            text = quote.data?.toDate()?.format(DateFormats.DD_OF_MM_FROM_YYYY)
+                                ?: "-",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Light
                         )
@@ -251,13 +255,19 @@ fun QuoteCard(
                         contentDescription = "Opções"
                     )
 
-                    DropdownMenu(expanded = dropDownState,
+                    DropdownMenu(
+                        expanded = dropDownState,
                         onDismissRequest = {
                             dropDownState = false
-                        }) {
+                        }, modifier = Modifier.background(
+                            MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(
+                                defaultRadius
+                            )
+                        )
+                    ) {
                         dropDownOptions.forEach { option ->
                             DropdownMenuItem(text = {
-                                androidx.compose.material.Text(
+                                Text(
                                     text = option,
                                     style = MaterialTheme.typography.labelMedium,
                                     modifier = Modifier.padding(8.dp),
@@ -265,9 +275,13 @@ fun QuoteCard(
                                 )
                             }, onClick = {
                                 when (option) {
-                                    "Excluir" -> onDelete(quoteDataModel)
+                                    "Excluir" -> quoteActions.onDelete(quoteDataModel)
                                     "Editar" -> {
-                                        onEdit(quoteDataModel)
+                                        quoteActions.onEdit(quoteDataModel)
+                                    }
+
+                                    "Denunciar" -> {
+                                        quoteActions.onReport(quoteDataModel)
                                     }
                                 }
                                 dropDownState = false
@@ -279,81 +293,89 @@ fun QuoteCard(
             }
         }
 
-        Box {
+        Capturable(controller = captureController, onCaptured = { bitmap, error ->
+            bitmap?.let {
+                quoteActions.onShare(quoteDataModel, it.asAndroidBitmap())
+            }
+        }) {
+            Box {
 
-            GlideImage(
-                imageModel = { style?.backgroundURL },
-                glideRequestType = if (!loadAsGif) GlideRequestType.BITMAP else GlideRequestType.GIF,
-                modifier = Modifier
-                    .border(
-                        width = borderAnimation,
-                        brush = brush,
-                        shape = RoundedCornerShape(defaultRadius)
-                    )
-                    .clip(RoundedCornerShape(defaultRadius))
-                    .matchParentSize()
-                    .alpha(imageAlpha)
-                    .blur(imageBlur)
-                    .clickable {
-                        onClickUser(quoteDataModel.user?.id ?: "")
-                    },
-                onImageStateChanged = {
-                    imageLoaded = it is GlideImageState.Success
-                    if (it is GlideImageState.Success) {
-                        backgroundBitmap = it.imageBitmap
-                    }
-                },
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(Alignment.CenterVertically)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AnimatedText(
-                    text = quote.quote,
-                    animationEnabled = animationEnabled,
-                    shadow = shadowStyle,
-                    fontFamily = defaultFont,
-                    textStyle = MaterialTheme.typography.headlineLarge.copy(
-                        shadow = shadowStyle,
-                        color = textColor,
-                        textAlign = textAlign,
-                        fontFamily = defaultFont
-                    ),
+                GlideImage(
+                    imageModel = { style?.backgroundURL },
+                    glideRequestType = if (!loadAsGif) GlideRequestType.BITMAP else GlideRequestType.GIF,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .border(
+                            width = borderAnimation,
+                            brush = brush,
+                            shape = RoundedCornerShape(defaultRadius)
+                        )
+                        .clip(RoundedCornerShape(defaultRadius))
+                        .matchParentSize()
+                        .alpha(imageAlpha)
+                        .blur(imageBlur),
+                    onImageStateChanged = {
+                        imageLoaded = it is GlideImageState.Success
+                        if (it is GlideImageState.Success) {
+                            backgroundBitmap = it.imageBitmap
+                        }
+                    },
+                )
+
+                Column(
+                    modifier = Modifier
                         .fillMaxWidth()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    animationCompleted = true
+                    AnimatedText(
+                        text = quote.quote,
+                        animationEnabled = animationEnabled,
+                        shadow = shadowStyle,
+                        fontFamily = defaultFont,
+                        textStyle = MaterialTheme.typography.headlineLarge.copy(
+                            shadow = shadowStyle,
+                            color = textColor,
+                            textAlign = textAlign,
+                            fontFamily = defaultFont
+                        ),
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                    ) {
+                        animationCompleted = true
+                    }
+
+                    Text(
+                        text = quote.author, modifier = Modifier
+                            .padding(16.dp)
+                            .graphicsLayer(alpha = imageAlpha),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            shadow = shadowStyle,
+                            color = textColor,
+                            textAlign = textAlign,
+                            fontFamily = defaultFont
+                        ),
+                        fontStyle = FontStyle.Italic,
+                        softWrap = true
+                    )
                 }
 
-                Text(
-                    text = quote.author, modifier = Modifier
-                        .padding(16.dp)
-                        .graphicsLayer(alpha = imageAlpha),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        shadow = shadowStyle,
-                        color = textColor,
-                        textAlign = textAlign,
-                        fontFamily = defaultFont
-                    ),
-                    fontStyle = FontStyle.Italic,
-                    softWrap = true
-                )
             }
-
         }
 
-        Row(modifier = Modifier.graphicsLayer(alpha = imageAlpha)) {
+
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .graphicsLayer(alpha = imageAlpha)
+        ) {
 
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = { quoteActions.onLike(quoteDataModel) },
                 modifier = Modifier.padding(4.dp)
             ) {
                 val isFavorite = quoteDataModel.isFavorite
@@ -368,7 +390,7 @@ fun QuoteCard(
             }
 
             IconButton(
-                onClick = { /*TODO*/ }, modifier = Modifier.padding(4.dp)
+                onClick = { captureController.capture() }, modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
                     painterResource(id = R.drawable.share),
@@ -384,6 +406,7 @@ fun QuoteCard(
 
 
 }
+
 
 fun Style?.getTextAlign(): TextAlign {
     if (this == null) return TextAlign.Center

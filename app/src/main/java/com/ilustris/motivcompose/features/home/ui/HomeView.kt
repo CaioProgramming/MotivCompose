@@ -6,9 +6,12 @@
 package com.ilustris.motivcompose.features.home.ui
 
 import ai.atick.material.MaterialColor
+import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.media.MediaPlayer.OnPreparedListener
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -58,7 +61,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -69,20 +74,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.model.Quote
+import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
+import com.ilustris.motiv.foundation.ui.component.ReportDialog
+import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.MotivTheme
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motivcompose.features.home.presentation.HomeViewModel
+import com.ilustris.motivcompose.features.home.presentation.ShareState
 import com.ilustris.motivcompose.features.radio.ui.RadioView
+import com.ilustris.motivcompose.ui.navigation.AppNavigation
+import com.silent.ilustriscore.BuildConfig
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.delayedFunction
 import com.skydoves.landscapist.components.rememberImageComponent
+import java.io.File
 
 @Composable
 fun HomeView(navController: NavController) {
@@ -92,9 +106,47 @@ fun HomeView(navController: NavController) {
     var query by remember {
         mutableStateOf("")
     }
-    val state = homeViewModel.viewModelState.observeAsState().value
+    val shareState = homeViewModel.shareState.observeAsState().value
+    val reportVisibility = remember {
+        mutableStateOf(false)
+    }
+    val reportedQuote = remember {
+        mutableStateOf<Quote?>(null)
+    }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+
+    val quoteActions = object : QuoteActions {
+        override fun onClickUser(uid: String) {
+            navController.navigate(AppNavigation.PROFILE.route.replace("{userId}", uid))
+        }
+
+        override fun onLike(dataModel: QuoteDataModel) {
+            homeViewModel.likeQuote(dataModel)
+        }
+
+        override fun onShare(dataModel: QuoteDataModel, bitmap: Bitmap) {
+            homeViewModel.handleShare(dataModel.quoteBean, bitmap)
+        }
+
+        override fun onDelete(dataModel: QuoteDataModel) {
+            homeViewModel.deleteQuote(dataModel)
+        }
+
+        override fun onEdit(dataModel: QuoteDataModel) {
+            navController.navigate(
+                AppNavigation.POST.route.replace(
+                    "{quoteId}",
+                    dataModel.quoteBean.id
+                )
+            )
+        }
+
+        override fun onReport(dataModel: QuoteDataModel) {
+            reportVisibility.value = true
+            reportedQuote.value = dataModel.quoteBean
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -200,22 +252,62 @@ fun HomeView(navController: NavController) {
                         modifier = Modifier
                             .wrapContentSize()
                             .quoteCardModifier(),
-                        onClickUser = {
-                            navController.navigate("profile/$it")
-                        },
-                        onDelete = {},
-                        onLike = {},
-                        onShare = {},
-                        onEdit = {}
+                        quoteActions = quoteActions,
                     )
 
                 }
             )
         }
+
+        ReportDialog(visible = reportVisibility.value, reportFeedback = {
+            reportedQuote.value?.let { quote ->
+                homeViewModel.reportQuote(quote, it)
+            }
+            reportVisibility.value = false
+        }) {
+            reportVisibility.value = false
+        }
+    }
+
+    val context = LocalContext.current
+
+    fun launchShareActivity(uri: Uri, quote: Quote) {
+
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "image/*"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            setDataAndType(uri, context.contentResolver.getType(uri))
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                context.resources.getString(R.string.app_name)
+            )
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "${quote.quote}\n - ${quote.author}"
+            )
+            putExtra(Intent.EXTRA_STREAM, uri)
+        }
+        context.startActivity(
+            Intent.createChooser(
+                shareIntent,
+                "Compartilhar post em..."
+            )
+        )
     }
 
     LaunchedEffect(Unit) {
-        homeViewModel.getAllData()
+        if (quotes.isEmpty()) {
+            homeViewModel.getAllData()
+        }
+    }
+
+    LaunchedEffect(shareState) {
+        shareState?.let {
+            if (it is ShareState.ShareSuccess) {
+                launchShareActivity(it.uri, it.quote)
+            }
+        }
     }
 
 }
