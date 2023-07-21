@@ -2,6 +2,8 @@ package com.ilustris.motivcompose.ui.navigation
 
 import android.os.Bundle
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -48,11 +50,15 @@ fun MotivNavigationGraph(
     NavHost(
         navController = navHostController,
         startDestination = AppNavigation.HOME.route,
-        modifier = modifier.padding(padding)
     ) {
         AppNavigation.values().forEach { item ->
             val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }
-            composable(route = item.route, arguments = args, enterTransition = { fadeIn() }) {
+            composable(
+                route = item.route,
+                arguments = args,
+                enterTransition = { fadeIn() },
+                exitTransition = { fadeOut() },
+                popExitTransition = { scaleOut() }) {
                 GetRouteScreen(navigationItem = item, navHostController, it.arguments)
             }
         }
@@ -144,7 +150,8 @@ fun GetRouteScreen(
         }
 
         AppNavigation.POST -> {
-            QuotePostView(navController)
+            val quoteId = arguments?.getString(navigationItem.arguments.first())
+            QuotePostView(quoteId, navController)
         }
 
         AppNavigation.SETTINGS -> {

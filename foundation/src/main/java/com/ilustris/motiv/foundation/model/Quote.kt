@@ -1,5 +1,6 @@
 package com.ilustris.motiv.foundation.model
 
+import com.google.firebase.Timestamp
 import com.silent.ilustriscore.core.bean.BaseBean
 import java.util.*
 import kotlin.collections.ArrayList
@@ -20,9 +21,12 @@ data class Quote(
     var quote: String = "",
     var author: String = "",
     var style: String = "default",
-    var data: Date = Date(),
+    var data: Timestamp? = null,
     var userID: String = "",
-    var isReport: Boolean = false,
+    var reports: ArrayList<Report> = ArrayList(),
     var likes: ArrayList<String> = ArrayList(),
     override var id: String = ""
 ) : BaseBean(id)
+
+
+data class Report(val userID: String = "", val reason: String = "", val data: Timestamp? = null)

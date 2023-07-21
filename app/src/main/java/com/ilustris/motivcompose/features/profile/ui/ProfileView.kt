@@ -2,6 +2,9 @@
 
 package com.ilustris.motivcompose.features.profile.ui
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -60,16 +63,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.model.Quote
+import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.CoverSheet
 import com.ilustris.motiv.foundation.ui.component.IconSheet
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
+import com.ilustris.motiv.foundation.ui.component.ReportDialog
 import com.ilustris.motiv.foundation.ui.component.gradientAnimation
+import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
@@ -77,6 +86,7 @@ import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
+import com.ilustris.motivcompose.features.home.presentation.ShareState
 import com.ilustris.motivcompose.features.profile.presentation.ProfileViewModel
 import com.ilustris.motivcompose.features.profile.ui.component.CounterLabel
 import com.ilustris.motivcompose.features.profile.ui.component.ProfileTab
@@ -91,9 +101,48 @@ import kotlinx.coroutines.launch
 fun ProfileView(userID: String? = null, navController: NavController) {
 
     val viewModel = hiltViewModel<ProfileViewModel>()
+    val shareState = viewModel.shareState.observeAsState().value
+    val context = LocalContext.current
     val user = viewModel.user.observeAsState().value
+    val reportVisibility = remember {
+        mutableStateOf(false)
+    }
+    val reportedQuote = remember {
+        mutableStateOf<Quote?>(null)
+    }
     var currentFilter by remember {
         mutableStateOf(ProfileFilter.POSTS)
+    }
+    val quoteActions = object : QuoteActions {
+        override fun onClickUser(uid: String) {
+            navController.navigate(AppNavigation.PROFILE.route.replace("{userId}", uid))
+        }
+
+        override fun onLike(dataModel: QuoteDataModel) {
+            viewModel.likeQuote(dataModel, filter = currentFilter)
+        }
+
+        override fun onShare(dataModel: QuoteDataModel, bitmap: Bitmap) {
+            viewModel.shareQuote(dataModel.quoteBean, bitmap)
+        }
+
+        override fun onDelete(dataModel: QuoteDataModel) {
+            viewModel.deleteQuote(dataModel, currentFilter)
+        }
+
+        override fun onEdit(dataModel: QuoteDataModel) {
+            navController.navigate(
+                AppNavigation.POST.route.replace(
+                    "{quoteId}",
+                    dataModel.quoteBean.id
+                )
+            )
+        }
+
+        override fun onReport(dataModel: QuoteDataModel) {
+            reportVisibility.value = true
+            reportedQuote.value = dataModel.quoteBean
+        }
     }
 
     val isOwnUser = viewModel.isOwnUser.observeAsState()
@@ -140,7 +189,30 @@ fun ProfileView(userID: String? = null, navController: NavController) {
         }
     }
 
+    fun launchShareActivity(uri: Uri, quote: Quote) {
 
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "image/*"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            setDataAndType(uri, context.contentResolver.getType(uri))
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                context.resources.getString(R.string.app_name)
+            )
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "${quote.quote}\n - ${quote.author}"
+            )
+            putExtra(Intent.EXTRA_STREAM, uri)
+        }
+        context.startActivity(
+            Intent.createChooser(
+                shareIntent,
+                "Compartilhar post em..."
+            )
+        )
+    }
 
 
     LazyColumn(
@@ -186,7 +258,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                                     0f,
                                     avatarSize,
                                     gradientAnimation(borderBrush),
-                                    2.dp
+                                    3.dp
                                 )
                         )
 
@@ -323,21 +395,30 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                         .wrapContentSize()
                         .quoteCardModifier(),
-                    onClickUser = {
-                        if (it != user?.uid) {
-                            navController.navigate("profile/{userId}".replace("{userId}", it))
-                        }
-                    },
-                    onShare = {},
-                    onLike = {},
-                    onDelete = {},
-                    onEdit = {}
+                    quoteActions = quoteActions
                 )
             }
 
         }
 
     }
+
+    LaunchedEffect(shareState) {
+        shareState.let {
+            if (it is ShareState.ShareSuccess) {
+                launchShareActivity(it.uri, it.quote)
+            }
+        }
+    }
+
+    ReportDialog(visible = reportVisibility.value, reportFeedback = {
+        reportedQuote.value?.let { quote ->
+            viewModel.reportQuote(quote, it)
+        }
+        reportVisibility.value = false
+    }, dismissRequest = {
+        reportVisibility.value = false
+    })
 
 
     LaunchedEffect(listState) {

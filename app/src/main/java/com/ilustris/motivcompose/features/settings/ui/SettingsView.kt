@@ -78,6 +78,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -101,6 +102,7 @@ import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motivcompose.MainActivity
+import com.ilustris.motivcompose.R
 import com.ilustris.motivcompose.features.profile.ui.ProfileSheet
 import com.ilustris.motivcompose.features.settings.presentation.SettingsViewModel
 import com.silent.ilustriscore.core.model.ViewModelBaseState
@@ -610,6 +612,10 @@ fun SettingsView(navController: NavController) {
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
                     )
+                }
+
+                item {
+                    Text(text = stringResource(id = com.ilustris.motiv.foundation.R.string.app_name))
                 }
 
             }

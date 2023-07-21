@@ -62,7 +62,7 @@ private val LightColorScheme = lightColorScheme(
     secondary = MaterialColor.Purple800,
     tertiary = MaterialColor.PurpleA700,
     background = MaterialColor.White,
-    surface = MaterialColor.Gray300
+    surface = MaterialColor.Gray200
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -123,10 +123,10 @@ fun motivBrushes() = listOf(
 
 @Composable
 fun grayBrushes() = listOf(
-    MaterialColor.Gray700,
     MaterialColor.Gray500,
+    MaterialColor.Gray700,
     MaterialColor.Gray900,
-    Color.Transparent
+    MaterialColor.Black
 )
 
 @Composable

@@ -2,8 +2,10 @@ package com.ilustris.motivcompose.features.post.presentation
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Timestamp
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.service.QuoteService
@@ -22,31 +24,35 @@ import javax.inject.Inject
 class NewQuoteViewModel @Inject constructor(
     application: Application,
     override val service: QuoteService,
-    val styleService: StyleService
+    private val styleService: StyleService
 ) : BaseViewModel<Quote>(application) {
 
     var newQuote = MutableLiveData(Quote())
     var currentStyle = MutableLiveData<Style?>(null)
     var styles = mutableStateListOf<Style>()
+
+
     fun updateQuoteText(text: String) {
-        this.newQuote.postValue(newQuote.value?.apply { quote = text })
+        this.newQuote.postValue(newQuote.value?.copy(quote = text))
     }
 
     fun updateQuoteAuthor(authorText: String) {
-        this.newQuote.postValue(newQuote.value?.apply { author = authorText })
+        this.newQuote.postValue(newQuote.value?.copy(author = authorText))
     }
 
     fun updateStyle(styleId: String) {
-        this.newQuote.postValue(newQuote.value?.apply { style = styleId })
+        this.newQuote.postValue(newQuote.value?.copy(style = styleId))
         this.currentStyle.postValue(styles.find { it.id == styleId })
     }
 
-    fun getStyles() {
+    fun getStyles(isPosted: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             styleService.getAllData(orderBy = "font").run {
                 if (isSuccess) {
                     styles.addAll(success.data as List<Style>)
-                    currentStyle.postValue(styles.random())
+                    if (!isPosted) {
+                        currentStyle.postValue(styles.random())
+                    }
                 } else {
                     sendErrorState(error.errorException)
                 }
@@ -54,17 +60,27 @@ class NewQuoteViewModel @Inject constructor(
         }
     }
 
-    override fun saveData(quoteData: Quote) {
-        quoteData.apply {
-            data = Calendar.getInstance().time
+
+    override fun saveData(data: Quote) {
+        data.apply {
+            if (this.data == null) this.data = Timestamp.now()
             userID = getUser()?.uid ?: ""
             if (author.isEmpty()) {
                 author = getUser()?.displayName ?: "Autor desconhecido"
             }
         }
-        if (quoteData.quote.isNotEmpty() && quoteData.author.isNotEmpty()) {
-            super.saveData(quoteData)
+        if (data.quote.isNotEmpty() && data.author.isNotEmpty()) {
+            if (data.id.isNotEmpty()) {
+                editData(data)
+            } else {
+                super.saveData(data)
+            }
         }
+    }
+
+    fun updateQuote(quote: Quote) {
+        newQuote.postValue(quote)
+        currentStyle.postValue(styles.find { it.id == quote.style })
     }
 
 }

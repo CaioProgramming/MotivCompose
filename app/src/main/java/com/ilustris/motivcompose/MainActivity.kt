@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterialApi::class
+)
 
 package com.ilustris.motivcompose
 
@@ -13,22 +16,36 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.BottomSheetState
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +92,7 @@ import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.delayedFunction
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -93,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
                 var showRadio by remember { mutableStateOf(true) }
                 val radioExpanded = remember { mutableStateOf(false) }
-
+                val swipeEnabled = remember { mutableStateOf(true) }
                 val signInLauncher = rememberLauncherForActivityResult(
                     FirebaseAuthUIActivityResultContract()
                 ) { result ->
@@ -136,6 +155,18 @@ class MainActivity : ComponentActivity() {
 
                     fun playRadio(radio: Radio) {
                         try {
+                            swipeEnabled.value = false
+                            if (radio == playingRadio) {
+                                if (mediaPlayer.isPlaying) {
+                                    mediaPlayer.pause()
+                                } else {
+                                    mediaPlayer.start()
+                                    radioExpanded.value = !radioExpanded.value
+                                }
+                                swipeEnabled.value = true
+                                return
+                            }
+                            Log.i(javaClass.simpleName, "playRadio: Playing radio(${radio.name})")
                             if (mediaPlayer.isPlaying) {
                                 mediaPlayer.reset()
                             }
@@ -145,7 +176,6 @@ class MainActivity : ComponentActivity() {
                                 mediaPlayer.setVolume(0.3f, 0.3f)
                                 mediaPlayer.start()
                                 viewModel.updatePlayingRadio(radio)
-
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -155,56 +185,77 @@ class MainActivity : ComponentActivity() {
                             )
                             viewModel.updatePlayingRadio(null)
                             mediaPlayer.stop()
+                        } finally {
+                            swipeEnabled.value = true
                         }
                     }
 
-                    Scaffold(
-                        bottomBar = {
-                            MotivBottomNavigation(
-                                navController = navController,
-                                userProfilePic = currentUser?.picurl
+                    val bottomSheetScaffoldState =
+                        rememberBottomSheetScaffoldState(
+                            bottomSheetState = BottomSheetState(
+                                BottomSheetValue.Collapsed
                             )
-                        }) {
-                        ConstraintLayout(
-                            modifier = Modifier
-                                .padding(bottom = it.calculateBottomPadding())
-                                .fillMaxSize()
-                        ) {
-                            val (content, player) = createRefs()
-                            MotivNavigationGraph(
-                                navHostController = navController,
-                                padding = it,
-                                modifier = Modifier.constrainAs(content) {
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                })
+                        )
+                    val coroutineScope = rememberCoroutineScope()
 
+                    fun enableSheet(isEnabled: Boolean) {
+                        coroutineScope.launch {
+                            radioExpanded.value = isEnabled
+                            if (isEnabled) {
+                                bottomSheetScaffoldState.bottomSheetState.expand()
+                            } else {
+                                bottomSheetScaffoldState.bottomSheetState.collapse()
 
-
-                            AnimatedVisibility(visible = showRadio,
-                                enter = fadeIn(),
-                                exit = shrinkOut() + fadeOut(),
-                                modifier = Modifier
-                                    .constrainAs(player) {
-                                        start.linkTo(parent.start)
-                                        end.linkTo(parent.end)
-                                        bottom.linkTo(parent.bottom)
-                                    }) {
-                                RadioView(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onSelectRadio = ::playRadio,
-                                    expanded = radioExpanded.value && showRadio,
-                                    playingRadio = playingRadio,
-                                    onExpand = {
-                                        radioExpanded.value = !radioExpanded.value
-                                    }
-                                )
                             }
                         }
                     }
+
+                    LaunchedEffect(radioExpanded) {
+                        enableSheet(radioExpanded.value)
+                    }
+
+                    BottomSheetScaffold(
+                        sheetContent = {
+                            RadioView(
+                                playingRadio = playingRadio,
+                                swipeEnabled = swipeEnabled.value,
+                                expanded = radioExpanded.value,
+                                modifier = Modifier.fillMaxWidth(),
+                                onSelectRadio = ::playRadio,
+                                onExpand = {
+                                    radioExpanded.value = !radioExpanded.value
+                                }
+                            )
+                        },
+                        scaffoldState = bottomSheetScaffoldState,
+                        sheetShape = RoundedCornerShape(defaultRadius),
+                        sheetGesturesEnabled = true,
+                        sheetPeekHeight = 32.dp,
+                        sheetBackgroundColor = MaterialTheme.colorScheme.background
+                    ) {
+                        Scaffold(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(bottom = 32.dp),
+                            bottomBar = {
+                                MotivBottomNavigation(
+                                    navController = navController,
+                                    userProfilePic = currentUser?.picurl
+                                )
+                            }) {
+                            MotivNavigationGraph(
+                                navHostController = navController,
+                                padding = it,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+
+                    LaunchedEffect(bottomSheetScaffoldState) {
+                        radioExpanded.value = bottomSheetScaffoldState.bottomSheetState.isExpanded
+                    }
+
                 }
-
-
                 LaunchedEffect(Unit) {
                     viewModel.fetchUser()
                 }
@@ -226,6 +277,7 @@ class MainActivity : ComponentActivity() {
                         radioExpanded.value = false
                     }
                 }
+
             }
         }
     }

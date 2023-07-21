@@ -1,18 +1,23 @@
 package com.ilustris.motivcompose.features.profile.presentation
 
 import android.app.Application
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Timestamp
 import com.ilustris.motiv.foundation.model.Cover
 import com.ilustris.motiv.foundation.model.Icon
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
+import com.ilustris.motiv.foundation.model.Report
 import com.ilustris.motiv.foundation.model.User
 import com.ilustris.motiv.foundation.service.QuoteHelper
 import com.ilustris.motiv.foundation.service.QuoteService
 import com.ilustris.motiv.foundation.service.UserService
+import com.ilustris.motivcompose.features.home.presentation.ShareState
+import com.ilustris.motivcompose.features.profile.ui.ProfileFilter
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel
 import com.silent.ilustriscore.core.model.ViewModelBaseState
@@ -38,6 +43,7 @@ class ProfileViewModel @Inject constructor(
     val postsCount = MutableLiveData(0)
     val favoriteCount = MutableLiveData(0)
     val isOwnUser = MutableLiveData(false)
+    val shareState = MutableLiveData<ShareState>()
 
 
     fun fetchUser(uid: String? = service.currentUser()?.uid) {
@@ -106,18 +112,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateUserIcon(icon: Icon) {
-        viewModelState.postValue(ViewModelBaseState.LoadingState)
-        viewModelScope.launch(Dispatchers.IO) {
-            service.editField(icon.uri, service.currentUser()?.uid ?: "", "picurl").run {
-                if (isSuccess) {
-                    refreshUser()
-                } else {
-                    sendErrorState(error.errorException)
-                }
-            }
-        }
-    }
 
     private fun refreshUser() {
         viewModelState.postValue(ViewModelBaseState.LoadingState)
@@ -127,14 +121,76 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateUserCover(cover: Cover) {
-        viewModelState.postValue(ViewModelBaseState.LoadingState)
+    fun deleteQuote(quoteDataModel: QuoteDataModel, filter: ProfileFilter) {
         viewModelScope.launch(Dispatchers.IO) {
-            service.editField(cover.url, service.currentUser()?.uid ?: "", "cover").run {
-                if (isSuccess) {
-                    refreshUser()
+            val result = quoteService.deleteData(quoteDataModel.quoteBean.id)
+            if (result.isSuccess) {
+                if (filter == ProfileFilter.POSTS) {
+                    userQuotes.remove(quoteDataModel)
                 } else {
-                    sendErrorState(error.errorException)
+                    userFavorites.remove(quoteDataModel)
+                }
+            } else {
+                sendErrorState(result.error.errorException)
+            }
+        }
+    }
+
+    fun likeQuote(quoteDataModel: QuoteDataModel, filter: ProfileFilter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val quote = quoteDataModel.quoteBean
+            getUser()?.let {
+                if (quote.likes.contains(it.uid)) {
+                    quote.likes.remove(it.uid)
+                } else {
+                    quote.likes.add(it.uid)
+                }
+                val result = quoteService.editData(quote)
+                if (result.isSuccess) {
+                    if (filter == ProfileFilter.POSTS) {
+                        userQuotes[userQuotes.indexOf(quoteDataModel)] = quoteDataModel.copy(
+                            quoteBean = quote,
+                            isFavorite = quote.likes.contains(it.uid)
+                        )
+                    } else {
+                        val isFavorite = quote.likes.contains(it.uid)
+                        if (isFavorite) {
+                            userFavorites[userFavorites.indexOf(quoteDataModel)] =
+                                quoteDataModel.copy(
+                                    quoteBean = quote,
+                                    isFavorite = quote.likes.contains(it.uid)
+                                )
+                        } else {
+                            userFavorites.remove(quoteDataModel)
+                        }
+                    }
+                } else {
+                    sendErrorState(result.error.errorException)
+                }
+            }
+        }
+    }
+
+    fun reportQuote(quote: Quote, reason: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getUser()?.let {
+                quote.reports.add(Report(it.uid, reason, Timestamp.now()))
+                quoteService.editData(quote)
+            }
+        }
+    }
+
+    fun shareQuote(quoteBean: Quote, bitmap: Bitmap) {
+        viewModelScope.launch(Dispatchers.IO) {
+            quoteHelper.generateQuoteImage(
+                getApplication<Application>().applicationContext,
+                quoteBean,
+                bitmap
+            ).run {
+                if (this.isSuccess) {
+                    shareState.postValue(ShareState.ShareSuccess(success.data, quoteBean))
+                } else {
+                    shareState.postValue(ShareState.ShareError)
                 }
             }
         }
