@@ -37,24 +37,6 @@ import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 
 
 @Composable
-fun gradientAnimation(gradientColors: List<Color> = motivBrushes()): Brush {
-    val infiniteTransition = rememberInfiniteTransition()
-    val offsetAnimation = infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            tween(5000, easing = EaseInCubic),
-            repeatMode = RepeatMode.Reverse,
-        )
-    )
-    return Brush.linearGradient(
-        gradientColors,
-        start = Offset(offsetAnimation.value, offsetAnimation.value),
-        end = Offset(x = offsetAnimation.value * 2, y = offsetAnimation.value * 3)
-    )
-}
-
-@Composable
 fun MotivLoader(
     showText: Boolean = true,
     customIcon: Int = R.drawable.ic_saturn_and_other_planets_primary,

@@ -1,0 +1,131 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
+package com.ilustris.manager.feature.home.ui
+
+import android.graphics.Bitmap
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.core.view.inputmethod.EditorInfoCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ilustris.manager.feature.home.presentation.ManagerViewModel
+import com.ilustris.motiv.foundation.model.QuoteDataModel
+import com.ilustris.motiv.foundation.ui.component.QuoteCard
+import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
+import com.ilustris.motiv.foundation.ui.theme.MotivTitle
+import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
+import com.ilustris.motiv.foundation.ui.theme.gradientFill
+import com.ilustris.motiv.foundation.ui.theme.gradientOverlay
+import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
+import com.silent.ilustriscore.core.utilities.DateFormats
+import com.silent.ilustriscore.core.utilities.format
+
+@Composable
+fun ManagerHomeView() {
+
+    val managerViewModel = hiltViewModel<ManagerViewModel>()
+    val quotes = managerViewModel.quotes
+
+    LazyColumn {
+
+        items(quotes.size) {
+            val quoteData = quotes[it]
+            QuoteCard(
+                quoteData,
+                animationEnabled = false,
+                quoteActions = object : QuoteActions {
+                    override fun onClickUser(uid: String) {}
+
+                    override fun onLike(dataModel: QuoteDataModel) {}
+
+                    override fun onShare(dataModel: QuoteDataModel, bitmap: Bitmap) {}
+
+                    override fun onDelete(dataModel: QuoteDataModel) {
+                        managerViewModel.deleteQuote(dataModel)
+                    }
+
+                    override fun onEdit(dataModel: QuoteDataModel) {}
+
+                    override fun onReport(dataModel: QuoteDataModel) {}
+                },
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .wrapContentSize()
+                    .quoteCardModifier()
+            )
+
+            quoteData.quoteBean.reports.forEach { report ->
+
+                Divider(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surface,
+                            RoundedCornerShape(defaultRadius)
+                        )
+                        .clip(RoundedCornerShape(defaultRadius))
+                        .width(3.dp)
+                        .height(25.dp)
+
+                )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surface, RoundedCornerShape(
+                                defaultRadius
+                            )
+                        )
+                        .clip(RoundedCornerShape(defaultRadius))
+                        .clickable {
+                            managerViewModel.removeReport(quoteData, report)
+                        }
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = report.reason,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = report.data?.toDate()?.format(DateFormats.DD_OF_MM_FROM_YYYY) ?: "-",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Light,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+        }
+
+    }
+
+    LaunchedEffect(Unit) {
+        managerViewModel.getQuotes()
+    }
+
+}

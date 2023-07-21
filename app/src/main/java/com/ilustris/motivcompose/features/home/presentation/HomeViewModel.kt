@@ -78,21 +78,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun loadMoreQuotes(startIndex: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (indexLimit == dataQuotes.size) {
-                Log.w(javaClass.simpleName, "loadMoreQuotes: limit reached")
-                return@launch
-            }
-            dataQuotes.subList(startIndex, startIndex + indexLimit).forEach {
-                val quoteModel = quoteHelper.mapQuoteToQuoteDataModel(it)
-                if (quoteModel.isSuccess) {
-                    quotes.add(quoteModel.success.data)
-                }
-            }
-        }
-
-    }
 
     fun searchQuote(query: String) {
         viewModelScope.launch(Dispatchers.IO) {

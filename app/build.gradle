@@ -59,6 +59,7 @@ android {
 dependencies {
 
     implementation project(':foundation')
+    implementation project(':manager')
     implementation('androidx.palette:palette:1.0.0')
     implementation "com.google.dagger:hilt-android:$hiltVersion"
     kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"

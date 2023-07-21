@@ -29,6 +29,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.ilustris.manager.feature.ManagerView
+import com.ilustris.manager.feature.home.ui.ManagerHomeView
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
@@ -49,7 +51,7 @@ fun MotivNavigationGraph(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = AppNavigation.HOME.route,
+        startDestination = AppNavigation.MANAGER.route,
     ) {
         AppNavigation.values().forEach { item ->
             val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }
@@ -58,7 +60,8 @@ fun MotivNavigationGraph(
                 arguments = args,
                 enterTransition = { fadeIn() },
                 exitTransition = { fadeOut() },
-                popExitTransition = { scaleOut() }) {
+                popEnterTransition = { fadeIn() },
+                popExitTransition = { fadeOut() }) {
                 GetRouteScreen(navigationItem = item, navHostController, it.arguments)
             }
         }
@@ -87,10 +90,6 @@ fun MotivBottomNavigation(navController: NavController, userProfilePic: String? 
     ) {
         AppNavigation.values().filter { it.showOnNavigation }.forEach { item ->
             val isSelected = currentRoute?.hierarchy?.any { it.route == item.route } == true
-            val itemColor =
-                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = 0.5f
-                )
 
             val selectedBrush = if (isSelected) motivGradient() else grayGradients()
 
@@ -156,6 +155,10 @@ fun GetRouteScreen(
 
         AppNavigation.SETTINGS -> {
             SettingsView(navController)
+        }
+
+        AppNavigation.MANAGER -> {
+            ManagerView(navController = navController)
         }
     }
 }

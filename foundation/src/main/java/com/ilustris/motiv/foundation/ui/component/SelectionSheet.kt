@@ -41,6 +41,7 @@ import com.ilustris.motiv.foundation.model.Cover
 import com.ilustris.motiv.foundation.model.Icon
 import com.ilustris.motiv.foundation.ui.presentation.CoversViewModel
 import com.ilustris.motiv.foundation.ui.presentation.IconsViewModel
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.motivGradient

@@ -22,7 +22,10 @@ class QuoteHelper @Inject constructor(
     private val styleService: StyleService
 ) {
 
-    suspend fun mapQuoteToQuoteDataModel(quote: Quote): ServiceResult<DataException, QuoteDataModel> {
+    suspend fun mapQuoteToQuoteDataModel(
+        quote: Quote,
+        isManager: Boolean = false
+    ): ServiceResult<DataException, QuoteDataModel> {
         return try {
             val uid = userService.currentUser()?.uid
             val user = try {
@@ -44,7 +47,7 @@ class QuoteHelper @Inject constructor(
                     user,
                     style,
                     isFavorite = quote.likes.contains(uid),
-                    isUserQuote = quote.userID == uid
+                    isUserQuote = quote.userID == uid || isManager
                 )
             )
         } catch (e: Exception) {
@@ -55,7 +58,10 @@ class QuoteHelper @Inject constructor(
         }
     }
 
-    suspend fun mapQuoteToQuoteDataModel(quotes: List<Quote>): ServiceResult<DataException, List<QuoteDataModel>> {
+    suspend fun mapQuoteToQuoteDataModel(
+        quotes: List<Quote>,
+        isManager: Boolean = false
+    ): ServiceResult<DataException, List<QuoteDataModel>> {
 
         return try {
             if (quotes.isEmpty()) {
@@ -77,7 +83,7 @@ class QuoteHelper @Inject constructor(
                     user,
                     style,
                     isFavorite = quote.likes.contains(user?.uid),
-                    isUserQuote = quote.userID == userService.currentUser()?.uid
+                    isUserQuote = quote.userID == userService.currentUser()?.uid || isManager
                 )
             }
             ServiceResult.Success(quoteModels)

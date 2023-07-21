@@ -5,6 +5,14 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
+import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.core.EaseInElastic
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -14,9 +22,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -38,12 +48,14 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.utils.FontUtils
 import java.lang.Math.PI
 import java.lang.Math.cos
 import java.lang.Math.sin
@@ -74,6 +86,8 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+
+const val MOTIV_FONT = "Josefin Sans"
 
 @Composable
 fun MotivTheme(
@@ -114,11 +128,10 @@ val fontProvider = GoogleFont.Provider(
 
 @Composable
 fun motivBrushes() = listOf(
-    MaterialColor.DeepPurple500,
-    MaterialColor.PinkA200,
-    MaterialColor.Purple500,
-    MaterialColor.PurpleA700,
-    MaterialColor.Pink500,
+    MaterialColor.Purple700,
+    MaterialColor.DeepPurple300,
+    MaterialColor.PurpleA200,
+    MaterialColor.DeepPurpleA700,
 )
 
 @Composable
@@ -130,31 +143,22 @@ fun grayBrushes() = listOf(
 )
 
 @Composable
+fun managerBrushes() = listOf(
+    MaterialColor.Gray300,
+    MaterialColor.Pink100,
+    MaterialColor.Purple200
+)
+
+@Composable
 fun motivGradient() = Brush.linearGradient(colors = motivBrushes())
+
+@Composable
+fun managerGradient() = Brush.linearGradient(colors = managerBrushes(), tileMode = TileMode.Clamp)
 
 @Composable
 fun grayGradients() = Brush.linearGradient(
     colors = grayBrushes()
 )
-
-@Composable
-fun transparentFadeGradient(): Brush {
-
-
-    val mainColor = MaterialTheme.colorScheme.background
-
-    val blackColors = listOf(
-        Color.Transparent,
-        mainColor.copy(alpha = 1f),
-    )
-
-
-    return Brush.verticalGradient(
-        1f to Color.Transparent,
-        0.5f to mainColor,
-        endY = 750f
-    )
-}
 
 @Composable
 fun getDeviceWidth() = LocalConfiguration.current.screenWidthDp
@@ -230,9 +234,42 @@ fun Palette.colorsFromPalette(): List<Color> {
     return listOf(dominantSwatch, vibrantSwatch, mutedSwatch)
 }
 
+@Composable
+fun MotivTitle() {
+    val font = FontUtils.getFontFamily(MOTIV_FONT)
+
+    Text(
+        text = "Motiv",
+        style = MaterialTheme.typography.headlineLarge,
+        fontWeight = FontWeight.SemiBold,
+        fontFamily = font,
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(16.dp)
+            .gradientFill(gradientAnimation())
+    )
+}
 
 fun Modifier.quoteCardModifier() = clip(RoundedCornerShape(defaultRadius))
 
+@Composable
+fun gradientAnimation(gradientColors: List<Color> = motivBrushes()): Brush {
+    val infiniteTransition = rememberInfiniteTransition()
+    val offsetAnimation = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            tween(10000, easing = EaseInCubic),
+            repeatMode = RepeatMode.Reverse,
+        )
+    )
+    return Brush.linearGradient(
+        gradientColors,
+        tileMode = TileMode.Clamp,
+        start = Offset.Zero,
+        end = Offset(x = offsetAnimation.value * 2, y = offsetAnimation.value * 3)
+    )
+}
 
 fun Modifier.gradientFill(brush: Brush) =
     graphicsLayer(alpha = 0.99f)

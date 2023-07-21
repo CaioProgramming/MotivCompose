@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 rootProject.name = "Motiv Compose"
 include ':app'
 include ':foundation'
+include ':manager'

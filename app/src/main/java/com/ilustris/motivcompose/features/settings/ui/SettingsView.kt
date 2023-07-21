@@ -33,7 +33,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -47,7 +46,6 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,17 +65,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -89,14 +86,15 @@ import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.CoverSheet
 import com.ilustris.motiv.foundation.ui.component.IconSheet
-import com.ilustris.motiv.foundation.ui.component.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
-import com.ilustris.motiv.foundation.ui.theme.gradientOverlay
 import com.ilustris.motiv.foundation.ui.theme.grayBrushes
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
+import com.ilustris.motiv.foundation.ui.theme.managerBrushes
+import com.ilustris.motiv.foundation.ui.theme.managerGradient
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
@@ -105,6 +103,7 @@ import com.ilustris.motivcompose.MainActivity
 import com.ilustris.motivcompose.R
 import com.ilustris.motivcompose.features.profile.ui.ProfileSheet
 import com.ilustris.motivcompose.features.settings.presentation.SettingsViewModel
+import com.ilustris.motivcompose.ui.navigation.AppNavigation
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.DateFormats
 import com.silent.ilustriscore.core.utilities.format
@@ -113,7 +112,6 @@ import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Calendar
 
 @Composable
@@ -138,8 +136,6 @@ fun SettingsView(navController: NavController) {
     val borderBrush = profileBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.brushsFromPalette()
         ?: grayGradients()
 
-    val managerBrush = managerBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.brushsFromPalette()
-        ?: grayGradients()
 
     val dialogState = remember {
         mutableStateOf(false)
@@ -341,6 +337,62 @@ fun SettingsView(navController: NavController) {
 
 
                 item {
+                    userMetadata.value?.let {
+                        if (it.admin) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        navController.navigate(AppNavigation.MANAGER.route)
+                                    }
+                                    .background(
+                                        managerGradient(),
+                                        RoundedCornerShape(defaultRadius)
+                                    )
+                                    .padding(rowPadding),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.saturn_svgrepo_com),
+                                    contentDescription = null,
+                                    tint = MaterialColor.Black,
+                                    modifier = Modifier
+                                        .background(
+                                            MaterialColor.White.copy(alpha = 0.2f),
+                                            CircleShape
+                                        )
+                                        .padding(16.dp)
+                                )
+                                Column() {
+                                    Text(
+                                        text = "Motiv +",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.SemiBold,
+                                        ),
+                                        textAlign = TextAlign.Start,
+                                        color = MaterialColor.Black,
+                                        modifier = Modifier.padding(horizontal = textPadding)
+
+                                    )
+
+                                    Text(
+                                        text = "Gerencie publicações, estilos e muito mais",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        textAlign = TextAlign.Start,
+                                        color = MaterialColor.Black,
+                                        modifier = Modifier.padding(horizontal = textPadding)
+                                    )
+                                }
+
+                            }
+                        }
+
+                    }
+
+                }
+
+                item {
 
                     Column(
                         modifier = Modifier
@@ -359,59 +411,6 @@ fun SettingsView(navController: NavController) {
                             .fillMaxWidth()
 
                     ) {
-                        userMetadata.value?.let {
-                            if (it.admin) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            navController.navigate("admin")
-                                        }
-                                        .padding(rowPadding),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    GlideImage(
-                                        imageModel = { "https://media.giphy.com/media/xUOwGcu6wd0cXBj5n2/giphy.gif" },
-                                        glideRequestType = GlideRequestType.GIF,
-                                        onImageStateChanged = {
-                                            if (it is GlideImageState.Success) {
-                                                if (managerBitmap == null) {
-                                                    managerBitmap = it.imageBitmap
-                                                }
-                                            }
-                                        },
-                                        imageOptions = ImageOptions(
-                                            Alignment.Center,
-                                            contentScale = ContentScale.Crop,
-                                        ),
-                                        modifier = Modifier
-                                            .radioIconModifier(
-                                                borderWidth = 2.dp,
-                                                brush = gradientAnimation(motivBrushes()),
-                                                rotationValue = 0f,
-                                                sizeValue = 24.dp
-                                            )
-
-                                    )
-                                    Text(
-                                        text = "Motiv +",
-                                        style = rowTextStyle,
-                                        fontStyle = FontStyle.Italic,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .padding(horizontal = textPadding)
-                                            .gradientFill(managerBrush)
-
-                                    )
-                                }
-                                Divider(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
-                                    thickness = 1.dp
-                                )
-                            }
-
-                        }
 
                         fun getCreateDate(): String {
                             return try {
@@ -477,7 +476,7 @@ fun SettingsView(navController: NavController) {
                                     .padding(16.dp)
                             ) {
                                 val icon = if (it.emailVerified) {
-                                    Icons.Rounded.CheckCircle
+                                    Icons.Rounded.Check
                                 } else {
                                     Icons.Rounded.Warning
                                 }

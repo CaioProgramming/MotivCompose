@@ -77,10 +77,10 @@ import com.ilustris.motiv.foundation.ui.component.CoverSheet
 import com.ilustris.motiv.foundation.ui.component.IconSheet
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
 import com.ilustris.motiv.foundation.ui.component.ReportDialog
-import com.ilustris.motiv.foundation.ui.component.gradientAnimation
 import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap

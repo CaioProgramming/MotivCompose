@@ -95,7 +95,7 @@ fun QuoteCard(
     modifier: Modifier,
     loadAsGif: Boolean = true,
     animationEnabled: Boolean = true,
-    quoteActions: QuoteActions
+    quoteActions: QuoteActions? = null
 ) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
@@ -209,7 +209,7 @@ fun QuoteCard(
                             .size(50.dp)
                             .clip(CircleShape)
                             .clickable {
-                                quoteDataModel.user?.id?.let { quoteActions.onClickUser(it) }
+                                quoteDataModel.user?.id?.let { quoteActions?.onClickUser(it) }
                             }
                             .border(
                                 1.dp,
@@ -228,7 +228,7 @@ fun QuoteCard(
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.clickable {
-                                quoteDataModel.user?.id?.let { quoteActions.onClickUser(it) }
+                                quoteDataModel.user?.id?.let { quoteActions?.onClickUser(it) }
                             }
                         )
                         Text(
@@ -275,13 +275,13 @@ fun QuoteCard(
                                 )
                             }, onClick = {
                                 when (option) {
-                                    "Excluir" -> quoteActions.onDelete(quoteDataModel)
+                                    "Excluir" -> quoteActions?.onDelete(quoteDataModel)
                                     "Editar" -> {
-                                        quoteActions.onEdit(quoteDataModel)
+                                        quoteActions?.onEdit(quoteDataModel)
                                     }
 
                                     "Denunciar" -> {
-                                        quoteActions.onReport(quoteDataModel)
+                                        quoteActions?.onReport(quoteDataModel)
                                     }
                                 }
                                 dropDownState = false
@@ -295,7 +295,7 @@ fun QuoteCard(
 
         Capturable(controller = captureController, onCaptured = { bitmap, error ->
             bitmap?.let {
-                quoteActions.onShare(quoteDataModel, it.asAndroidBitmap())
+                quoteActions?.onShare(quoteDataModel, it.asAndroidBitmap())
             }
         }) {
             Box {
@@ -375,7 +375,7 @@ fun QuoteCard(
 
 
             IconButton(
-                onClick = { quoteActions.onLike(quoteDataModel) },
+                onClick = { quoteActions?.onLike(quoteDataModel) },
                 modifier = Modifier.padding(4.dp)
             ) {
                 val isFavorite = quoteDataModel.isFavorite

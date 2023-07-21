@@ -84,10 +84,12 @@ import com.ilustris.motiv.foundation.ui.component.QuoteCard
 import com.ilustris.motiv.foundation.ui.component.ReportDialog
 import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.MotivTheme
+import com.ilustris.motiv.foundation.ui.theme.MotivTitle
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
+import com.ilustris.motiv.foundation.utils.FontUtils
 import com.ilustris.motivcompose.features.home.presentation.HomeViewModel
 import com.ilustris.motivcompose.features.home.presentation.ShareState
 import com.ilustris.motivcompose.features.radio.ui.RadioView
@@ -156,20 +158,8 @@ fun HomeView(navController: NavController) {
             quotes.size
         }
 
-        LaunchedEffect(pagerState.currentPage) {
-            if (pagerState.currentPage == quotes.size - 3 && quotes.size >= 10) {
-                homeViewModel.loadMoreQuotes(pagerState.currentPage)
-            }
-        }
 
-        Text(
-            text = LocalContext.current.getString(R.string.app_name),
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .gradientFill(motivGradient()),
-        )
+        MotivTitle()
 
         TextField(
             value = query,

@@ -86,10 +86,10 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.bumptech.glide.GlideBuilder
 import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.model.Radio
-import com.ilustris.motiv.foundation.ui.component.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.gradientOverlay
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes

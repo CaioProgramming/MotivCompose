@@ -77,21 +77,17 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.ilustris.motiv.foundation.model.Radio
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
-import com.ilustris.motiv.foundation.ui.component.AnimatedText
-import com.ilustris.motiv.foundation.ui.component.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.MotivTheme
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
-import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motivcompose.features.radio.ui.RadioView
 import com.ilustris.motivcompose.ui.navigation.AppNavigation
 import com.ilustris.motivcompose.ui.navigation.MotivBottomNavigation
 import com.ilustris.motivcompose.ui.navigation.MotivNavigationGraph
 import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ViewModelBaseState
-import com.silent.ilustriscore.core.utilities.delayedFunction
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -112,6 +108,11 @@ class MainActivity : ComponentActivity() {
 
                 var showRadio by remember { mutableStateOf(true) }
                 val radioExpanded = remember { mutableStateOf(false) }
+                val showBottomNavigation = remember {
+                    mutableStateOf(
+                        true
+                    )
+                }
                 val swipeEnabled = remember { mutableStateOf(true) }
                 val signInLauncher = rememberLauncherForActivityResult(
                     FirebaseAuthUIActivityResultContract()
@@ -238,10 +239,13 @@ class MainActivity : ComponentActivity() {
                                 .background(MaterialTheme.colorScheme.background)
                                 .padding(bottom = 32.dp),
                             bottomBar = {
-                                MotivBottomNavigation(
-                                    navController = navController,
-                                    userProfilePic = currentUser?.picurl
-                                )
+                                AnimatedVisibility(visible = showBottomNavigation.value) {
+                                    MotivBottomNavigation(
+                                        navController = navController,
+                                        userProfilePic = currentUser?.picurl
+                                    )
+                                }
+
                             }) {
                             MotivNavigationGraph(
                                 navHostController = navController,
@@ -274,6 +278,9 @@ class MainActivity : ComponentActivity() {
                     viewModel.validateAuth()
                     navController.currentBackStackEntryFlow.collect { backStackEntry ->
                         showRadio = backStackEntry.destination.route != AppNavigation.POST.route
+                        showBottomNavigation.value = AppNavigation.values()
+                            .find { it.route == backStackEntry.destination.route }?.showBottomBar
+                            ?: true
                         radioExpanded.value = false
                     }
                 }
