@@ -306,5 +306,5 @@ fun Modifier.radioIconModifier(
         .rotate(rotationValue)
 
 
-
+fun String.isGifUrl() = this.contains(".gif")
 

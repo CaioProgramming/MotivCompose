@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -32,14 +33,20 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
+import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 
 
 @Composable
 fun MotivLoader(
-    showText: Boolean = true,
-    customIcon: Int = R.drawable.ic_saturn_and_other_planets_primary,
+    message: String? = null,
     modifier: Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition()
@@ -69,18 +76,28 @@ fun MotivLoader(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val appname = stringResource(id = R.string.app_name)
-        Icon(
-            imageVector = ImageVector.vectorResource(id = customIcon),
-            contentDescription = appname,
-            modifier = Modifier
-                .size(100.dp)
+        val waveAnimation by rememberLottieComposition(
+            LottieCompositionSpec.RawRes(R.raw.rotating_wave)
         )
 
-        AnimatedVisibility(visible = showText, enter = fadeIn(), exit = fadeOut()) {
+        val waveProgress by animateLottieCompositionAsState(
+            waveAnimation,
+            isPlaying = true,
+            iterations = LottieConstants.IterateForever
+        )
+
+        LottieAnimation(
+            waveAnimation,
+            waveProgress,
+            modifier = Modifier
+                .size(50.dp)
+                .gradientFill(gradientAnimation())
+        )
+
+        AnimatedVisibility(visible = message != null, enter = fadeIn(), exit = fadeOut()) {
             Text(
-                text = appname,
-                style = MaterialTheme.typography.headlineMedium,
+                text = message ?: "",
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )

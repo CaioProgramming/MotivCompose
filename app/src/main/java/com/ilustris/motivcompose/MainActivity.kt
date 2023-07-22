@@ -277,11 +277,15 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(navController) {
                     viewModel.validateAuth()
                     navController.currentBackStackEntryFlow.collect { backStackEntry ->
-                        showRadio = backStackEntry.destination.route != AppNavigation.POST.route
-                        showBottomNavigation.value = AppNavigation.values()
-                            .find { it.route == backStackEntry.destination.route }?.showBottomBar
-                            ?: true
+                        val previousRoute = navController.previousBackStackEntry?.destination?.route
+                        val route = backStackEntry.destination.route
+                        showRadio = route != AppNavigation.POST.route
+                        showBottomNavigation.value =
+                            AppNavigation.values().find { it.route == route }?.showBottomBar ?: true
                         radioExpanded.value = false
+                        if (previousRoute == AppNavigation.PROFILE.route) {
+                            viewModel.fetchUser()
+                        }
                     }
                 }
 

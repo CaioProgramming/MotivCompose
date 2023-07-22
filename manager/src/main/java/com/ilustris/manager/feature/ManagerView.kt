@@ -4,6 +4,8 @@ package com.ilustris.manager.feature
 
 import ai.atick.material.MaterialColor
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,8 +47,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.home.ui.ManagerHomeView
+import com.ilustris.manager.feature.icons.ui.IconsView
 import com.ilustris.motiv.foundation.ui.theme.MotivTitle
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -69,7 +75,7 @@ fun ManagerView(navController: NavController) {
             }
 
             ManagerFeatures.ICONS -> {
-                Text(text = "Icones")
+                IconsView()
             }
 
             ManagerFeatures.COVERS -> {
@@ -81,6 +87,7 @@ fun ManagerView(navController: NavController) {
     fun selectFeature(features: ManagerFeatures) {
         currentFeature.value = features
         scope.launch {
+            delay(1000)
             drawerState.close()
         }
     }
@@ -94,34 +101,40 @@ fun ManagerView(navController: NavController) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet() {
+            ModalDrawerSheet(
+                modifier = Modifier
+                    .fillMaxHeight(),
+                drawerShape = RoundedCornerShape(0.dp),
+                drawerContainerColor = MaterialTheme.colorScheme.background
+            ) {
                 MotivTitle()
-                ManagerFeatures.values().sortedBy { it.name }.forEach {
+                ManagerFeatures.values().forEach {
                     val isSelected = it == currentFeature.value
                     val textColor =
-                        if (isSelected) MaterialColor.White else MaterialTheme.colorScheme.onSurface
-                    val backColor =
-                        if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f) else Color.Transparent
-
+                        MaterialTheme.colorScheme.onBackground.copy(alpha = if (isSelected) 1f else 0.5f)
+                    val weight = if (isSelected) FontWeight.Bold else FontWeight.Light
+                    val sizeFactor = if (isSelected) 1.3f else 1f
+                    val fontSizeAnimation =
+                        animateFloatAsState(targetValue = sizeFactor, tween(1000))
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                        .clip(RoundedCornerShape(defaultRadius))
                         .clickable {
                             selectFeature(it)
                         }
-                        .background(
-                            backColor,
-                            RoundedCornerShape(
-                                bottomEnd = defaultRadius,
-                                topEnd = defaultRadius
-                            )
+                        .padding(16.dp)) {
+                        Icon(
+                            painter = painterResource(id = it.icon),
+                            contentDescription = it.title,
+                            tint = textColor,
+                            modifier = Modifier.size(24.dp * fontSizeAnimation.value)
                         )
-                        .padding(vertical = 8.dp, horizontal = 32.dp)) {
-                        Icon(painter = painterResource(id = it.icon), contentDescription = it.title)
                         Text(
-                            text = it.name,
-                            style = MaterialTheme.typography.labelMedium,
+                            text = it.title,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = textColor,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            modifier = Modifier.padding(16.dp)
+                            fontWeight = weight,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize * fontSizeAnimation.value,
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
 
@@ -133,7 +146,7 @@ fun ManagerView(navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
             IconButton(onClick = { openDrawer() }) {
                 Icon(
-                    Icons.Rounded.Menu,
+                    painter = painterResource(id = R.drawable.burger_menu_left_svgrepo_com),
                     contentDescription = "Abrir menu",
                     tint = MaterialTheme.colorScheme.onBackground
                 )

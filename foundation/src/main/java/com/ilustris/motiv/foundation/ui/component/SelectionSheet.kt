@@ -52,7 +52,7 @@ import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
 
 @Composable
-fun IconSheet(onSelection: (Icon) -> Unit) {
+fun IconSheet(selectedIcon: String? = "", onSelection: (Icon) -> Unit) {
 
     val viewModel = hiltViewModel<IconsViewModel>()
     val viewModelState = viewModel.viewModelState.observeAsState()
@@ -117,32 +117,11 @@ fun IconSheet(onSelection: (Icon) -> Unit) {
                     items(icons.size, key = {
                         icons[it].id
                     }) { index ->
-
-
                         val icon = icons[index]
-                        val loadedImage = remember { mutableStateOf(false) }
-                        val alphaAnimation = animateFloatAsState(
-                            targetValue = if (loadedImage.value) 1f else 0f,
-                            tween(1000)
-                        )
-                        GlideImage(
-                            imageModel = { icon.uri },
-                            glideRequestType = GlideRequestType.BITMAP,
-                            onImageStateChanged = {
-                                loadedImage.value = it is GlideImageState.Success
-                            },
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .alpha(alphaAnimation.value)
-                                .radioIconModifier(
-                                    0f,
-                                    170.dp,
-                                    motivGradient(),
-                                    2.dp
-                                )
-                                .clickable {
-                                    onSelection(icon)
-                                }
+                        IconView(
+                            icon = icon,
+                            isSelected = icon.uri == selectedIcon,
+                            onSelectIcon = onSelection
                         )
                     }
 

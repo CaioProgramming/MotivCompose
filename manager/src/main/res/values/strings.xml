@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delete_icon_message">Você deseja excluir este icone? Esta ação não pode ser desfeita. Usuários que já utilizam este icone não poderam visualiza-lo.</string>
+</resources>

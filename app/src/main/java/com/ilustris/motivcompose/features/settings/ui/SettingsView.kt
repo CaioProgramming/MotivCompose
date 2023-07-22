@@ -174,7 +174,7 @@ fun SettingsView(navController: NavController) {
 
     @Composable
     fun getSheet() = currentSheet.value?.let {
-        if (currentSheet.value == ProfileSheet.ICONS) IconSheet {
+        if (currentSheet.value == ProfileSheet.ICONS) IconSheet(user.value?.picurl) {
             viewModel.updateUserIcon(it)
             hideBottomSheet()
         } else {

@@ -82,6 +82,7 @@ import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
+import com.ilustris.motiv.foundation.ui.theme.isGifUrl
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
@@ -247,7 +248,6 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                     ) {
                         GlideImage(
                             imageModel = { user.picurl },
-                            glideRequestType = GlideRequestType.BITMAP,
                             onImageStateChanged = {
                                 if (it is GlideImageState.Success) {
                                     profileBitmap = it.imageBitmap
