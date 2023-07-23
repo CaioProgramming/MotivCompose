@@ -349,7 +349,6 @@ fun SettingsView(navController: NavController) {
                                     .background(
                                         managerGradient(),
                                         RoundedCornerShape(defaultRadius),
-                                        alpha = 0.6f
                                     )
                                     .padding(rowPadding),
                                 verticalAlignment = Alignment.CenterVertically
@@ -388,7 +387,6 @@ fun SettingsView(navController: NavController) {
 
                             }
                         }
-
                     }
 
                 }
