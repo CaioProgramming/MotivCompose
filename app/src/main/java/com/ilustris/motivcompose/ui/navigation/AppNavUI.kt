@@ -46,10 +46,10 @@ import com.skydoves.landscapist.glide.GlideRequestType
 @Composable
 fun MotivNavigationGraph(
     navHostController: NavHostController,
-    padding: PaddingValues,
     modifier: Modifier
 ) {
     NavHost(
+        modifier = modifier,
         navController = navHostController,
         startDestination = AppNavigation.SETTINGS.route,
     ) {

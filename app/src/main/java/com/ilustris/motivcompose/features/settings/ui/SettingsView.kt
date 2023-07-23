@@ -611,11 +611,6 @@ fun SettingsView(navController: NavController) {
                         )
                     )
                 }
-
-                item {
-                    Text(text = stringResource(id = com.ilustris.motiv.foundation.R.string.app_name))
-                }
-
             }
 
             AnimatedVisibility(

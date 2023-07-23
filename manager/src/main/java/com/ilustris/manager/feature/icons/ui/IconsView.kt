@@ -6,6 +6,7 @@ import ai.atick.material.MaterialColor
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -118,7 +119,7 @@ fun IconsView() {
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxSize()
-                .animateContentSize(tween(500)),
+                .animateContentSize(tween(1000, easing = EaseIn)),
             columns = GridCells.Fixed(columns)
         ) {
             item(span = { GridItemSpan(columns) }) {
@@ -136,7 +137,12 @@ fun IconsView() {
                 val icons = state.dataList as List<Icon>
                 item(span = { GridItemSpan(columns) }) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Ícones", style = MaterialTheme.typography.headlineMedium)
+                        Text(
+                            text = "Ícones",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                         Text(
                             text = "${icons.size} ícones disponíveis, selecione um para excluir ou faça upload de um novo ícone.",
                             style = MaterialTheme.typography.bodyMedium

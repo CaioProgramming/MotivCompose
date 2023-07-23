@@ -109,13 +109,12 @@ class MainActivity : AppCompatActivity() {
                 val playingRadio = viewModel.playingRadio.observeAsState().value
 
                 var showRadio by remember { mutableStateOf(true) }
-                val radioExpanded = remember { mutableStateOf(false) }
                 val showBottomNavigation = remember {
                     mutableStateOf(
                         true
                     )
                 }
-                val swipeEnabled = remember { mutableStateOf(true) }
+                var swipeEnabled by remember { mutableStateOf(true) }
                 val signInLauncher = rememberLauncherForActivityResult(
                     FirebaseAuthUIActivityResultContract()
                 ) { result ->
@@ -158,27 +157,29 @@ class MainActivity : AppCompatActivity() {
 
                     fun playRadio(radio: Radio) {
                         try {
-                            swipeEnabled.value = false
+                            swipeEnabled = false
                             if (radio == playingRadio) {
                                 if (mediaPlayer.isPlaying) {
                                     mediaPlayer.pause()
                                 } else {
                                     mediaPlayer.start()
-                                    radioExpanded.value = !radioExpanded.value
                                 }
-                                swipeEnabled.value = true
                                 return
-                            }
-                            Log.i(javaClass.simpleName, "playRadio: Playing radio(${radio.name})")
-                            if (mediaPlayer.isPlaying) {
-                                mediaPlayer.reset()
-                            }
-                            mediaPlayer.setDataSource(context, Uri.parse(radio.url))
-                            mediaPlayer.prepareAsync()
-                            mediaPlayer.setOnPreparedListener {
-                                mediaPlayer.setVolume(0.3f, 0.3f)
-                                mediaPlayer.start()
-                                viewModel.updatePlayingRadio(radio)
+                            } else {
+                                Log.i(
+                                    javaClass.simpleName,
+                                    "playRadio: Playing radio(${radio.name})"
+                                )
+                                if (mediaPlayer.isPlaying) {
+                                    mediaPlayer.reset()
+                                }
+                                mediaPlayer.setDataSource(context, Uri.parse(radio.url))
+                                mediaPlayer.prepareAsync()
+                                mediaPlayer.setOnPreparedListener {
+                                    mediaPlayer.setVolume(0.3f, 0.3f)
+                                    mediaPlayer.start()
+                                    viewModel.updatePlayingRadio(radio)
+                                }
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -187,59 +188,30 @@ class MainActivity : AppCompatActivity() {
                                 "playRadio: Error playing radio(${radio.name}) ${e.message}"
                             )
                             viewModel.updatePlayingRadio(null)
-                            mediaPlayer.stop()
+                            mediaPlayer.reset()
                         } finally {
-                            swipeEnabled.value = true
+                            swipeEnabled = true
                         }
-                    }
-
-                    val bottomSheetScaffoldState =
-                        rememberBottomSheetScaffoldState(
-                            bottomSheetState = BottomSheetState(
-                                BottomSheetValue.Collapsed
-                            )
-                        )
-                    val coroutineScope = rememberCoroutineScope()
-
-                    fun enableSheet(isEnabled: Boolean) {
-                        coroutineScope.launch {
-                            radioExpanded.value = isEnabled
-                            if (isEnabled) {
-                                bottomSheetScaffoldState.bottomSheetState.expand()
-                            } else {
-                                bottomSheetScaffoldState.bottomSheetState.collapse()
-
-                            }
-                        }
-                    }
-
-                    LaunchedEffect(radioExpanded) {
-                        enableSheet(radioExpanded.value)
                     }
 
                     BottomSheetScaffold(
                         sheetContent = {
                             RadioView(
                                 playingRadio = playingRadio,
-                                swipeEnabled = swipeEnabled.value,
-                                expanded = radioExpanded.value,
+                                enabled = swipeEnabled,
                                 modifier = Modifier.fillMaxWidth(),
                                 onSelectRadio = ::playRadio,
-                                onExpand = {
-                                    radioExpanded.value = !radioExpanded.value
-                                }
                             )
                         },
-                        scaffoldState = bottomSheetScaffoldState,
                         sheetShape = RoundedCornerShape(defaultRadius),
                         sheetGesturesEnabled = true,
-                        sheetPeekHeight = 32.dp,
+                        sheetPeekHeight = 16.dp,
                         sheetBackgroundColor = MaterialTheme.colorScheme.background
                     ) {
                         Scaffold(
                             modifier = Modifier
                                 .background(MaterialTheme.colorScheme.background)
-                                .padding(bottom = 32.dp),
+                                .padding(bottom = 16.dp),
                             bottomBar = {
                                 AnimatedVisibility(visible = showBottomNavigation.value) {
                                     MotivBottomNavigation(
@@ -248,19 +220,13 @@ class MainActivity : AppCompatActivity() {
                                     )
                                 }
 
-                            }) {
+                            }) { _ ->
                             MotivNavigationGraph(
                                 navHostController = navController,
-                                padding = it,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
-
-                    LaunchedEffect(bottomSheetScaffoldState) {
-                        radioExpanded.value = bottomSheetScaffoldState.bottomSheetState.isExpanded
-                    }
-
                 }
                 LaunchedEffect(Unit) {
                     viewModel.fetchUser()
@@ -284,7 +250,6 @@ class MainActivity : AppCompatActivity() {
                         showRadio = route != AppNavigation.POST.route
                         showBottomNavigation.value =
                             AppNavigation.values().find { it.route == route }?.showBottomBar ?: true
-                        radioExpanded.value = false
                         if (previousRoute == AppNavigation.PROFILE.route) {
                             viewModel.fetchUser()
                         }

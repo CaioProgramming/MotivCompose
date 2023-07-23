@@ -135,8 +135,9 @@ fun CoversView() {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "Capas de perfil",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                     Text(text = "${covers.size} capas disponíveis para os usuários, adicione ou remova capas para que os usuários possam escolher.")
                 }
