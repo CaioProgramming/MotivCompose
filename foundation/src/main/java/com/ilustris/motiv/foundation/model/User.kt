@@ -3,7 +3,6 @@ package com.ilustris.motiv.foundation.model
 import com.google.firebase.auth.FirebaseUser
 import com.silent.ilustriscore.core.bean.BaseBean
 
-const val DEFAULT_USER_BACKGROUND = "https://media.giphy.com/media/ZFibRNOSrIdUWgupdc/giphy.gif"
 
 data class User(
     var name: String = "",

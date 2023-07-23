@@ -151,13 +151,7 @@ fun CoverSheet(onSelection: (Cover) -> Unit) {
         exit = fadeOut()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            CircularProgressIndicator(
-                strokeWidth = 5.dp,
-                modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.Center)
-                    .gradientFill(gradientAnimation())
-            )
+            MotivLoader(modifier = Modifier.size(64.dp))
         }
 
     }
@@ -196,16 +190,7 @@ fun CoverSheet(onSelection: (Cover) -> Unit) {
 
             items(covers.size) { index ->
                 val cover = covers[index]
-                GlideImage(
-                    imageModel = { cover.url },
-                    glideRequestType = GlideRequestType.GIF,
-                    modifier = Modifier
-                        .size(200.dp)
-                        .border(color = MaterialTheme.colorScheme.onBackground, width = 2.dp)
-                        .clickable {
-                            onSelection(cover)
-                        }
-                )
+                CoverView(cover = cover, onSelection = onSelection)
             }
 
         })

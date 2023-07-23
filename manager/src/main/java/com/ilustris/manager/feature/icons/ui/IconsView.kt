@@ -57,10 +57,14 @@ import com.ilustris.motiv.foundation.model.Icon
 import com.ilustris.motiv.foundation.ui.component.IconView
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
+import com.ilustris.motiv.foundation.ui.theme.gradientFill
+import com.ilustris.motiv.foundation.ui.theme.grayBrushes
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun IconsView() {
@@ -129,17 +133,27 @@ fun IconsView() {
 
             if (state is ViewModelBaseState.DataListRetrievedState) {
 
+                val icons = state.dataList as List<Icon>
+                item(span = { GridItemSpan(columns) }) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Ícones", style = MaterialTheme.typography.headlineMedium)
+                        Text(
+                            text = "${icons.size} ícones disponíveis, selecione um para excluir ou faça upload de um novo ícone.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
                 item {
-                    IconButton(
-                        onClick = { enableBottomSheet(true) },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .radioIconModifier(0f, 100.dp, grayGradients())
-                    ) {
+                    IconButton(onClick = { enableBottomSheet(true) }) {
                         Icon(
                             Icons.Rounded.KeyboardArrowUp,
                             contentDescription = "enviar novo icone",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .radioIconModifier(0f, 100.dp, grayGradients())
+                                .gradientFill(grayGradients())
                         )
                     }
                 }
@@ -249,7 +263,7 @@ fun IconsView() {
     }
 
     LaunchedEffect(selectedIcon) {
-        Log.i("IconsView", "IconsView: Icon selected $selectedIcon")
+        Timber.i("IconsView", "IconsView: Icon selected $selectedIcon")
         dialogVisibility.value = selectedIcon != null
     }
 

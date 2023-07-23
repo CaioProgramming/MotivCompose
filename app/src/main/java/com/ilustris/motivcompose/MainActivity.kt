@@ -15,8 +15,10 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
@@ -91,7 +93,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val mediaPlayer = MediaPlayer()
@@ -124,8 +126,8 @@ class MainActivity : ComponentActivity() {
                     .build()
 
                 AnimatedVisibility(
-                    visible = currentUser == null && viewModelState.value == ViewModelBaseState.RequireAuth,
-                    enter = fadeIn(),
+                    visible = viewModelState.value is ViewModelBaseState.ErrorState,
+                    enter = fadeIn(tween(500)),
                     exit = fadeOut()
                 ) {
 
@@ -149,7 +151,7 @@ class MainActivity : ComponentActivity() {
 
                 AnimatedVisibility(
                     visible = currentUser != null,
-                    enter = fadeIn(),
+                    enter = fadeIn(tween(1500)),
                     exit = fadeOut()
                 ) {
                     val context = LocalContext.current

@@ -48,6 +48,7 @@ import androidx.navigation.NavController
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.home.ui.ManagerHomeView
 import com.ilustris.manager.feature.icons.ui.IconsView
+import com.ilustris.manager.feature.covers.ui.CoversView
 import com.ilustris.motiv.foundation.ui.theme.MotivTitle
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import kotlinx.coroutines.delay
@@ -79,7 +80,7 @@ fun ManagerView(navController: NavController) {
             }
 
             ManagerFeatures.COVERS -> {
-                Text(text = "Capas")
+                CoversView()
             }
         }
     }
