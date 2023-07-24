@@ -5,6 +5,7 @@
 
 package com.ilustris.motivcompose.features.post.ui
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -88,11 +89,13 @@ import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
+import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motiv.foundation.utils.FontUtils
 import com.ilustris.motivcompose.features.post.presentation.NewQuoteViewModel
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.delayedFunction
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @Composable
 fun QuotePostView(quoteId: String? = null, navController: NavController) {
@@ -105,7 +108,7 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
 
     val context = LocalContext.current
     val quote = newQuoteViewModel.newQuote.observeAsState().value
-    val styles = newQuoteViewModel.styles
+    val styles = newQuoteViewModel.styles.observeAsState().value
     val currentStyle = newQuoteViewModel.currentStyle.observeAsState().value
     val isFocusing = remember { mutableStateOf(false) }
     val backgroundBlur =
@@ -134,26 +137,23 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
         mutableStateOf(false)
     }
 
-    val rowState = rememberPagerState(pageCount = { styles.size })
+    val rowState = rememberPagerState(pageCount = { styles?.size ?: 0 })
     val scope = rememberCoroutineScope()
     fun getFont(fontPosition: Int) =
         FontUtils.getFontFamily(FontUtils.getFamily(context, fontPosition))
 
     LaunchedEffect(rowState.currentPage) {
-        if (styles.isNotEmpty() && swipeEnabled) {
-            newQuoteViewModel.updateStyle(styles[rowState.currentPage].id)
+        styles?.let {
+            if (it.isNotEmpty()) {
+                newQuoteViewModel.updateStyle(it[rowState.currentPage].id)
+            }
         }
     }
 
     LaunchedEffect(Unit) {
-        if (styles.isEmpty()) {
+        if (styles == null) {
             newQuoteViewModel.getStyles(quoteId != null)
         }
-
-        quoteId?.let {
-            newQuoteViewModel.getSingleData(it)
-        }
-
     }
 
     LaunchedEffect(backgroundBitmap) {
@@ -170,9 +170,6 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
 
     LaunchedEffect(currentStyle) {
         backgroundBitmap = null
-        currentStyle?.let {
-            scrollToStyle(styles.indexOf(it))
-        }
     }
 
     LaunchedEffect(state) {
@@ -181,9 +178,12 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
                 navController.popBackStack()
             }
         } else if (state is ViewModelBaseState.DataRetrievedState) {
-            newQuoteViewModel.updateQuote(state.data as Quote)
+            val quote = state.data as Quote
+            newQuoteViewModel.updateQuote(quote)
             delayedFunction(500) {
-                swipeEnabled = true
+                styles?.let {
+                    scrollToStyle(styles.indexOfFirst { it.id == quote.style })
+                }
             }
         }
     }
@@ -208,6 +208,20 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
             }
 
         }
+    }
+
+    LaunchedEffect(styles) {
+        styles?.let {
+            Log.i("StylesList", "QuotePostView: ${styles.size} styles updated")
+            if (styles.isNotEmpty()) {
+                if (quoteId?.contains("{quoteId}") == true) {
+                    scrollToStyle(Random.nextInt(0, styles.size))
+                } else {
+                    newQuoteViewModel.getSingleData(quoteId!!)
+                }
+            }
+        }
+
     }
 
     @Composable
@@ -357,26 +371,29 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
                 .animateContentSize(tween(1500))
                 .size(80.dp)
                 .clip(CircleShape),
-            visible = styles.isNotEmpty(),
+            visible = !styles.isNullOrEmpty(),
             enter = scaleIn(), exit = shrinkOut()
         ) {
             HorizontalPager(
                 state = rowState,
-                userScrollEnabled = !isSaving() && swipeEnabled,
+                userScrollEnabled = !isSaving(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(CircleShape)
                     .animateContentSize(tween(1500)),
                 pageContent = {
-                    val style = styles[it]
-                    StyleIcon(
-                        style = style,
-                        isSaving = state == ViewModelBaseState.LoadingState,
-                    ) { selectedStyle ->
-                        quote?.let { quote ->
-                            newQuoteViewModel.saveData(quote)
+                    styles?.run {
+                        val style = get(it)
+                        StyleIcon(
+                            style = style,
+                            isSaving = state == ViewModelBaseState.LoadingState,
+                        ) { selectedStyle ->
+                            quote?.let { quote ->
+                                newQuoteViewModel.saveData(quote)
+                            }
                         }
                     }
+
                 })
         }
 
@@ -410,7 +427,7 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
                 .wrapContentHeight()
                 .padding(8.dp),
             contentPadding = PaddingValues(16.dp),
-            shape = RoundedCornerShape(defaultRadius),
+            shape = RoundedCornerShape(radioRadius),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.onBackground,
                 contentColor = MaterialTheme.colorScheme.background

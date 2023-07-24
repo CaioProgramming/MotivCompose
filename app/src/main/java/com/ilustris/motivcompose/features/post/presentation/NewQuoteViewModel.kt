@@ -29,7 +29,7 @@ class NewQuoteViewModel @Inject constructor(
 
     var newQuote = MutableLiveData(Quote())
     var currentStyle = MutableLiveData<Style?>(null)
-    var styles = mutableStateListOf<Style>()
+    var styles = MutableLiveData<List<Style>>()
 
 
     fun updateQuoteText(text: String) {
@@ -42,17 +42,16 @@ class NewQuoteViewModel @Inject constructor(
 
     fun updateStyle(styleId: String) {
         this.newQuote.postValue(newQuote.value?.copy(style = styleId))
-        this.currentStyle.postValue(styles.find { it.id == styleId })
+        styles.value?.let {
+            currentStyle.postValue(it.find { style -> style.id == styleId })
+        }
     }
 
     fun getStyles(isPosted: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             styleService.getAllData(orderBy = "font").run {
                 if (isSuccess) {
-                    styles.addAll(success.data as List<Style>)
-                    if (!isPosted) {
-                        currentStyle.postValue(styles.random())
-                    }
+                    styles.postValue(success.data as List<Style>)
                 } else {
                     sendErrorState(error.errorException)
                 }
@@ -80,7 +79,9 @@ class NewQuoteViewModel @Inject constructor(
 
     fun updateQuote(quote: Quote) {
         newQuote.postValue(quote)
-        currentStyle.postValue(styles.find { it.id == quote.style })
+        styles.value?.let {
+            currentStyle.postValue(it.find { style -> style.id == quote.style })
+        }
     }
 
 }
