@@ -68,7 +68,7 @@ import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motivcompose.features.home.presentation.HomeViewModel
 import com.ilustris.motivcompose.features.home.presentation.ShareState
-import com.ilustris.motivcompose.ui.navigation.AppNavigation
+import com.ilustris.motiv.foundation.navigation.AppNavigation
 
 @Composable
 fun HomeView(navController: NavController) {

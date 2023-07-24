@@ -81,6 +81,10 @@ import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.utils.FontUtils
+import com.ilustris.motiv.foundation.utils.buildFont
+import com.ilustris.motiv.foundation.utils.buildStyleShadow
+import com.ilustris.motiv.foundation.utils.buildTextColor
+import com.ilustris.motiv.foundation.utils.getTextAlign
 import com.silent.ilustriscore.core.utilities.DateFormats
 import com.silent.ilustriscore.core.utilities.format
 import com.skydoves.landscapist.ImageOptions
@@ -118,7 +122,7 @@ fun QuoteCard(
 
     val style = quoteDataModel.style
     val shadowStyle = style.buildStyleShadow()
-    val textAlign = style.getTextAlign()
+    val textAlign = style?.textAlignment?.getTextAlign() ?: TextAlign.Center
     val textColor = style?.textColor.buildTextColor()
 
 
@@ -407,39 +411,3 @@ fun QuoteCard(
 }
 
 
-fun Style?.getTextAlign(): TextAlign {
-    if (this == null) return TextAlign.Center
-    return when (textAlignment) {
-        TextAlignment.JUSTIFY -> TextAlign.Justify
-        TextAlignment.CENTER -> TextAlign.Center
-        TextAlignment.START -> TextAlign.Start
-        TextAlignment.END -> TextAlign.End
-    }
-}
-
-fun Style?.buildStyleShadow() = if (this != null) Shadow(
-    color = Color(
-        android.graphics.Color.parseColor(shadowStyle.shadowColor)
-    ),
-    offset = Offset(shadowStyle.dx, shadowStyle.dy),
-    blurRadius = shadowStyle.radius
-) else {
-    Shadow()
-}
-
-@Composable
-fun String?.buildTextColor() = if (this == null) MaterialTheme.colorScheme.onBackground else Color(
-    android.graphics.Color.parseColor(this)
-)
-
-fun Style.getFontPosition(): Int? {
-    return try {
-        font.toInt()
-    } catch (e: Exception) {
-        null
-    }
-}
-
-fun Style.buildFont(context: Context): FontFamily {
-    return FontUtils.getFont(context, font)
-}

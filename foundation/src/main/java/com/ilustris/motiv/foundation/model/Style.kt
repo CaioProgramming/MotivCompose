@@ -1,6 +1,5 @@
 package com.ilustris.motiv.foundation.model
 
-import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.silent.ilustriscore.core.bean.BaseBean
 
@@ -8,8 +7,9 @@ import com.silent.ilustriscore.core.bean.BaseBean
 const val DEFAULT_TEXT_COLOR = "#ffffff"
 const val DEFAULT_SHADOW_COLOR = "#000000"
 private const val DEFAULT_BACKGROUND_URL =
-    "https://media.giphy.com/media/RJy4FQlLbxDz4kJ6GF/giphy.gif"
+    "https://media.giphy.com/media/PvZ0Gv4ME2Er45Qywt/giphy.gif"
 const val NEW_STYLE_BACKGROUND = "https://media.giphy.com/media/bLdgTj2jCKe9Wf94Km/giphy.gif"
+const val DEFAULT_FONT_FAMILY = "Roboto"
 
 
 @IgnoreExtraProperties
@@ -17,11 +17,12 @@ data class Style(
     override var id: String = "",
     var font: Int = 0,
     var textAlignment: TextAlignment = TextAlignment.CENTER,
-    var fontStyle: FontStyle = FontStyle.REGULAR,
+    var fontStyle: FontStyle = FontStyle.NORMAL,
     var textColor: String = DEFAULT_TEXT_COLOR,
     var backgroundURL: String = DEFAULT_BACKGROUND_URL,
-    var shadowStyle: ShadowStyle = ShadowStyle(),
-    var styleProperties: StyleProperties = StyleProperties(),
+    var textProperties: TextProperties? = TextProperties(),
+    var shadowStyle: ShadowStyle? = ShadowStyle(),
+    var styleProperties: StyleProperties? = StyleProperties(),
 ) : BaseBean(id) {
 
 }
@@ -31,8 +32,10 @@ enum class TextAlignment {
 }
 
 enum class FontStyle {
-    REGULAR, BOLD, ITALIC
+    NORMAL, ITALIC, BOLD, BLACK
 }
+
+
 
 data class ShadowStyle(
     var radius: Float = 0f,
@@ -49,6 +52,16 @@ data class StyleProperties(
     val customWindow: Window = Window.MODERN,
     val animation: Animation = Animation.TYPE
 )
+
+data class TextProperties(
+    var fontFamily: String = "Roboto",
+    var textAlignment: TextAlignment = TextAlignment.CENTER,
+    var fontStyle: FontStyle = FontStyle.NORMAL,
+)
+
+enum class TextOptions {
+    HIGHLIGHT
+}
 
 enum class BlendMode {
     NORMAL, DARKEN, LIGHTEN, OVERLAY, SCREEN

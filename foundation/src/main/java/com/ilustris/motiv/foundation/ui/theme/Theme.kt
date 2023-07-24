@@ -161,6 +161,15 @@ fun grayGradients() = Brush.linearGradient(
 )
 
 @Composable
+fun textColorGradient() = Brush.verticalGradient(
+    colors = listOf(
+        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+        MaterialTheme.colorScheme.onBackground
+    ),
+    tileMode = TileMode.Clamp
+)
+
+@Composable
 fun getDeviceWidth() = LocalConfiguration.current.screenWidthDp
 
 @Composable

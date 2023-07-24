@@ -85,6 +85,7 @@ dependencies {
     api 'androidx.compose.ui:ui-tooling:1.4.3'
     api 'androidx.compose.material3:material3'
     api 'androidx.compose.runtime:runtime-livedata:1.5.0-beta02'
+    api 'com.github.mcginty:material-colors:1.1.0'
 
 
     api 'com.github.atick-faisal:compose-material-color:3.0.0'

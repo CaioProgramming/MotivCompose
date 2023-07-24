@@ -70,16 +70,15 @@ import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.StyleIcon
-import com.ilustris.motiv.foundation.ui.component.buildFont
-import com.ilustris.motiv.foundation.ui.component.buildStyleShadow
-import com.ilustris.motiv.foundation.ui.component.buildTextColor
-import com.ilustris.motiv.foundation.ui.component.getTextAlign
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
-import com.ilustris.motiv.foundation.utils.FontUtils
+import com.ilustris.motiv.foundation.utils.buildFont
+import com.ilustris.motiv.foundation.utils.buildStyleShadow
+import com.ilustris.motiv.foundation.utils.buildTextColor
+import com.ilustris.motiv.foundation.utils.getTextAlign
 import com.ilustris.motivcompose.features.post.presentation.NewQuoteViewModel
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.delayedFunction
@@ -273,7 +272,7 @@ fun QuotePostScreen(quoteId: String? = null, navController: NavController) {
                     val textStyle = MaterialTheme.typography.headlineMedium
                         .copy(
                             fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                            textAlign = it?.getTextAlign(),
+                            textAlign = it?.textAlignment.getTextAlign(),
                             color = it?.textColor.buildTextColor(),
                             shadow = it?.buildStyleShadow(),
                             fontFamily = it?.buildFont(context)

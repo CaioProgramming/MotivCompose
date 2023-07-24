@@ -45,13 +45,8 @@ import com.ilustris.manager.feature.styles.presentation.StylesViewModel
 import com.ilustris.motiv.foundation.model.DEFAULT_USER_BACKGROUND
 import com.ilustris.motiv.foundation.model.NEW_STYLE_BACKGROUND
 import com.ilustris.motiv.foundation.model.Style
+import com.ilustris.motiv.foundation.navigation.AppNavigation
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
-import com.ilustris.motiv.foundation.ui.component.buildFont
-import com.ilustris.motiv.foundation.ui.component.buildStyleShadow
-import com.ilustris.motiv.foundation.ui.component.buildTextColor
-import com.ilustris.motiv.foundation.ui.component.getTextAlign
-import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.utils.FontUtils
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -66,7 +61,7 @@ fun StylesScreen(navController: NavController) {
     }
 
     fun saveNewStyle() {
-
+        navController.navigate(AppNavigation.NEWSTYLE.route)
     }
 
     LazyVerticalGrid(

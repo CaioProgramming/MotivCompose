@@ -22,13 +22,15 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.model.Style
-import com.ilustris.motiv.foundation.ui.component.buildStyleShadow
-import com.ilustris.motiv.foundation.ui.component.buildTextColor
-import com.ilustris.motiv.foundation.ui.component.getTextAlign
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.utils.FontUtils
+import com.ilustris.motiv.foundation.utils.buildStyleShadow
+import com.ilustris.motiv.foundation.utils.buildTextColor
+import com.ilustris.motiv.foundation.utils.getFontStyle
+import com.ilustris.motiv.foundation.utils.getFontWeight
+import com.ilustris.motiv.foundation.utils.getTextAlign
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -38,8 +40,10 @@ fun StyleCard(style: Style, onSelectStyle: (Style) -> Unit) {
     val context = LocalContext.current
     val font = FontUtils.getFont(context, style.font)
     val shadowStyle = style.buildStyleShadow()
-    val textAlign = style.getTextAlign()
+    val textAlign = style.textAlignment.getTextAlign()
     val textColor = style.textColor.buildTextColor()
+    val fontStyle = style.fontStyle.getFontStyle()
+    val fontWeight = style.fontStyle.getFontWeight()
     var styleBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
@@ -75,7 +79,9 @@ fun StyleCard(style: Style, onSelectStyle: (Style) -> Unit) {
                 shadow = shadowStyle,
                 color = textColor,
                 textAlign = textAlign,
-                fontFamily = font
+                fontFamily = font,
+                fontWeight = fontWeight,
+                fontStyle = fontStyle
             ),
             modifier = Modifier
                 .fillMaxWidth()

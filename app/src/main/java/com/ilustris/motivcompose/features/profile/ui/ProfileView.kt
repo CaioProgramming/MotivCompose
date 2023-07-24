@@ -7,9 +7,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,7 +17,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,15 +30,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,14 +46,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -73,8 +64,6 @@ import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
 import com.ilustris.motiv.foundation.ui.component.CardBackground
-import com.ilustris.motiv.foundation.ui.component.CoverSheet
-import com.ilustris.motiv.foundation.ui.component.IconSheet
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
 import com.ilustris.motiv.foundation.ui.component.ReportDialog
 import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
@@ -82,7 +71,6 @@ import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
-import com.ilustris.motiv.foundation.ui.theme.isGifUrl
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
@@ -91,12 +79,9 @@ import com.ilustris.motivcompose.features.home.presentation.ShareState
 import com.ilustris.motivcompose.features.profile.presentation.ProfileViewModel
 import com.ilustris.motivcompose.features.profile.ui.component.CounterLabel
 import com.ilustris.motivcompose.features.profile.ui.component.ProfileTab
-import com.ilustris.motivcompose.ui.navigation.AppNavigation
-import com.silent.ilustriscore.core.model.ViewModelBaseState
+import com.ilustris.motiv.foundation.navigation.AppNavigation
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
-import com.skydoves.landscapist.glide.GlideRequestType
-import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileView(userID: String? = null, navController: NavController) {

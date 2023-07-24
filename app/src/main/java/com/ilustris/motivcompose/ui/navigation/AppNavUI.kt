@@ -27,6 +27,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.ilustris.manager.feature.ManagerScreen
+import com.ilustris.manager.feature.styles.ui.form.ui.NewStyleScreen
+import com.ilustris.motiv.foundation.navigation.AppNavigation
+import com.ilustris.motiv.foundation.navigation.AppNavigation.*
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
@@ -47,9 +50,9 @@ fun MotivNavigationGraph(
     NavHost(
         modifier = modifier,
         navController = navHostController,
-        startDestination = AppNavigation.SETTINGS.route,
+        startDestination = NEWSTYLE.route,
     ) {
-        AppNavigation.values().forEach { item ->
+        values().forEach { item ->
             val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }
             composable(
                 route = item.route,
@@ -84,7 +87,7 @@ fun MotivBottomNavigation(navController: NavController, userProfilePic: String? 
         backgroundColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        AppNavigation.values().filter { it.showOnNavigation }.forEach { item ->
+        values().filter { it.showOnNavigation }.forEach { item ->
             val isSelected = currentRoute?.hierarchy?.any { it.route == item.route } == true
 
             val selectedBrush = if (isSelected) motivGradient() else grayGradients()
@@ -93,7 +96,7 @@ fun MotivBottomNavigation(navController: NavController, userProfilePic: String? 
                 selected = isSelected,
                 onClick = { navigateToScreen(item.route) },
                 icon = {
-                    if (item == AppNavigation.PROFILE && userProfilePic != null) {
+                    if (item == PROFILE && userProfilePic != null) {
                         GlideImage(
                             imageModel = { userProfilePic },
                             glideRequestType = GlideRequestType.BITMAP,
@@ -135,26 +138,30 @@ fun GetRouteScreen(
     arguments: Bundle?
 ) {
     when (navigationItem) {
-        AppNavigation.HOME -> {
+        HOME -> {
             HomeView(navController)
         }
 
-        AppNavigation.PROFILE -> {
+        PROFILE -> {
             val userID = arguments?.getString("userId")
             ProfileView(userID, navController = navController)
         }
 
-        AppNavigation.POST -> {
+        POST -> {
             val quoteId = arguments?.getString(navigationItem.arguments.first())
             QuotePostScreen(quoteId, navController)
         }
 
-        AppNavigation.SETTINGS -> {
+        SETTINGS -> {
             SettingsView(navController)
         }
 
-        AppNavigation.MANAGER -> {
+        MANAGER -> {
             ManagerScreen(navController = navController)
+        }
+
+        NEWSTYLE -> {
+            NewStyleScreen(navController = navController)
         }
     }
 }

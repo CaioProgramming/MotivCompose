@@ -57,7 +57,7 @@ import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motivcompose.features.radio.ui.RadioSheet
-import com.ilustris.motivcompose.ui.navigation.AppNavigation
+import com.ilustris.motiv.foundation.navigation.AppNavigation
 import com.ilustris.motivcompose.ui.navigation.MotivBottomNavigation
 import com.ilustris.motivcompose.ui.navigation.MotivNavigationGraph
 import com.silent.ilustriscore.core.model.DataException

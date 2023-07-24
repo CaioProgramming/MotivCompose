@@ -1,20 +1,14 @@
 package com.ilustris.motiv.foundation.utils
 
 import android.content.Context
-import android.graphics.Typeface
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
-import androidx.core.provider.FontRequest
-import androidx.core.provider.FontsContractCompat
 import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.ui.theme.fontProvider
-import kotlinx.coroutines.coroutineScope
 
 object FontUtils {
     fun getFontFamily(fontName: String) = FontFamily(
