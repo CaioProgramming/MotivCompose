@@ -17,12 +17,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,22 +28,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -53,7 +43,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,12 +70,12 @@ import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.StyleIcon
+import com.ilustris.motiv.foundation.ui.component.buildFont
 import com.ilustris.motiv.foundation.ui.component.buildStyleShadow
 import com.ilustris.motiv.foundation.ui.component.buildTextColor
 import com.ilustris.motiv.foundation.ui.component.getTextAlign
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.quoteCardModifier
 import com.ilustris.motiv.foundation.ui.theme.radioRadius
@@ -98,7 +87,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 @Composable
-fun QuotePostView(quoteId: String? = null, navController: NavController) {
+fun QuotePostScreen(quoteId: String? = null, navController: NavController) {
 
 
     val newQuoteViewModel = hiltViewModel<NewQuoteViewModel>()
@@ -139,8 +128,7 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
 
     val rowState = rememberPagerState(pageCount = { styles?.size ?: 0 })
     val scope = rememberCoroutineScope()
-    fun getFont(fontPosition: Int) =
-        FontUtils.getFontFamily(FontUtils.getFamily(context, fontPosition))
+
 
     LaunchedEffect(rowState.currentPage) {
         styles?.let {
@@ -269,9 +257,6 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
                     backgroundBitmap = it
                 }
 
-
-
-
                 AnimatedContent(targetState = currentStyle, transitionSpec = {
                     fadeIn() with fadeOut()
                 }, modifier = Modifier
@@ -291,7 +276,7 @@ fun QuotePostView(quoteId: String? = null, navController: NavController) {
                             textAlign = it?.getTextAlign(),
                             color = it?.textColor.buildTextColor(),
                             shadow = it?.buildStyleShadow(),
-                            fontFamily = getFont(it?.font ?: 0)
+                            fontFamily = it?.buildFont(context)
                         )
 
                     Column {

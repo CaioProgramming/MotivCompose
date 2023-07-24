@@ -36,6 +36,10 @@ object FontUtils {
         androidx.compose.ui.text.font.Font(R.font.pathway_variable)
     )
 
+    fun getFont(context: Context, index: Int): FontFamily {
+        val family = getFamily(context, index)
+        return getFontFamily(family)
+    }
 
     fun getFamily(context: Context, index: Int): String {
         val array = context.resources.getStringArray(R.array.family_names)

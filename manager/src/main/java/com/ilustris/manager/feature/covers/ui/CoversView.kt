@@ -3,8 +3,6 @@
 package com.ilustris.manager.feature.covers.ui
 
 import ai.atick.material.MaterialColor
-import android.app.Activity
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -21,11 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,12 +28,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,19 +43,16 @@ import com.giphy.sdk.ui.themes.GPHTheme
 import com.giphy.sdk.ui.views.GiphyDialogFragment
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.covers.presentation.CoversViewModel
-import com.ilustris.manager.feature.giphy.GifSheet
 import com.ilustris.motiv.foundation.model.Cover
 import com.ilustris.motiv.foundation.model.DEFAULT_USER_BACKGROUND
 import com.ilustris.motiv.foundation.ui.component.CoverView
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
-import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType
-import kotlinx.coroutines.launch
 
 @Composable
-fun CoversView() {
+fun CoversScreen() {
     val context = LocalContext.current
     val coversViewModel = hiltViewModel<CoversViewModel>()
     val state = coversViewModel.viewModelState.observeAsState().value

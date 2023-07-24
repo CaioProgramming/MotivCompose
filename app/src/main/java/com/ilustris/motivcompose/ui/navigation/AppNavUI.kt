@@ -3,10 +3,7 @@ package com.ilustris.motivcompose.ui.navigation
 import android.os.Bundle
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigation
@@ -29,14 +26,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.ilustris.manager.feature.ManagerView
-import com.ilustris.manager.feature.home.ui.ManagerHomeView
+import com.ilustris.manager.feature.ManagerScreen
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.ilustris.motivcompose.features.home.ui.HomeView
-import com.ilustris.motivcompose.features.post.ui.QuotePostView
+import com.ilustris.motivcompose.features.post.ui.QuotePostScreen
 import com.ilustris.motivcompose.features.profile.ui.ProfileView
 import com.ilustris.motivcompose.features.settings.ui.SettingsView
 import com.skydoves.landscapist.ImageOptions
@@ -150,7 +146,7 @@ fun GetRouteScreen(
 
         AppNavigation.POST -> {
             val quoteId = arguments?.getString(navigationItem.arguments.first())
-            QuotePostView(quoteId, navController)
+            QuotePostScreen(quoteId, navController)
         }
 
         AppNavigation.SETTINGS -> {
@@ -158,7 +154,7 @@ fun GetRouteScreen(
         }
 
         AppNavigation.MANAGER -> {
-            ManagerView(navController = navController)
+            ManagerScreen(navController = navController)
         }
     }
 }

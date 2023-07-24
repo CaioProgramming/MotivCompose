@@ -1,6 +1,7 @@
 package com.ilustris.motiv.foundation.ui.component
 
 import ai.atick.material.MaterialColor
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInExpo
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,7 +80,6 @@ import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
-import com.ilustris.motiv.foundation.ui.theme.radioRadius
 import com.ilustris.motiv.foundation.utils.FontUtils
 import com.silent.ilustriscore.core.utilities.DateFormats
 import com.silent.ilustriscore.core.utilities.format
@@ -99,9 +100,7 @@ fun QuoteCard(
 ) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
-    val defaultFont =
-        FontUtils.getFontFamily(FontUtils.getFamily(context, quoteDataModel.style?.font ?: 0))
-
+    val defaultFont = quoteDataModel.style?.buildFont(context) ?: FontFamily.Default
     var backgroundBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
@@ -432,3 +431,15 @@ fun Style?.buildStyleShadow() = if (this != null) Shadow(
 fun String?.buildTextColor() = if (this == null) MaterialTheme.colorScheme.onBackground else Color(
     android.graphics.Color.parseColor(this)
 )
+
+fun Style.getFontPosition(): Int? {
+    return try {
+        font.toInt()
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun Style.buildFont(context: Context): FontFamily {
+    return FontUtils.getFont(context, font)
+}

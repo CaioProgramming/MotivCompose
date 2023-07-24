@@ -9,6 +9,7 @@ const val DEFAULT_TEXT_COLOR = "#ffffff"
 const val DEFAULT_SHADOW_COLOR = "#000000"
 private const val DEFAULT_BACKGROUND_URL =
     "https://media.giphy.com/media/RJy4FQlLbxDz4kJ6GF/giphy.gif"
+const val NEW_STYLE_BACKGROUND = "https://media.giphy.com/media/bLdgTj2jCKe9Wf94Km/giphy.gif"
 
 
 @IgnoreExtraProperties
@@ -20,8 +21,7 @@ data class Style(
     var textColor: String = DEFAULT_TEXT_COLOR,
     var backgroundURL: String = DEFAULT_BACKGROUND_URL,
     var shadowStyle: ShadowStyle = ShadowStyle(),
-    @get:Exclude
-    var storedStyle: Boolean = false
+    var styleProperties: StyleProperties = StyleProperties(),
 ) : BaseBean(id) {
 
 }
@@ -42,3 +42,22 @@ data class ShadowStyle(
     var strokeColor: String = DEFAULT_SHADOW_COLOR
 )
 
+data class StyleProperties(
+    val clipMask: Boolean = false,
+    val backgroundColor: String? = null,
+    val blendMode: BlendMode = BlendMode.NORMAL,
+    val customWindow: Window = Window.MODERN,
+    val animation: Animation = Animation.TYPE
+)
+
+enum class BlendMode {
+    NORMAL, DARKEN, LIGHTEN, OVERLAY, SCREEN
+}
+
+enum class Animation {
+    TYPE, FADE, SCALE
+}
+
+enum class Window {
+    CLASSIC, MODERN, GRADIENT, DEPTH
+}

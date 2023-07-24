@@ -58,9 +58,7 @@ import com.ilustris.motiv.foundation.model.Icon
 import com.ilustris.motiv.foundation.ui.component.IconView
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
-import com.ilustris.motiv.foundation.ui.theme.grayBrushes
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.radioIconModifier
 import com.silent.ilustriscore.core.model.ViewModelBaseState
