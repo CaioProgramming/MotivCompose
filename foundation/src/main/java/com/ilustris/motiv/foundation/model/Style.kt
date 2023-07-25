@@ -7,7 +7,7 @@ import com.silent.ilustriscore.core.bean.BaseBean
 const val DEFAULT_TEXT_COLOR = "#ffffff"
 const val DEFAULT_SHADOW_COLOR = "#000000"
 private const val DEFAULT_BACKGROUND_URL =
-    "https://media.giphy.com/media/PvZ0Gv4ME2Er45Qywt/giphy.gif"
+    "https://media.giphy.com/media/3og0INtldac8gncQO4/giphy-downsized-large.gif"
 const val NEW_STYLE_BACKGROUND = "https://media.giphy.com/media/bLdgTj2jCKe9Wf94Km/giphy.gif"
 const val DEFAULT_FONT_FAMILY = "Roboto"
 
@@ -17,24 +17,22 @@ data class Style(
     override var id: String = "",
     var font: Int = 0,
     var textAlignment: TextAlignment = TextAlignment.CENTER,
-    var fontStyle: FontStyle = FontStyle.NORMAL,
+    var fontStyle: FontStyle = FontStyle.REGULAR,
     var textColor: String = DEFAULT_TEXT_COLOR,
     var backgroundURL: String = DEFAULT_BACKGROUND_URL,
+    var animationProperties: AnimationProperties? = AnimationProperties(),
     var textProperties: TextProperties? = TextProperties(),
     var shadowStyle: ShadowStyle? = ShadowStyle(),
     var styleProperties: StyleProperties? = StyleProperties(),
-) : BaseBean(id) {
-
-}
+) : BaseBean(id)
 
 enum class TextAlignment {
     CENTER, START, END, JUSTIFY
 }
 
 enum class FontStyle {
-    NORMAL, ITALIC, BOLD, BLACK
+    REGULAR, ITALIC, BOLD, BLACK
 }
-
 
 
 data class ShadowStyle(
@@ -48,15 +46,19 @@ data class ShadowStyle(
 data class StyleProperties(
     val clipMask: Boolean = false,
     val backgroundColor: String? = null,
-    val blendMode: BlendMode = BlendMode.NORMAL,
     val customWindow: Window = Window.MODERN,
-    val animation: Animation = Animation.TYPE
 )
 
 data class TextProperties(
     var fontFamily: String = "Roboto",
+    var textColor: String = DEFAULT_TEXT_COLOR,
     var textAlignment: TextAlignment = TextAlignment.CENTER,
-    var fontStyle: FontStyle = FontStyle.NORMAL,
+    var fontStyle: FontStyle = FontStyle.REGULAR,
+)
+
+data class AnimationProperties(
+    val animation: AnimationOptions = AnimationOptions.TYPE,
+    val transition: AnimationTransition = AnimationTransition.LETTERS,
 )
 
 enum class TextOptions {
@@ -67,10 +69,14 @@ enum class BlendMode {
     NORMAL, DARKEN, LIGHTEN, OVERLAY, SCREEN
 }
 
-enum class Animation {
+enum class AnimationOptions {
     TYPE, FADE, SCALE
 }
 
+enum class AnimationTransition(val title: String) {
+    WORDS("Palavras"), LETTERS("Letras"), LINES("Linhas")
+}
+
 enum class Window {
-    CLASSIC, MODERN, GRADIENT, DEPTH
+    CLASSIC, MODERN
 }

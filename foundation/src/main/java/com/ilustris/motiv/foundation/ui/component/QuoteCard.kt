@@ -335,7 +335,6 @@ fun QuoteCard(
                     AnimatedText(
                         text = quote.quote,
                         animationEnabled = animationEnabled,
-                        shadow = shadowStyle,
                         fontFamily = defaultFont,
                         textStyle = MaterialTheme.typography.headlineLarge.copy(
                             shadow = shadowStyle,

@@ -45,67 +45,6 @@ import com.skydoves.landscapist.glide.GlideRequestType
 import kotlin.random.Random
 
 @Composable
-fun AnimatedText(
-    text: String,
-    shadow: Shadow?,
-    fontFamily: FontFamily,
-    modifier: Modifier,
-    textStyle: TextStyle,
-    animationEnabled: Boolean = true,
-    onCompleteType: (() -> Unit)? = null
-) {
-
-
-    var textIndex by remember { mutableIntStateOf(0) }
-    val textPart = try {
-        if (!animationEnabled) text else text.substring(0, textIndex)
-    } catch (e: Exception) {
-        text
-    }
-
-    fun isAnimationComplete() = textPart == text || !animationEnabled
-
-
-    var style by remember { mutableStateOf(textStyle) }
-
-
-    LaunchedEffect(textIndex) {
-        val delay = (25 * Random.nextInt(1, 2)).toLong()
-        delayedFunction(delay) {
-            if (textIndex < text.length && animationEnabled) {
-                textIndex++
-            } else {
-                onCompleteType?.invoke()
-            }
-        }
-
-    }
-
-    LaunchedEffect(Unit) {
-        if (animationEnabled) {
-            delayedFunction(500) {
-                textIndex++
-            }
-        }
-
-    }
-
-    Text(
-        text = textPart,
-        style = textStyle,
-        modifier = modifier.animateContentSize(tween(100)),
-        fontFamily = fontFamily,
-        onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowHeight && isAnimationComplete()) {
-                style = textStyle.copy(fontSize = textStyle.fontSize * 0.7)
-            }
-        }
-    )
-
-
-}
-
-@Composable
 fun CardBackground(
     modifier: Modifier,
     backgroundImage: String?,
@@ -117,8 +56,6 @@ fun CardBackground(
     var imageLoaded by remember {
         mutableStateOf(false)
     }
-
-
 
     AnimatedContent(targetState = backgroundImage, transitionSpec = {
         fadeIn(tween(1000)) with fadeOut(tween(500))

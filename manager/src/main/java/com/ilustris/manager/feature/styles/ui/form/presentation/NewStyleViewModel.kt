@@ -2,8 +2,10 @@ package com.ilustris.manager.feature.styles.ui.form.presentation
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
+import com.ilustris.motiv.foundation.model.AnimationProperties
 import com.ilustris.motiv.foundation.model.ShadowStyle
 import com.ilustris.motiv.foundation.model.Style
+import com.ilustris.motiv.foundation.model.StyleProperties
 import com.ilustris.motiv.foundation.model.TextProperties
 import com.ilustris.motiv.foundation.service.StyleService
 import com.silent.ilustriscore.core.model.BaseService
@@ -39,6 +41,18 @@ class NewStyleViewModel @Inject constructor(
 
     fun updateTextProperties(textProperties: TextProperties) {
         newStyle.postValue(newStyle.value?.copy(textProperties = textProperties))
+    }
+
+    fun updateStyleBackground(url: String) {
+        newStyle.postValue(newStyle.value?.copy(backgroundURL = url))
+    }
+
+    fun updateStyleProperties(properties: StyleProperties) {
+        newStyle.postValue(newStyle.value?.copy(styleProperties = properties))
+    }
+
+    fun updateAnimationProperties(animationProperties: AnimationProperties) {
+        newStyle.postValue(newStyle.value?.copy(animationProperties = animationProperties))
     }
 
 }

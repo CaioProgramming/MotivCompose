@@ -62,16 +62,16 @@ import java.lang.Math.sin
 import java.lang.Math.sqrt
 
 private val DarkColorScheme = darkColorScheme(
-    primary = MaterialColor.DeepPurple300,
+    primary = MaterialColor.Purple500,
     secondary = MaterialColor.DeepPurple500,
-    tertiary = MaterialColor.DeepPurpleA200,
+    tertiary = MaterialColor.PurpleA700,
     background = MaterialColor.Black,
     surface = MaterialColor.Gray900
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = MaterialColor.Purple500,
-    secondary = MaterialColor.Purple800,
+    secondary = MaterialColor.DeepPurple500,
     tertiary = MaterialColor.PurpleA700,
     background = MaterialColor.White,
     surface = MaterialColor.Gray200
@@ -128,10 +128,9 @@ val fontProvider = GoogleFont.Provider(
 
 @Composable
 fun motivBrushes() = listOf(
-    MaterialColor.Purple700,
-    MaterialColor.DeepPurple300,
-    MaterialColor.PurpleA200,
-    MaterialColor.DeepPurpleA700,
+    MaterialTheme.colorScheme.primary,
+    MaterialTheme.colorScheme.secondary,
+    MaterialTheme.colorScheme.tertiary,
 )
 
 @Composable
@@ -297,6 +296,7 @@ fun Modifier.gradientOverlay(brush: Brush) =
                 drawRect(brush, blendMode = BlendMode.Darken)
             }
         }
+
 
 fun Modifier.radioIconModifier(
     rotationValue: Float,

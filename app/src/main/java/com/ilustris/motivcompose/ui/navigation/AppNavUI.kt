@@ -50,7 +50,7 @@ fun MotivNavigationGraph(
     NavHost(
         modifier = modifier,
         navController = navHostController,
-        startDestination = NEWSTYLE.route,
+        startDestination = MANAGER.route,
     ) {
         values().forEach { item ->
             val args = item.arguments.map { navArgument(it) { type = NavType.StringType } }

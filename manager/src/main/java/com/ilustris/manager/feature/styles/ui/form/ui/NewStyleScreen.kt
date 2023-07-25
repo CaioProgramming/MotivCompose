@@ -3,9 +3,11 @@
 package com.ilustris.manager.feature.styles.ui.form.ui
 
 import ai.atick.material.MaterialColor
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -15,12 +17,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -37,6 +41,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -49,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,14 +64,27 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.giphy.sdk.core.models.Media
+import com.giphy.sdk.ui.GPHContentType
+import com.giphy.sdk.ui.GPHSettings
+import com.giphy.sdk.ui.Giphy
+import com.giphy.sdk.ui.themes.GPHTheme
+import com.giphy.sdk.ui.views.GiphyDialogFragment
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.styles.ui.form.presentation.NewStyleViewModel
+import com.ilustris.manager.feature.styles.utils.StyleUtils
+import com.ilustris.motiv.foundation.model.AnimationOptions
+import com.ilustris.motiv.foundation.model.AnimationProperties
+import com.ilustris.motiv.foundation.model.AnimationTransition
+import com.ilustris.motiv.foundation.model.BlendMode
 import com.ilustris.motiv.foundation.model.DEFAULT_FONT_FAMILY
 import com.ilustris.motiv.foundation.model.FontStyle
-import com.ilustris.motiv.foundation.model.NEW_STYLE_BACKGROUND
 import com.ilustris.motiv.foundation.model.ShadowStyle
+import com.ilustris.motiv.foundation.model.StyleProperties
 import com.ilustris.motiv.foundation.model.TextAlignment
 import com.ilustris.motiv.foundation.model.TextProperties
+import com.ilustris.motiv.foundation.model.Window
+import com.ilustris.motiv.foundation.ui.component.AnimatedText
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
@@ -77,11 +96,14 @@ import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.textColorGradient
 import com.ilustris.motiv.foundation.utils.ColorUtils
 import com.ilustris.motiv.foundation.utils.FontUtils
+import com.ilustris.motiv.foundation.utils.borderForWindow
 import com.ilustris.motiv.foundation.utils.buildStyleShadow
 import com.ilustris.motiv.foundation.utils.buildTextColor
 import com.ilustris.motiv.foundation.utils.getFontStyle
 import com.ilustris.motiv.foundation.utils.getFontWeight
 import com.ilustris.motiv.foundation.utils.getTextAlign
+import com.ilustris.motiv.foundation.utils.getWindowView
+import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -89,6 +111,7 @@ import com.skydoves.landscapist.glide.GlideRequestType
 @Composable
 fun NewStyleScreen(navController: NavController) {
     val viewModel = hiltViewModel<NewStyleViewModel>()
+    val state = viewModel.viewModelState.observeAsState().value
     val style = viewModel.newStyle.observeAsState().value
 
     val font = FontUtils.getFontFamily(style?.textProperties?.fontFamily ?: DEFAULT_FONT_FAMILY)
@@ -99,9 +122,46 @@ fun NewStyleScreen(navController: NavController) {
         mutableStateOf(FormOptions.values().first())
     }
 
-
     val brush =
         gifBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.colorsFromPalette() ?: managerBrushes()
+    val context = LocalContext.current
+    var exampleText by remember {
+        mutableStateOf(StyleUtils.getExampleQuote())
+    }
+
+    fun showGifDialog() {
+        val activity = context as AppCompatActivity
+        val fragmentManager = activity.supportFragmentManager
+        val giphyKey = context.getString(R.string.giphy_api)
+        Giphy.configure(context, context.getString(R.string.giphy_api), true)
+        val settings = GPHSettings(
+            theme = GPHTheme.Automatic,
+            mediaTypeConfig = arrayOf(GPHContentType.gif),
+            stickerColumnCount = 2,
+            selectedContentType = GPHContentType.gif
+        )
+        GiphyDialogFragment.newInstance(settings, giphyKey)
+            .apply {
+                gifSelectionListener = object : GiphyDialogFragment.GifSelectionListener {
+                    override fun didSearchTerm(term: String) {}
+
+                    override fun onDismissed(selectedContentType: GPHContentType) {}
+
+                    override fun onGifSelected(
+                        media: Media,
+                        searchTerm: String?,
+                        selectedContentType: GPHContentType
+                    ) {
+                        media.images.downsizedMedium?.gifUrl?.let { url ->
+                            viewModel.updateStyleBackground(url)
+                            gifBitmap = null
+                        }
+                    }
+
+                }
+            }
+            .show(fragmentManager, GiphyDialogFragment::class.java.simpleName)
+    }
 
     @Composable
     fun getOptionsView() {
@@ -128,7 +188,14 @@ fun NewStyleScreen(navController: NavController) {
             }
 
             FormOptions.STYLE -> {
-                Text("Configurações do estilo")
+                StyleOptions(
+                    animationProperties = style?.animationProperties,
+                    styleProperties = style?.styleProperties,
+                    {
+                        viewModel.updateAnimationProperties(it)
+                    }) {
+                    viewModel.updateStyleProperties(it)
+                }
             }
         }
     }
@@ -169,7 +236,7 @@ fun NewStyleScreen(navController: NavController) {
             }
         }
 
-        Box(
+        Column(
             modifier = Modifier
                 .constrainAs(card) {
                     top.linkTo(topBar.bottom)
@@ -179,45 +246,73 @@ fun NewStyleScreen(navController: NavController) {
                     height = Dimension.fillToConstraints
                 }
                 .padding(16.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .borderForWindow(style?.styleProperties?.customWindow)
+                .animateContentSize(tween(1000, easing = LinearEasing))
         ) {
-            GlideImage(
-                imageModel = { NEW_STYLE_BACKGROUND },
-                glideRequestType = GlideRequestType.GIF,
-                onImageStateChanged = {
-                    if (it is GlideImageState.Success && gifBitmap == null) {
-                        gifBitmap = it.imageBitmap
-                    }
-                },
+            style?.styleProperties?.customWindow?.getWindowView(modifier = Modifier.fillMaxWidth())
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(defaultRadius))
-                    .border(
-                        brush = gradientAnimation(brush),
-                        width = 2.dp,
-                        shape = RoundedCornerShape(defaultRadius)
-                    )
-            )
-
-            Text(
-                text = "Motiv",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    color = style?.textColor.buildTextColor(),
-                    shadow = style.buildStyleShadow(),
-                    textAlign = style?.textProperties?.textAlignment?.getTextAlign()
-                        ?: TextAlign.Center,
-                    fontFamily = font,
-                    fontStyle = style?.textProperties?.fontStyle?.getFontStyle(),
-                    fontWeight = style?.textProperties?.fontStyle?.getFontWeight()
-                ),
-                modifier = Modifier
-                    .padding(16.dp)
                     .fillMaxWidth()
-                    .align(Alignment.Center)
-                    .animateContentSize(tween(1500, easing = EaseIn))
-            )
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                GlideImage(
+                    imageModel = { style?.backgroundURL },
+                    glideRequestType = GlideRequestType.GIF,
+                    onImageStateChanged = {
+                        if (it is GlideImageState.Success && gifBitmap == null) {
+                            gifBitmap = it.imageBitmap
+                        }
+                    },
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable {
+                            showGifDialog()
+                        }
+                        .clip(
+                            RoundedCornerShape(
+                                bottomEnd = defaultRadius,
+                                bottomStart = defaultRadius
+                            )
+                        )
+                        .border(
+                            brush = gradientAnimation(brush),
+                            width = 2.dp,
+                            shape = RoundedCornerShape(
+                                bottomEnd = defaultRadius,
+                                bottomStart = defaultRadius
+                            )
+                        )
+                )
+
+
+                AnimatedText(
+                    text = exampleText,
+                    animationEnabled = currentOption == FormOptions.STYLE,
+                    animation = style?.animationProperties?.animation ?: AnimationOptions.TYPE,
+                    transitionMethod = style?.animationProperties?.transition
+                        ?: AnimationTransition.LETTERS,
+                    fontFamily = font,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .animateContentSize(tween(1500, easing = EaseIn))
+                        .graphicsLayer(alpha = 0.99f),
+                    textStyle = MaterialTheme.typography.displayMedium.copy(
+                        color = style?.textColor.buildTextColor(),
+                        shadow = style.buildStyleShadow(),
+                        textAlign = style?.textProperties?.textAlignment?.getTextAlign()
+                            ?: TextAlign.Center,
+                        fontFamily = font,
+                        fontStyle = style?.textProperties?.fontStyle?.getFontStyle(),
+                        fontWeight = style?.textProperties?.fontStyle?.getFontWeight()
+                    )
+                )
+            }
         }
+
 
         LazyColumn(modifier = Modifier
             .constrainAs(actions) {
@@ -228,7 +323,6 @@ fun NewStyleScreen(navController: NavController) {
             .heightIn(min = 0.dp, max = 300.dp)
             .animateContentSize(tween(1500, easing = EaseIn))
             .fillMaxWidth()) {
-
             item {
                 getOptionsView()
             }
@@ -245,19 +339,14 @@ fun NewStyleScreen(navController: NavController) {
             items(FormOptions.values().size) {
                 val option = FormOptions.values()[it]
                 val isSelected = option == currentOption
-                val selectedColor = animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface.copy(
-                        alpha = 0.6f
-                    ),
-                    tween(1000, easing = EaseIn)
-                )
+
                 IconButton(
                     onClick = {
                         currentOption = option
                     }, modifier = Modifier
                         .padding(8.dp)
                         .background(
-                            brush = if (isSelected) gradientAnimation(managerBrushes()) else grayGradients(),
+                            brush = if (isSelected) managerGradient() else grayGradients(),
                             shape = CircleShape
                         )
                         .border(
@@ -278,6 +367,16 @@ fun NewStyleScreen(navController: NavController) {
         }
     }
 
+    LaunchedEffect(style?.animationProperties) {
+        exampleText = StyleUtils.getExampleQuote(exampleText)
+    }
+
+    LaunchedEffect(state) {
+        if (state is ViewModelBaseState.DataSavedState) {
+            navController.popBackStack()
+        }
+    }
+
 }
 
 
@@ -295,9 +394,21 @@ fun ColorsOptions(
             .fillMaxWidth()
     ) {
         Text(
+            text = "Ajustes de cor", style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
+        Text(
             text = "Cor do texto",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         )
         ColorList(
             colors = colors.filter { it != backgroundColor },
@@ -306,7 +417,7 @@ fun ColorsOptions(
         )
         Text(
             text = "Cor de fundo",
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -372,11 +483,13 @@ fun ShadowOptions(shadowStyle: ShadowStyle?, updateShadowStyle: (ShadowStyle) ->
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = "Ajustes de sombreamento",
+            text = "Ajustes de sombra",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         )
 
         Text(
@@ -426,7 +539,7 @@ fun ShadowOptions(shadowStyle: ShadowStyle?, updateShadowStyle: (ShadowStyle) ->
                     sliderY = it
                 },
                 onValueChangeFinished = {
-                    updateShadowStyle(shadowStyle?.copy(dx = sliderY) ?: ShadowStyle(dx = sliderY))
+                    updateShadowStyle(shadowStyle?.copy(dy = sliderY) ?: ShadowStyle(dy = sliderY))
                 },
                 valueRange = positionRange,
                 steps = 100,
@@ -586,6 +699,136 @@ fun TextOptions(textProperties: TextProperties?, updateTextProperties: (TextProp
 }
 
 @Composable
+fun StyleOptions(
+    animationProperties: AnimationProperties?,
+    styleProperties: StyleProperties?,
+    updateAnimationProperties: (AnimationProperties) -> Unit,
+    updateStyleProperties: (StyleProperties) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "Configurações de estilo", style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
+
+        Text(
+            text = "Animação do texto", modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        )
+
+        LazyRow() {
+            items(AnimationOptions.values().size) {
+                val animation = AnimationOptions.values()[it]
+                val isSelected = animationProperties?.animation == animation
+                IconButton(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape),
+                    onClick = {
+                        updateAnimationProperties(
+                            animationProperties?.copy(animation = animation) ?: AnimationProperties(
+                                animation = animation
+                            )
+                        )
+                    }) {
+
+                    Icon(
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        painter = painterResource(id = animation.getIconForAnimation()),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .gradientFill(
+                                if (isSelected) managerGradient() else textColorGradient()
+                            )
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = "Tipo de animação", modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        )
+
+        LazyRow() {
+            items(AnimationTransition.values().size) {
+                val transition = AnimationTransition.values()[it]
+                val isSelected = animationProperties?.transition == transition
+                Text(
+                    text = transition.title,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surface, RoundedCornerShape(
+                                defaultRadius
+                            )
+                        )
+                        .padding(8.dp)
+                        .gradientFill(if (isSelected) managerGradient() else textColorGradient())
+                        .clickable {
+                            updateAnimationProperties(
+                                animationProperties?.copy(transition = transition)
+                                    ?: AnimationProperties(
+                                        transition = transition
+                                    )
+                            )
+                        }
+                )
+            }
+        }
+
+
+        Text(
+            text = "Ajuste de bordas", modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        )
+
+        LazyRow() {
+            items(Window.values().size) {
+                val window = Window.values()[it]
+                val isSelected = styleProperties?.customWindow == window
+                IconButton(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape),
+                    onClick = {
+                        updateStyleProperties(
+                            styleProperties?.copy(customWindow = window) ?: StyleProperties(
+                                customWindow = window
+                            )
+                        )
+                    }) {
+
+                    Icon(
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        painter = painterResource(id = window.getIconForWindow()),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .gradientFill(
+                                if (isSelected) managerGradient() else textColorGradient()
+                            )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun FontCard(fontName: String, isSelected: Boolean, onSelectFont: (String) -> Unit) {
     val font = FontUtils.getFontFamily(fontName)
     Column(
@@ -631,7 +874,7 @@ enum class FormOptions(val icon: Int = com.ilustris.motiv.foundation.R.drawable.
 
 fun FontStyle.getIconForFontStyle(): Int {
     return when (this) {
-        FontStyle.NORMAL -> R.drawable.ic_text_24
+        FontStyle.REGULAR -> R.drawable.ic_text_24
         FontStyle.ITALIC -> R.drawable.ic_italic_24
         FontStyle.BOLD -> R.drawable.ic_bold_24
         FontStyle.BLACK -> R.drawable.ic_extra_bold_24
@@ -646,3 +889,29 @@ fun TextAlignment.getIconForAlignment(): Int {
         TextAlignment.JUSTIFY -> R.drawable.ic_round_format_align_justify_24
     }
 }
+
+fun AnimationOptions.getIconForAnimation(): Int {
+    return when (this) {
+        AnimationOptions.TYPE -> R.drawable.ic_text_input
+        AnimationOptions.FADE -> R.drawable.ic_shadows
+        AnimationOptions.SCALE -> R.drawable.ic_scale_24
+    }
+}
+
+fun Window.getIconForWindow(): Int {
+    return when (this) {
+        Window.CLASSIC -> R.drawable.ic_retro
+        Window.MODERN -> R.drawable.ic_modern
+    }
+}
+
+fun BlendMode.getIconForBlend(): Int {
+    return when (this) {
+        BlendMode.NORMAL -> R.drawable.ic_normal_24
+        BlendMode.DARKEN -> R.drawable.ic_darken_24
+        BlendMode.LIGHTEN -> R.drawable.ic_lighten_24
+        BlendMode.OVERLAY -> R.drawable.ic_overlay_24
+        BlendMode.SCREEN -> R.drawable.ic_screen_24
+    }
+}
+
