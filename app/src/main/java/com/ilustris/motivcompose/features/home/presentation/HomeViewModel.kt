@@ -45,7 +45,6 @@ class HomeViewModel @Inject constructor(
 
     val quotes = mutableStateListOf<QuoteDataModel>()
     var dataQuotes: List<Quote> = emptyList()
-    var indexLimit = 10
     var shareState = MutableLiveData<ShareState>(null)
 
 

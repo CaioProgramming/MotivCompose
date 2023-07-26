@@ -1,18 +1,13 @@
 package com.ilustris.motiv.foundation.ui.component
 
 import ai.atick.material.MaterialColor
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.EaseInExpo
+import androidx.compose.animation.core.EaseInElastic
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,21 +15,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Send
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -49,42 +39,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.model.AnimationOptions
+import com.ilustris.motiv.foundation.model.AnimationTransition
 import com.ilustris.motiv.foundation.model.QuoteDataModel
-import com.ilustris.motiv.foundation.model.Style
-import com.ilustris.motiv.foundation.model.TextAlignment
 import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivGradient
-import com.ilustris.motiv.foundation.utils.FontUtils
+import com.ilustris.motiv.foundation.utils.borderForWindow
 import com.ilustris.motiv.foundation.utils.buildFont
 import com.ilustris.motiv.foundation.utils.buildStyleShadow
-import com.ilustris.motiv.foundation.utils.buildTextColor
+import com.ilustris.motiv.foundation.utils.getBorder
+import com.ilustris.motiv.foundation.utils.getFontStyle
 import com.ilustris.motiv.foundation.utils.getTextAlign
+import com.ilustris.motiv.foundation.utils.getTextColor
+import com.ilustris.motiv.foundation.utils.CustomWindow
 import com.silent.ilustriscore.core.utilities.DateFormats
 import com.silent.ilustriscore.core.utilities.format
 import com.skydoves.landscapist.ImageOptions
@@ -104,12 +92,8 @@ fun QuoteCard(
 ) {
     val quote = quoteDataModel.quoteBean
     val context = LocalContext.current
-    val defaultFont = quoteDataModel.style?.buildFont(context) ?: FontFamily.Default
     var backgroundBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
-    }
-    var showInfo by remember {
-        mutableStateOf(false)
     }
 
     var palette by remember {
@@ -122,9 +106,25 @@ fun QuoteCard(
 
     val style = quoteDataModel.style
     val shadowStyle = style.buildStyleShadow()
-    val textAlign = style?.textAlignment?.getTextAlign() ?: TextAlign.Center
-    val textColor = style?.textColor.buildTextColor()
-
+    val textAlign = style.getTextAlign()
+    val textColor = style.getTextColor()
+    val defaultFont = style.buildFont(context)
+    val fontStyle = style.getFontStyle()
+    val textStyle = MaterialTheme.typography.headlineMedium.copy(
+        shadow = shadowStyle,
+        color = textColor,
+        textAlign = textAlign,
+        fontFamily = defaultFont,
+        fontStyle = fontStyle
+    )
+    val authorTextStyle = MaterialTheme.typography.labelMedium.copy(
+        shadow = shadowStyle,
+        color = textColor,
+        textAlign = textAlign,
+        fontFamily = defaultFont,
+        fontStyle = fontStyle
+    )
+    val cardBorder = style?.styleProperties?.customWindow.getBorder()
 
     LaunchedEffect(backgroundBitmap) {
         backgroundBitmap?.let {
@@ -134,7 +134,6 @@ fun QuoteCard(
 
     LaunchedEffect(Unit) {
         if (!animationEnabled) animationCompleted = true
-
     }
 
     val brush = if (animationCompleted) palette?.brushsFromPalette()
@@ -144,23 +143,18 @@ fun QuoteCard(
 
     val captureController = rememberCaptureController()
 
-    val borderAnimation by animateDpAsState(
-        targetValue = if (animationCompleted) 2.dp else 0.dp,
-        tween(1500, easing = EaseInExpo)
-    )
-
     var imageLoaded by remember {
         mutableStateOf(false)
     }
 
     val imageBlur by animateDpAsState(
         targetValue = if (imageLoaded) 0.dp else 50.dp,
-        tween(1500)
+        tween(2500, delayMillis = 500, easing = EaseInElastic), label = "blur"
     )
 
     val imageAlpha by animateFloatAsState(
         targetValue = if (imageLoaded && animationCompleted) 1f else 0f,
-        tween(1500)
+        tween(1500), label = "alpha"
     )
 
     var dropDownState by remember {
@@ -221,10 +215,7 @@ fun QuoteCard(
                             )
 
                     )
-                    Column(modifier = Modifier
-
-                        .padding(8.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
                         Text(
                             text = (quoteDataModel.user?.name) ?: "".trimEnd(),
                             maxLines = 1,
@@ -299,72 +290,76 @@ fun QuoteCard(
         Capturable(controller = captureController, onCaptured = { bitmap, error ->
             bitmap?.let {
                 quoteActions?.onShare(quoteDataModel, it.asAndroidBitmap())
+
             }
         }) {
-            Box {
-
-                GlideImage(
-                    imageModel = { style?.backgroundURL },
-                    glideRequestType = if (!loadAsGif) GlideRequestType.BITMAP else GlideRequestType.GIF,
-                    modifier = Modifier
-                        .border(
-                            width = borderAnimation,
-                            brush = brush,
-                            shape = RoundedCornerShape(defaultRadius)
-                        )
-                        .clip(RoundedCornerShape(defaultRadius))
-                        .matchParentSize()
-                        .alpha(imageAlpha)
-                        .blur(imageBlur),
-                    onImageStateChanged = {
-                        imageLoaded = it is GlideImageState.Success
-                        if (it is GlideImageState.Success) {
-                            backgroundBitmap = it.imageBitmap
-                        }
-                    },
-                )
-
-                Column(
-                    modifier = Modifier
+            Column(
+                verticalArrangement = Arrangement.Center, modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+                    .borderForWindow(style?.styleProperties?.customWindow, brush)
+                    .animateContentSize(tween(1000, easing = LinearEasing))
+            ) {
+                style?.styleProperties?.customWindow?.CustomWindow(
+                    Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(Alignment.CenterVertically)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AnimatedText(
-                        text = quote.quote,
-                        animationEnabled = animationEnabled,
-                        fontFamily = defaultFont,
-                        textStyle = MaterialTheme.typography.headlineLarge.copy(
-                            shadow = shadowStyle,
-                            color = textColor,
-                            textAlign = textAlign,
-                            fontFamily = defaultFont
-                        ),
+                        .graphicsLayer(alpha = imageAlpha),
+                    brush = brush,
+                    user = quoteDataModel.user
+                )
+                Box {
+
+                    GlideImage(
+                        imageModel = { style?.backgroundURL },
+                        glideRequestType = if (!loadAsGif) GlideRequestType.BITMAP else GlideRequestType.GIF,
                         modifier = Modifier
-                            .padding(8.dp)
+                            .clip(cardBorder)
+                            .matchParentSize()
+                            .alpha(imageAlpha)
+                            .blur(imageBlur),
+                        onImageStateChanged = {
+                            imageLoaded = it is GlideImageState.Success
+                            if (it is GlideImageState.Success) {
+                                backgroundBitmap = it.imageBitmap
+                            }
+                        },
+                    )
+
+                    Column(
+                        modifier = Modifier
                             .fillMaxWidth()
+                            .wrapContentHeight(Alignment.CenterVertically)
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        animationCompleted = true
+                        AnimatedText(
+                            text = quote.quote,
+                            animationEnabled = animationEnabled,
+                            animation = style?.animationProperties?.animation
+                                ?: AnimationOptions.TYPE,
+                            transitionMethod = style?.animationProperties?.transition
+                                ?: AnimationTransition.LETTERS,
+                            textStyle = textStyle,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth()
+                        ) {
+                            animationCompleted = true
+                        }
+
+                        Text(
+                            text = quote.author, modifier = Modifier
+                                .padding(16.dp)
+                                .graphicsLayer(alpha = imageAlpha),
+                            textAlign = TextAlign.Center,
+                            style = authorTextStyle,
+                            fontStyle = FontStyle.Italic,
+                            softWrap = true
+                        )
                     }
 
-                    Text(
-                        text = quote.author, modifier = Modifier
-                            .padding(16.dp)
-                            .graphicsLayer(alpha = imageAlpha),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            shadow = shadowStyle,
-                            color = textColor,
-                            textAlign = textAlign,
-                            fontFamily = defaultFont
-                        ),
-                        fontStyle = FontStyle.Italic,
-                        softWrap = true
-                    )
                 }
-
             }
         }
 
@@ -408,5 +403,7 @@ fun QuoteCard(
 
 
 }
+
+
 
 

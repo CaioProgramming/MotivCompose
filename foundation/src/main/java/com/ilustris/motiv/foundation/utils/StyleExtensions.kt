@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.R
 import com.ilustris.motiv.foundation.model.BlendMode
+import com.ilustris.motiv.foundation.model.DEFAULT_FONT_FAMILY
 import com.ilustris.motiv.foundation.model.FontStyle
 import com.ilustris.motiv.foundation.model.Style
 import com.ilustris.motiv.foundation.model.TextAlignment
@@ -51,21 +52,53 @@ import com.ilustris.motiv.foundation.model.Window
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 
-fun Style?.buildStyleShadow() = if (this != null && shadowStyle != null)
-    shadowStyle!!.buildShadow() else {
+fun Style?.buildStyleShadow() = if (this != null && shadowStyle != null) {
+    shadowStyle!!.buildShadow()
+} else {
     Shadow()
 }
 
 @Composable
-fun String?.buildTextColor() = if (this == null) MaterialTheme.colorScheme.onBackground else Color(
-    android.graphics.Color.parseColor(this)
-)
-
-
-fun Style.buildFont(context: Context): FontFamily {
-    if (textProperties != null) {
-        return FontUtils.getFontFamily(textProperties!!.fontFamily)
-    }
-    return FontUtils.getFont(context, font)
+fun Style?.getTextColor() = if (this == null) {
+    MaterialTheme.colorScheme.onBackground
+} else {
+    textProperties?.let { textColor.buildTextColor() } ?: textColor.buildTextColor()
 }
+
+fun Style?.getTextAlign() = if (this == null) {
+    TextAlign.Center
+} else {
+    textProperties?.let {
+        it.textAlignment.getTextAlign()
+    } ?: textAlignment.getTextAlign()
+}
+
+@Composable
+fun String?.buildTextColor() = if (this == null) {
+    MaterialTheme.colorScheme.onBackground
+} else {
+    Color(android.graphics.Color.parseColor(this))
+}
+
+fun Style?.buildFont(context: Context): FontFamily {
+    return if (this == null) FontUtils.getFontFamily(DEFAULT_FONT_FAMILY) else {
+        if (textProperties != null) {
+            FontUtils.getFontFamily(textProperties!!.fontFamily)
+        } else {
+            FontUtils.getFont(
+                context,
+                font
+            )
+        }
+    }
+}
+
+fun Style?.getFontStyle() = if (this == null) androidx.compose.ui.text.font.FontStyle.Normal else {
+    textProperties?.let { it.fontStyle.getFontStyle() } ?: fontStyle.getFontStyle()
+}
+
+fun Style?.getFontWeight() = if (this == null) FontWeight.Normal else {
+    textProperties?.let { it.fontStyle.getFontWeight() } ?: fontStyle.getFontWeight()
+}
+
 

@@ -99,7 +99,9 @@ fun RadioSheet(
         ),
         exit = slideOutVertically()
     ) {
-        val radios = (state as ViewModelBaseState.DataListRetrievedState).dataList as List<Radio>
+        val radios = if (state is ViewModelBaseState.DataListRetrievedState) {
+            state.dataList as List<Radio>
+        } else emptyList()
 
         var visualizerBitmap by remember {
             mutableStateOf<Bitmap?>(null)

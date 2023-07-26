@@ -20,10 +20,10 @@ data class Style(
     var fontStyle: FontStyle = FontStyle.REGULAR,
     var textColor: String = DEFAULT_TEXT_COLOR,
     var backgroundURL: String = DEFAULT_BACKGROUND_URL,
-    var animationProperties: AnimationProperties? = AnimationProperties(),
-    var textProperties: TextProperties? = TextProperties(),
-    var shadowStyle: ShadowStyle? = ShadowStyle(),
-    var styleProperties: StyleProperties? = StyleProperties(),
+    var animationProperties: AnimationProperties? = null,
+    var textProperties: TextProperties? = null,
+    var shadowStyle: ShadowStyle? = null,
+    var styleProperties: StyleProperties? = null,
 ) : BaseBean(id)
 
 enum class TextAlignment {
@@ -80,3 +80,4 @@ enum class AnimationTransition(val title: String) {
 enum class Window {
     CLASSIC, MODERN
 }
+

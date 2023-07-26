@@ -15,7 +15,7 @@ import com.ilustris.motiv.foundation.model.AnimationOptions
 
 fun AnimationOptions.getEnterAnimation(): EnterTransition {
     return when (this) {
-        AnimationOptions.TYPE -> fadeIn(tween(100))
+        AnimationOptions.TYPE -> fadeIn(tween(50))
         AnimationOptions.FADE -> fadeIn(tween(1500))
         AnimationOptions.SCALE -> scaleIn(tween(1000))
     }
@@ -23,9 +23,9 @@ fun AnimationOptions.getEnterAnimation(): EnterTransition {
 
 fun AnimationOptions.getExitAnimation(): ExitTransition {
     return when (this) {
-        AnimationOptions.TYPE -> fadeOut(tween(50))
-        AnimationOptions.FADE -> fadeOut(tween(50))
-        AnimationOptions.SCALE -> fadeOut(tween(50))
+        AnimationOptions.TYPE -> fadeOut(tween(5))
+        AnimationOptions.FADE -> fadeOut(tween(5))
+        AnimationOptions.SCALE -> fadeOut(tween(5))
     }
 }
 

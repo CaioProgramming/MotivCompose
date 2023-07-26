@@ -1,9 +1,12 @@
 package com.ilustris.motiv.foundation.utils
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.ilustris.motiv.foundation.model.FontStyle
 import com.ilustris.motiv.foundation.model.TextAlignment
+import com.ilustris.motiv.foundation.model.TextProperties
 
 fun TextAlignment?.getTextAlign(): TextAlign {
     if (this == null) return TextAlign.Center

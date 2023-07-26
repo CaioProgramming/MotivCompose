@@ -2,6 +2,7 @@ package com.ilustris.manager.feature.home.presentation
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
@@ -26,6 +27,7 @@ class ManagerViewModel @Inject constructor(
 ) : BaseViewModel<Quote>(application) {
 
     val quotes = mutableStateListOf<QuoteDataModel>()
+    val quoteCount = MutableLiveData<Int>(0)
     private var dataQuotes: List<Quote> = emptyList()
 
     fun deleteQuote(quoteDataModel: QuoteDataModel) {
@@ -51,18 +53,6 @@ class ManagerViewModel @Inject constructor(
         }
     }
 
-    override fun getAllData() {
-        viewModelScope.launch(Dispatchers.IO) {
-            updateViewState(ViewModelBaseState.LoadingState)
-            quotes.clear()
-            val result = service.getAllData(orderBy = "data")
-            if (result.isSuccess) {
-                val list = result.success.data as List<Quote>
-                dataQuotes = list
-                loadQuoteListExtras(list)
-            } else sendErrorState(result.error.errorException)
-        }
-    }
 
     private suspend fun loadQuoteListExtras(quotesDataList: List<Quote>) {
         try {
@@ -81,10 +71,12 @@ class ManagerViewModel @Inject constructor(
     }
 
     fun getQuotes() {
+        viewModelState.postValue(ViewModelBaseState.LoadingState)
         viewModelScope.launch(Dispatchers.IO) {
-            service.getAllData(orderBy = "reports", ordering = Ordering.DESCENDING).run {
+            service.getAllData(orderBy = "data", ordering = Ordering.DESCENDING).run {
                 if (isSuccess) {
-                    val list = (success.data as List<Quote>)
+                    val list = (success.data as List<Quote>).sortedBy { it.reports.size }
+                    quoteCount.postValue(list.size)
                     dataQuotes = list
                     loadQuoteListExtras(list)
                 } else sendErrorState(error.errorException)

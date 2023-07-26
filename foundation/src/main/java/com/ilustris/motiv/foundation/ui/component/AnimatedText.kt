@@ -38,7 +38,6 @@ import kotlin.random.Random
 @Composable
 fun AnimatedText(
     text: String,
-    fontFamily: FontFamily,
     modifier: Modifier,
     textStyle: TextStyle,
     animationEnabled: Boolean = true,
@@ -109,7 +108,8 @@ fun AnimatedText(
 
     AnimatedContent(
         targetState = textPart,
-        transitionSpec = { EnterTransition.None with ExitTransition.None }) { targetText ->
+        transitionSpec = { EnterTransition.None with ExitTransition.None }, label = "AnimatedText"
+    ) { targetText ->
         Text(
             text = targetText,
             style = textStyle,
@@ -117,7 +117,6 @@ fun AnimatedText(
                 enter = animation.getEnterAnimation(),
                 exit = animation.getExitAnimation()
             ),
-            fontFamily = fontFamily,
             onTextLayout = { textLayoutResult ->
                 if (textLayoutResult.didOverflowHeight && isAnimationComplete()) {
                     style = textStyle.copy(fontSize = textStyle.fontSize * 0.7)

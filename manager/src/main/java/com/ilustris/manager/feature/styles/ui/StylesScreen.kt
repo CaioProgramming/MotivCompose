@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -193,7 +194,9 @@ fun StylesScreen(navController: NavController) {
                     )
                     selectedStyle?.let {
                         StyleCard(style = it, onSelectStyle = {})
-                    }
+                    } ?: MotivLoader(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp))
                 }
             })
     }

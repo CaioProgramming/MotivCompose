@@ -269,7 +269,7 @@ fun gradientAnimation(gradientColors: List<Color> = motivBrushes()): Brush {
         animationSpec = infiniteRepeatable(
             tween(10000, easing = EaseInCubic),
             repeatMode = RepeatMode.Reverse,
-        )
+        ), label = "gradientAnimation"
     )
     return Brush.linearGradient(
         gradientColors,

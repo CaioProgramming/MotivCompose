@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -77,7 +76,6 @@ import com.ilustris.motiv.foundation.model.AnimationOptions
 import com.ilustris.motiv.foundation.model.AnimationProperties
 import com.ilustris.motiv.foundation.model.AnimationTransition
 import com.ilustris.motiv.foundation.model.BlendMode
-import com.ilustris.motiv.foundation.model.DEFAULT_FONT_FAMILY
 import com.ilustris.motiv.foundation.model.FontStyle
 import com.ilustris.motiv.foundation.model.ShadowStyle
 import com.ilustris.motiv.foundation.model.StyleProperties
@@ -85,24 +83,23 @@ import com.ilustris.motiv.foundation.model.TextAlignment
 import com.ilustris.motiv.foundation.model.TextProperties
 import com.ilustris.motiv.foundation.model.Window
 import com.ilustris.motiv.foundation.ui.component.AnimatedText
-import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette
+import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
-import com.ilustris.motiv.foundation.ui.theme.gradientAnimation
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
-import com.ilustris.motiv.foundation.ui.theme.managerBrushes
 import com.ilustris.motiv.foundation.ui.theme.managerGradient
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.ui.theme.textColorGradient
 import com.ilustris.motiv.foundation.utils.ColorUtils
 import com.ilustris.motiv.foundation.utils.FontUtils
 import com.ilustris.motiv.foundation.utils.borderForWindow
+import com.ilustris.motiv.foundation.utils.buildFont
 import com.ilustris.motiv.foundation.utils.buildStyleShadow
-import com.ilustris.motiv.foundation.utils.buildTextColor
 import com.ilustris.motiv.foundation.utils.getFontStyle
 import com.ilustris.motiv.foundation.utils.getFontWeight
 import com.ilustris.motiv.foundation.utils.getTextAlign
-import com.ilustris.motiv.foundation.utils.getWindowView
+import com.ilustris.motiv.foundation.utils.getTextColor
+import com.ilustris.motiv.foundation.utils.CustomWindow
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
@@ -114,7 +111,6 @@ fun NewStyleScreen(navController: NavController) {
     val state = viewModel.viewModelState.observeAsState().value
     val style = viewModel.newStyle.observeAsState().value
 
-    val font = FontUtils.getFontFamily(style?.textProperties?.fontFamily ?: DEFAULT_FONT_FAMILY)
     var gifBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
@@ -123,11 +119,19 @@ fun NewStyleScreen(navController: NavController) {
     }
 
     val brush =
-        gifBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.colorsFromPalette() ?: managerBrushes()
+        gifBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.brushsFromPalette() ?: managerGradient()
     val context = LocalContext.current
     var exampleText by remember {
         mutableStateOf(StyleUtils.getExampleQuote())
     }
+    var textyStyle = MaterialTheme.typography.headlineLarge.copy(
+        color = style.getTextColor(),
+        shadow = style.buildStyleShadow(),
+        textAlign = style.getTextAlign(),
+        fontFamily = style.buildFont(context),
+        fontStyle = style.getFontStyle(),
+        fontWeight = style.getFontWeight()
+    )
 
     fun showGifDialog() {
         val activity = context as AppCompatActivity
@@ -247,10 +251,13 @@ fun NewStyleScreen(navController: NavController) {
                 }
                 .padding(16.dp)
                 .fillMaxWidth()
-                .borderForWindow(style?.styleProperties?.customWindow)
+                .borderForWindow(style?.styleProperties?.customWindow, brush = brush)
                 .animateContentSize(tween(1000, easing = LinearEasing))
         ) {
-            style?.styleProperties?.customWindow?.getWindowView(modifier = Modifier.fillMaxWidth())
+            style?.styleProperties?.customWindow?.CustomWindow(
+                modifier = Modifier.fillMaxWidth(),
+                brush = brush
+            )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -277,7 +284,7 @@ fun NewStyleScreen(navController: NavController) {
                             )
                         )
                         .border(
-                            brush = gradientAnimation(brush),
+                            brush = brush,
                             width = 2.dp,
                             shape = RoundedCornerShape(
                                 bottomEnd = defaultRadius,
@@ -293,22 +300,13 @@ fun NewStyleScreen(navController: NavController) {
                     animation = style?.animationProperties?.animation ?: AnimationOptions.TYPE,
                     transitionMethod = style?.animationProperties?.transition
                         ?: AnimationTransition.LETTERS,
-                    fontFamily = font,
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth()
                         .align(Alignment.Center)
                         .animateContentSize(tween(1500, easing = EaseIn))
                         .graphicsLayer(alpha = 0.99f),
-                    textStyle = MaterialTheme.typography.displayMedium.copy(
-                        color = style?.textColor.buildTextColor(),
-                        shadow = style.buildStyleShadow(),
-                        textAlign = style?.textProperties?.textAlignment?.getTextAlign()
-                            ?: TextAlign.Center,
-                        fontFamily = font,
-                        fontStyle = style?.textProperties?.fontStyle?.getFontStyle(),
-                        fontWeight = style?.textProperties?.fontStyle?.getFontWeight()
-                    )
+                    textStyle = textyStyle
                 )
             }
         }

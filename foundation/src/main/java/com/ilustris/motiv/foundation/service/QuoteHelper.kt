@@ -6,10 +6,16 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.ilustris.motiv.foundation.model.AnimationProperties
 import com.ilustris.motiv.foundation.model.Quote
 import com.ilustris.motiv.foundation.model.QuoteDataModel
+import com.ilustris.motiv.foundation.model.ShadowStyle
 import com.ilustris.motiv.foundation.model.Style
+import com.ilustris.motiv.foundation.model.StyleProperties
+import com.ilustris.motiv.foundation.model.TextAlignment
+import com.ilustris.motiv.foundation.model.TextProperties
 import com.ilustris.motiv.foundation.model.User
+import com.ilustris.motiv.foundation.model.Window
 import com.ilustris.motiv.foundation.model.quoteList
 import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ServiceResult
@@ -21,6 +27,30 @@ class QuoteHelper @Inject constructor(
     private val userService: UserService,
     private val styleService: StyleService
 ) {
+
+    private val fallbackStyle = Style(
+        backgroundURL = "https://media.giphy.com/media/5vgHoMiknf5iJl8FH1/giphy.gif",
+        animationProperties = AnimationProperties(
+            animation = com.ilustris.motiv.foundation.model.AnimationOptions.TYPE,
+            transition = com.ilustris.motiv.foundation.model.AnimationTransition.LETTERS
+        ),
+        shadowStyle = ShadowStyle(
+            radius = 0f,
+            dx = 0f,
+            dy = 0f,
+            shadowColor = "#000000",
+        ),
+        textProperties = TextProperties(
+            textColor = "#ffffff",
+            textAlignment = TextAlignment.CENTER,
+            fontStyle = com.ilustris.motiv.foundation.model.FontStyle.REGULAR,
+            fontFamily = "Roboto"
+        ),
+        styleProperties = StyleProperties(
+            backgroundColor = "#000000",
+            customWindow = Window.MODERN
+        )
+    )
 
     suspend fun mapQuoteToQuoteDataModel(
         quote: Quote,
@@ -38,7 +68,7 @@ class QuoteHelper @Inject constructor(
                 styleService.getSingleData(quote.style).success.data as Style
             } catch (e: Exception) {
                 e.printStackTrace()
-                null
+                fallbackStyle
             }
 
             ServiceResult.Success(

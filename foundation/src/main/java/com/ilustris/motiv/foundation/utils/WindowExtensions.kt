@@ -26,23 +26,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.R
+import com.ilustris.motiv.foundation.model.User
 import com.ilustris.motiv.foundation.model.Window
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
+import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
+import com.ilustris.motiv.foundation.ui.theme.motivGradient
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun Window.getWindowView(modifier: Modifier, showTitle: Boolean = true) {
-    val arrangement = when (this) {
-        Window.CLASSIC -> Arrangement.SpaceBetween
-        Window.MODERN -> Arrangement.Start
-    }
+fun Window.CustomWindow(
+    modifier: Modifier,
+    brush: Brush,
+    user: User? = null
+) {
+    val arrangement = Arrangement.SpaceBetween
     Column(
         modifier
             .fillMaxWidth()
+            .background(brush, RoundedCornerShape(topEnd = defaultRadius, topStart = defaultRadius))
             .animateContentSize(tween(1000, easing = EaseIn))
     ) {
         Row(
@@ -52,32 +64,95 @@ fun Window.getWindowView(modifier: Modifier, showTitle: Boolean = true) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = arrangement
         ) {
-            when (this@getWindowView) {
+            when (this@CustomWindow) {
                 Window.MODERN -> {
-                    motivBrushes().forEach {
-                        Box(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .size(12.dp)
-                                .background(it, CircleShape)
-                                .border(
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                    width = 1.dp,
-                                    shape = CircleShape
-                                )
-                        )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier.gradientFill(brush)
+                    ) {
+                        motivBrushes().forEach {
+                            Box(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(12.dp)
+                                    .background(it, CircleShape)
+                                    .border(
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                        width = 1.dp,
+                                        shape = CircleShape
+                                    )
+                            )
+                        }
+                    }
+                    val fontFamily = FontUtils.getFontFamily("Lato")
+
+                    val title = "${user?.name ?: stringResource(id = R.string.app_name)}.app"
+                    Text(
+                        text = title,
+                        modifier = Modifier
+                            .padding()
+                            .graphicsLayer(alpha = 0.6f),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Light,
+                        fontFamily = fontFamily,
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier.graphicsLayer(alpha = 0f)
+                    ) {
+                        motivBrushes().forEach {
+                            Box(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(12.dp)
+                                    .background(it, CircleShape)
+                                    .border(
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                        width = 1.dp,
+                                        shape = CircleShape
+                                    )
+                            )
+                        }
                     }
                 }
 
                 Window.CLASSIC -> {
                     val fontFamily = FontUtils.getFontFamily("VT323")
+                    val title = "${user?.name ?: stringResource(id = R.string.app_name)}.exe"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        user?.let {
+                            GlideImage(
+                                imageModel = {
+                                    it.picurl
+                                },
+                                imageOptions = ImageOptions(
+                                    contentScale = ContentScale.Crop,
+                                    alignment = Alignment.Center,
+                                ),
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .border(
+                                        1.dp,
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                        CircleShape
+                                    )
 
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                        modifier = Modifier.padding(start = 8.dp),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = fontFamily,
-                    )
+                            )
+                        }
+                        Text(
+                            text = title,
+                            modifier = Modifier.padding(start = 8.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = fontFamily,
+                        )
+                    }
+
 
                     Icon(
                         Icons.Rounded.Close,
@@ -89,8 +164,6 @@ fun Window.getWindowView(modifier: Modifier, showTitle: Boolean = true) {
             }
 
         }
-
-        this@getWindowView.dividerForWindow()
     }
 
 }
@@ -100,7 +173,10 @@ fun Window.getWindowView(modifier: Modifier, showTitle: Boolean = true) {
 fun PreviewWindow() {
     Column() {
         Window.values().forEach {
-            it.getWindowView(modifier = Modifier.fillMaxWidth())
+            it.CustomWindow(
+                modifier = Modifier.fillMaxWidth(),
+                motivGradient(),
+            )
         }
     }
 
@@ -122,29 +198,31 @@ fun Window.dividerForWindow() {
     Divider(modifier = Modifier.fillMaxWidth(), color = color.value, thickness = borderThick.value)
 }
 
-fun Modifier.borderForWindow(window: Window?): Modifier = composed {
+fun Modifier.borderForWindow(window: Window?, brush: Brush): Modifier = composed {
 
     val shapeForWindows = RoundedCornerShape(defaultRadius)
 
     when (window) {
-        Window.CLASSIC -> background(
-            MaterialTheme.colorScheme.background, RoundedCornerShape(
-                defaultRadius
-            )
-        ).border(
+        Window.CLASSIC -> background(MaterialTheme.colorScheme.background, shapeForWindows).border(
             width = 2.dp,
-            color = MaterialTheme.colorScheme.onBackground,
+            brush = brush,
             shape = shapeForWindows
         )
 
         Window.MODERN, null -> background(
-            MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(
-                defaultRadius
-            )
-        ).border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface,
             shape = shapeForWindows
         )
+            .border(
+                width = 1.dp,
+                brush = brush,
+                shape = shapeForWindows
+            )
     }
 }
+
+fun Window?.getBorder(): RoundedCornerShape =
+    if (this == null) RoundedCornerShape(defaultRadius) else RoundedCornerShape(
+        bottomEnd = defaultRadius,
+        bottomStart = defaultRadius
+    )

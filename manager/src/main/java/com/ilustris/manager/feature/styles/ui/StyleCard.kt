@@ -1,5 +1,7 @@
 package com.ilustris.manager.feature.styles.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,11 +28,13 @@ import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.grayGradients
 import com.ilustris.motiv.foundation.ui.theme.paletteFromBitMap
 import com.ilustris.motiv.foundation.utils.FontUtils
+import com.ilustris.motiv.foundation.utils.buildFont
 import com.ilustris.motiv.foundation.utils.buildStyleShadow
 import com.ilustris.motiv.foundation.utils.buildTextColor
 import com.ilustris.motiv.foundation.utils.getFontStyle
 import com.ilustris.motiv.foundation.utils.getFontWeight
 import com.ilustris.motiv.foundation.utils.getTextAlign
+import com.ilustris.motiv.foundation.utils.getTextColor
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 import com.skydoves.landscapist.glide.GlideRequestType
@@ -38,18 +42,21 @@ import com.skydoves.landscapist.glide.GlideRequestType
 @Composable
 fun StyleCard(style: Style, onSelectStyle: (Style) -> Unit) {
     val context = LocalContext.current
-    val font = FontUtils.getFont(context, style.font)
+    val font = style.buildFont(context)
     val shadowStyle = style.buildStyleShadow()
-    val textAlign = style.textAlignment.getTextAlign()
-    val textColor = style.textColor.buildTextColor()
-    val fontStyle = style.fontStyle.getFontStyle()
-    val fontWeight = style.fontStyle.getFontWeight()
+    val textAlign = style.getTextAlign()
+    val textColor = style.getTextColor()
+    val fontStyle = style.getFontStyle()
+    val fontWeight = style.getFontWeight()
+
     var styleBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
 
     val brush =
         styleBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.brushsFromPalette() ?: grayGradients()
+
+    val colorAnimation = animateColorAsState(targetValue = textColor, tween(1000))
 
     Box {
         GlideImage(
@@ -77,7 +84,7 @@ fun StyleCard(style: Style, onSelectStyle: (Style) -> Unit) {
             text = "Motiv",
             style = MaterialTheme.typography.headlineMedium.copy(
                 shadow = shadowStyle,
-                color = textColor,
+                color = colorAnimation.value,
                 textAlign = textAlign,
                 fontFamily = font,
                 fontWeight = fontWeight,
