@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delete_icon_message">Você deseja excluir este icone? Esta ação não pode ser desfeita. Usuários que já utilizam este icone não poderam visualiza-lo.</string>
+    <string name="save_cover_message">Você deseja salvar este gif para usuários utilizarem, como capa de seus perfis?</string>
+    <string name="delete_cover_message">Você deseja excluir essa capa? Usuários que já utilizam esta capa não poderam visualiza-la.</string>
+    <string name="delete_style_message">Tem certeza que deseja excluir esse estilo? Publicações que o utilizam seram afetadas.</string>
+</resources>

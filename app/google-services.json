@@ -1,0 +1,187 @@
+{
+  "project_info": {
+    "project_number": "307669618733",
+    "firebase_url": "https://motiv-d16d1.firebaseio.com",
+    "project_id": "motiv-d16d1",
+    "storage_bucket": "motiv-d16d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307669618733:android:393e6c507741b16c",
+        "android_client_info": {
+          "package_name": "com.creat.motiv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307669618733-dgnrf5mdt7e5f2h96d58ar72meh82rbm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "e1da03da973add9196256eb4025b40261dad3c52"
+          }
+        },
+        {
+          "client_id": "307669618733-el9t086kpmn485ld33qk3hprql6t6vit.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "bee11ea238332ce1bcb62a999bbb2ea360d3eae9"
+          }
+        },
+        {
+          "client_id": "307669618733-fh2e1gfes9nfgad797jtq66kmguml2gf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "eb0d9afcb3a04748160227aae2b8c969db272ef2"
+          }
+        },
+        {
+          "client_id": "307669618733-hbaou11v33jb67a09mqnamoqjijgielj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "e52ea948ad8eb3370c325822e60b1550052192ac"
+          }
+        },
+        {
+          "client_id": "307669618733-hcu5qi111r5v6dbk5n33e3acedlt4c3a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "7079f2e50adb51d3144acf654427b19b72193d6c"
+          }
+        },
+        {
+          "client_id": "307669618733-j0uqpac28laev9sshh2b87enoqqeatqu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "82b01e65871d99e098df0f55358f193d6217a352"
+          }
+        },
+        {
+          "client_id": "307669618733-j81oeaj5139t6ri6fim5gb465rsv2e3a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "27f9c3e4d6329afb5ec5c475f97e4c1a6fe0f664"
+          }
+        },
+        {
+          "client_id": "307669618733-oogrcju59sjqv0rcc39oh17jsg4i4a4d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creat.motiv",
+            "certificate_hash": "6006b2462c797cf252fb2ddb096c0bdcc527f260"
+          }
+        },
+        {
+          "client_id": "307669618733-jf62067o9kr479420csisvttrhhukauu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4P0aebcPu8w75EWl4wKoIazdYUIwU9-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307669618733-jf62067o9kr479420csisvttrhhukauu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-4979584089010597~4181793255"
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307669618733:android:b9bc56df2b5473f8a5a8a4",
+        "android_client_info": {
+          "package_name": "com.ilustris.motiv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307669618733-j7bek5f5q80oljln4oqck3daqheirat5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ilustris.motiv",
+            "certificate_hash": "27f9c3e4d6329afb5ec5c475f97e4c1a6fe0f664"
+          }
+        },
+        {
+          "client_id": "307669618733-u9emo6edqtokingg4ls2o1f7rvbolbm1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ilustris.motiv",
+            "certificate_hash": "e52ea948ad8eb3370c325822e60b1550052192ac"
+          }
+        },
+        {
+          "client_id": "307669618733-jf62067o9kr479420csisvttrhhukauu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4P0aebcPu8w75EWl4wKoIazdYUIwU9-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307669618733-jf62067o9kr479420csisvttrhhukauu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307669618733:android:64b4902b1b5e6cf7a5a8a4",
+        "android_client_info": {
+          "package_name": "com.ilustris.motivcompose"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307669618733-2ov4d8ifsspu13usco05j7ef0he0nm50.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ilustris.motivcompose",
+            "certificate_hash": "e52ea948ad8eb3370c325822e60b1550052192ac"
+          }
+        },
+        {
+          "client_id": "307669618733-jf62067o9kr479420csisvttrhhukauu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4P0aebcPu8w75EWl4wKoIazdYUIwU9-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307669618733-jf62067o9kr479420csisvttrhhukauu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
