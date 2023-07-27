@@ -361,6 +361,9 @@ fun RadiosScreen() {
                                 url = musicFile.toString()
                             )
                         )
+                        saveNewRadio.value = false
+                        musicFile = null
+                        selectedGif = ""
                     }
 
                 }, enabled = musicFile != null) {
