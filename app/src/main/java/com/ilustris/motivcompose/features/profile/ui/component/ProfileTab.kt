@@ -22,12 +22,17 @@ import androidx.constraintlayout.compose.Dimension
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 
 @Composable
-fun ProfileTab(buttonText: String, isSelected: Boolean, onclick: () -> Unit) {
+fun ProfileTab(
+    buttonText: String,
+    isSelected: Boolean,
+    rowColor: Color = MaterialTheme.colorScheme.primary,
+    onclick: () -> Unit
+) {
     ConstraintLayout {
         val (button, divider) = createRefs()
         val scaleAnimation = animateFloatAsState(targetValue = if (isSelected) 1f else 0.5f)
         val colorAnimation =
-            animateColorAsState(targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+            animateColorAsState(targetValue = if (isSelected) rowColor else Color.Transparent)
         Text(
             text = buttonText,
             style = MaterialTheme.typography.labelLarge,

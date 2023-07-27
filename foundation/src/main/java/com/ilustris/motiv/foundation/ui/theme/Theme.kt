@@ -288,6 +288,15 @@ fun Modifier.gradientFill(brush: Brush) =
             }
         }
 
+fun Modifier.colorFill(color: Color) =
+    graphicsLayer(alpha = 0.90f)
+        .drawWithCache {
+            onDrawWithContent {
+                drawContent()
+                drawRect(color, blendMode = BlendMode.Darken)
+            }
+        }
+
 fun Modifier.gradientOverlay(brush: Brush) =
     graphicsLayer()
         .drawWithCache {

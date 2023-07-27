@@ -170,20 +170,19 @@ class MainActivity : AppCompatActivity() {
                         sheetContent = {
                             RadioSheet(
                                 playingRadio = playingRadio,
-                                enabled = swipeEnabled,
                                 modifier = Modifier.fillMaxWidth(),
                                 onSelectRadio = ::playRadio,
                             )
                         },
                         sheetShape = RoundedCornerShape(defaultRadius),
                         sheetGesturesEnabled = true,
-                        sheetPeekHeight = 16.dp,
+                        sheetPeekHeight = 24.dp,
                         sheetBackgroundColor = MaterialTheme.colorScheme.background
                     ) {
                         Scaffold(
                             modifier = Modifier
                                 .background(MaterialTheme.colorScheme.background)
-                                .padding(bottom = 16.dp),
+                                .padding(bottom = 24.dp),
                             bottomBar = {
                                 AnimatedVisibility(visible = showBottomNavigation.value) {
                                     MotivBottomNavigation(

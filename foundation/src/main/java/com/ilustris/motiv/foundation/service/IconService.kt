@@ -50,6 +50,17 @@ class IconService() : BaseService() {
         }
     }
 
+    override suspend fun deleteData(id: String): ServiceResult<DataException, Boolean> {
+        return try {
+            val data = getSingleData(id).success.data as Icon
+            storageReference().child(data.id.trim()).delete().await()
+            return deleteData(id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ServiceResult.Error(DataException.DELETE)
+        }
+    }
+
     override suspend fun editData(data: BaseBean): ServiceResult<DataException, BaseBean> {
         return try {
             val icon = data as Icon

@@ -1,6 +1,7 @@
 @file:OptIn(
     ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class,
-    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class
+    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
+    ExperimentalAnimationApi::class
 )
 
 package com.ilustris.motivcompose.features.home.ui
@@ -8,7 +9,9 @@ package com.ilustris.motivcompose.features.home.ui
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -16,6 +19,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -137,118 +141,125 @@ fun HomeView(navController: NavController) {
             quotes.size
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-                .animateContentSize(tween(1000, easing = LinearOutSlowInEasing))
-        ) {
-            if (expandedSearch) {
-                IconButton(onClick = {
-                    expandedSearch = false
-                }) {
-                    Icon(Icons.Rounded.Close, contentDescription = "fechar")
-                }
-                TextField(
-                    value = query,
-                    leadingIcon = {
-                        Icon(Icons.Rounded.Search, contentDescription = "Pesquisar")
-                    },
-                    trailingIcon = {
-                        this@Column.AnimatedVisibility(
-                            visible = query.isNotEmpty(),
-                            enter = fadeIn() + scaleIn(),
-                            exit = fadeOut()
-                        ) {
-                            Icon(
-                                Icons.Sharp.Close,
-                                contentDescription = "fechar",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        keyboardController?.hide()
-                                        focusManager.clearFocus()
-                                        query = ""
-                                        homeViewModel.getAllData()
-                                    }
+        AnimatedContent(targetState = expandedSearch, label = "titleContent", transitionSpec = {
+            fadeIn() with fadeOut()
+        }) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .animateContentSize(tween(1000, easing = LinearOutSlowInEasing))
+            ) {
+                if (it) {
+                    IconButton(onClick = {
+                        expandedSearch = false
+                    }) {
+                        Icon(Icons.Rounded.Close, contentDescription = "fechar")
+                    }
+                    TextField(
+                        value = query,
+                        leadingIcon = {
+                            Icon(Icons.Rounded.Search, contentDescription = "Pesquisar")
+                        },
+                        trailingIcon = {
+                            this@Column.AnimatedVisibility(
+                                visible = query.isNotEmpty(),
+                                enter = fadeIn() + scaleIn(),
+                                exit = fadeOut()
+                            ) {
+                                Icon(
+                                    Icons.Sharp.Close,
+                                    contentDescription = "fechar",
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            keyboardController?.hide()
+                                            focusManager.clearFocus()
+                                            query = ""
+                                            homeViewModel.getAllData()
+                                        }
+                                )
+                            }
+
+                        },
+                        onValueChange = {
+                            query = it
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Busque inspirações...",
+                                maxLines = 1,
+                                modifier = Modifier.fillMaxWidth(),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
-                        }
+                        },
+                        shape = RoundedCornerShape(defaultRadius),
+                        singleLine = true,
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Search,
+                            autoCorrect = true
+                        ),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            homeViewModel.searchQuote(query)
+                        }),
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                    },
-                    onValueChange = {
-                        query = it
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Busque inspirações...",
-                            maxLines = 1,
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                    },
-                    shape = RoundedCornerShape(defaultRadius),
-                    singleLine = true,
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Search,
-                        autoCorrect = true
-                    ),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        focusManager.clearFocus()
-                        keyboardController?.hide()
-                        homeViewModel.searchQuote(query)
-                    }),
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-            } else {
-                MotivTitle()
-                IconButton(onClick = {
-                    expandedSearch = !expandedSearch
-                }) {
-                    Icon(Icons.Rounded.Search, contentDescription = "Pesquisar")
+                } else {
+                    MotivTitle()
+                    IconButton(onClick = {
+                        expandedSearch = !expandedSearch
+                    }) {
+                        Icon(Icons.Rounded.Search, contentDescription = "Pesquisar")
+                    }
                 }
             }
         }
 
-        AnimatedVisibility(
-            visible = quotes.size > 0,
-            enter = fadeIn(),
-            exit = scaleOut(),
-            modifier = Modifier
-        ) {
-            VerticalPager(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxSize()
-                    .animateContentSize(tween(1500, easing = LinearOutSlowInEasing)),
-                state = pagerState,
-                pageSpacing = 8.dp,
-                userScrollEnabled = true,
-                pageContent = { index ->
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        QuoteCard(
-                            quotes[index],
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .quoteCardModifier()
-                                .align(Alignment.Center),
-                            quoteActions = quoteActions,
-                        )
+        AnimatedContent(
+            targetState = quotes.isNotEmpty(),
+            label = "quoteContent",
+            transitionSpec = {
+                fadeIn() with fadeOut()
+            }) {
+            if (it) {
+                VerticalPager(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxSize()
+                        .animateContentSize(tween(1500, easing = LinearOutSlowInEasing)),
+                    state = pagerState,
+                    pageSpacing = 8.dp,
+                    userScrollEnabled = true,
+                    pageContent = { index ->
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            QuoteCard(
+                                quotes[index],
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .quoteCardModifier()
+                                    .align(Alignment.Center),
+                                quoteActions = quoteActions,
+                            )
+                        }
+
+
                     }
+                )
+            }
 
-
-                }
-            )
         }
 
         ReportDialog(visible = reportVisibility.value, reportFeedback = {

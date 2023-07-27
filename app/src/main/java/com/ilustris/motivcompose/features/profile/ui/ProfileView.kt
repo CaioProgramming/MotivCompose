@@ -7,7 +7,10 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInElastic
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -50,8 +53,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -80,6 +86,7 @@ import com.ilustris.motivcompose.features.profile.presentation.ProfileViewModel
 import com.ilustris.motivcompose.features.profile.ui.component.CounterLabel
 import com.ilustris.motivcompose.features.profile.ui.component.ProfileTab
 import com.ilustris.motiv.foundation.navigation.AppNavigation
+import com.ilustris.motiv.foundation.ui.theme.colorFill
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideImageState
 
@@ -151,7 +158,12 @@ fun ProfileView(userID: String? = null, navController: NavController) {
     val favoriteCount = viewModel.favoriteCount.value ?: 0
     val coverAlpha = animateFloatAsState(
         targetValue = if (canShowData()) 1f else 0f,
-        tween(2000, easing = FastOutSlowInEasing)
+        tween(2000, delayMillis = 1000, easing = FastOutSlowInEasing)
+    )
+    val coverBackColor = animateColorAsState(
+        animationSpec = tween(1000),
+        targetValue = coverBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.colorsFromPalette()
+            ?.first() ?: MaterialTheme.colorScheme.surface
     )
 
 
@@ -159,6 +171,13 @@ fun ProfileView(userID: String? = null, navController: NavController) {
 
     val borderBrush = profileBitmap?.asAndroidBitmap()?.paletteFromBitMap()?.colorsFromPalette()
         ?: motivBrushes()
+
+    val topBackColor = animateColorAsState(
+        targetValue = if (showUserTitle()) MaterialTheme.colorScheme.background else Color.Transparent,
+        tween(1000, easing = EaseIn, delayMillis = 100),
+        label = "tabBackColors"
+    )
+
 
     LaunchedEffect(userQuotes) {
         Log.i("Profile view", "ProfileView: showing ${userQuotes.size} quotes")
@@ -200,7 +219,19 @@ fun ProfileView(userID: String? = null, navController: NavController) {
         )
     }
 
-
+    Box {
+        val avatarSize = 150.dp
+        CardBackground(
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(50.dp, BlurredEdgeTreatment.Unbounded)
+                .alpha(coverAlpha.value)
+                .colorFill(coverBackColor.value),
+            backgroundImage = user?.cover
+        ) {
+            coverBitmap = it
+        }
+    }
     LazyColumn(
         state = listState,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -321,7 +352,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(topBackColor.value)
                             .padding(16.dp)
                             .gradientFill(gradientAnimation(borderBrush))
                     )
@@ -339,12 +370,14 @@ fun ProfileView(userID: String? = null, navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(topBackColor.value)
+
                     ) {
 
                         ProfileFilter.values().forEach {
                             ProfileTab(
                                 buttonText = it.title,
+                                rowColor = coverBackColor.value,
                                 isSelected = it == currentFilter
                             ) {
                                 currentFilter = it

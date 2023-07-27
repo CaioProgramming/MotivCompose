@@ -72,7 +72,6 @@ import kotlin.random.Random
 @Composable
 fun RadioSheet(
     modifier: Modifier,
-    enabled: Boolean = true,
     playingRadio: Radio? = null,
     onSelectRadio: (Radio) -> Unit,
 ) {
@@ -116,13 +115,13 @@ fun RadioSheet(
                 .animateContentSize(tween(2000, easing = EaseInElastic))
         ) {
 
-            val page = Random.nextInt(radios.size - 1)
+            val page = if (radios.size > 1) Random.nextInt(radios.size - 1) else 0
             val pagerState = rememberPagerState(initialPage = page) {
                 radios.size
             }
 
             var speed by remember {
-                mutableFloatStateOf(1f)
+                mutableFloatStateOf(0.5f)
             }
 
             val borderBrush = gradientAnimation(
@@ -148,7 +147,7 @@ fun RadioSheet(
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(12.dp)
+                    .height(24.dp)
                     .gradientFill(brush = borderBrush)
             )
 
@@ -191,7 +190,7 @@ fun RadioSheet(
                     if (radios.isNotEmpty()) {
                         val pagerRadio = radios[pagerState.currentPage]
                         onSelectRadio(pagerRadio)
-                        speed = Random.nextInt(1, 3).toFloat()
+                        speed = (Random.nextInt(1, 5) / 10f)
                     }
                 }
 

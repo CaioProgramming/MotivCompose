@@ -13,6 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -71,6 +72,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -96,6 +98,8 @@ import com.ilustris.motivcompose.R
 import com.ilustris.motivcompose.features.profile.ui.ProfileSheet
 import com.ilustris.motivcompose.features.settings.presentation.SettingsViewModel
 import com.ilustris.motiv.foundation.navigation.AppNavigation
+import com.ilustris.motiv.foundation.ui.theme.gradientFill
+import com.ilustris.motiv.foundation.ui.theme.textColorGradient
 import com.silent.ilustriscore.core.model.ViewModelBaseState
 import com.silent.ilustriscore.core.utilities.DateFormats
 import com.silent.ilustriscore.core.utilities.format
@@ -196,8 +200,9 @@ fun SettingsView(navController: NavController) {
             sheetState = bottomSheetState,
             sheetBackgroundColor = MaterialTheme.colorScheme.background,
             modifier = Modifier
+                .padding(bottom = 50.dp)
                 .fillMaxSize()
-                .background(coverBackColor.value.copy(alpha = 0.4f))
+                .background(coverBackColor.value.copy(alpha = 0.7f))
         ) {
             LazyColumn(
                 modifier = Modifier.wrapContentSize()
@@ -330,53 +335,51 @@ fun SettingsView(navController: NavController) {
                 item {
                     userMetadata.value?.let {
                         if (it.admin) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        navController.navigate(AppNavigation.MANAGER.route)
-                                    }
-                                    .background(
-                                        managerGradient(),
-                                        RoundedCornerShape(defaultRadius),
-                                    )
-                                    .padding(rowPadding),
-                                verticalAlignment = Alignment.CenterVertically
+                            Button(
+                                onClick = {
+                                    navController.navigate(AppNavigation.MANAGER.route)
+                                },
+                                shape = RoundedCornerShape(defaultRadius),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                                        alpha = 0.8f
+                                    ),
+                                    contentColor = MaterialTheme.colorScheme.onBackground
+                                ),
+                                modifier = Modifier.padding(rowPadding)
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.saturn_svgrepo_com),
-                                    contentDescription = null,
-                                    tint = MaterialColor.Black,
+                                Row(
                                     modifier = Modifier
-                                        .background(
-                                            MaterialColor.White.copy(alpha = 0.2f),
-                                            CircleShape
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.saturn_svgrepo_com),
+                                        contentDescription = null,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                    Column() {
+                                        Text(
+                                            text = "Motiv +",
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.SemiBold,
+                                            ),
+                                            textAlign = TextAlign.Start,
+                                            modifier = Modifier.padding(horizontal = textPadding)
                                         )
-                                        .padding(16.dp)
-                                )
-                                Column() {
-                                    Text(
-                                        text = "Motiv +",
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = FontWeight.SemiBold,
-                                        ),
-                                        textAlign = TextAlign.Start,
-                                        color = MaterialColor.Black,
-                                        modifier = Modifier.padding(horizontal = textPadding)
 
-                                    )
+                                        Text(
+                                            text = "Gerencie publicações, estilos e muito mais",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            textAlign = TextAlign.Start,
+                                            modifier = Modifier.padding(horizontal = textPadding)
+                                        )
+                                    }
 
-                                    Text(
-                                        text = "Gerencie publicações, estilos e muito mais",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        textAlign = TextAlign.Start,
-                                        color = MaterialColor.Black,
-                                        modifier = Modifier.padding(horizontal = textPadding)
-                                    )
                                 }
-
                             }
+
                         }
                     }
 
@@ -539,6 +542,20 @@ fun SettingsView(navController: NavController) {
                             modifier = Modifier.padding(8.dp)
                         )
                     }
+                }
+
+                item {
+
+                    Image(
+                        painter = painterResource(id = R.drawable.giphy_mark),
+                        contentDescription = "Powered By Giphy",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .gradientFill(textColorGradient()),
+                        contentScale = ContentScale.Inside
+                    )
+
                 }
 
                 item {

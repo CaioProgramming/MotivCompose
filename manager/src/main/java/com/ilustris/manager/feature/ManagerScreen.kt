@@ -36,6 +36,7 @@ import com.ilustris.manager.R
 import com.ilustris.manager.feature.home.ui.ManagerHomeView
 import com.ilustris.manager.feature.icons.ui.IconsView
 import com.ilustris.manager.feature.covers.ui.CoversScreen
+import com.ilustris.manager.feature.radios.ui.RadiosScreen
 import com.ilustris.manager.feature.styles.ui.StylesScreen
 import com.ilustris.motiv.foundation.ui.theme.MotivTitle
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
@@ -69,6 +70,10 @@ fun ManagerScreen(navController: NavController) {
 
             ManagerFeatures.COVERS -> {
                 CoversScreen()
+            }
+
+            ManagerFeatures.RADIOS -> {
+                RadiosScreen()
             }
         }
     }
@@ -157,8 +162,13 @@ enum class ManagerFeatures(
         "Estilos",
         R.drawable.ic_baseline_architecture_24
     ),
-    ICONS("Ícones", R.drawable.ic_outline_theater_comedy_24), COVERS(
+    ICONS("Ícones", R.drawable.ic_outline_theater_comedy_24),
+    COVERS(
         "Capas",
         R.drawable.ic_baseline_imagesearch_roller_24
+    ),
+    RADIOS(
+        "Rádios",
+        R.drawable.ic_round_radio_24
     )
 }
