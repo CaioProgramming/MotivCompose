@@ -3,7 +3,7 @@ package com.ilustris.manager.feature.icons.presentation
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.data.model.Icon
 import com.ilustris.motiv.foundation.service.IconService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel

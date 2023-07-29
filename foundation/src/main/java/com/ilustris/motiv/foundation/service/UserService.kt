@@ -4,7 +4,7 @@ import android.net.Uri
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.ilustris.motiv.foundation.model.User
+import com.ilustris.motiv.foundation.data.model.User
 import com.silent.ilustriscore.core.bean.BaseBean
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.DataException

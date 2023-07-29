@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.ilustris.motiv.foundation.model.Icon
-import com.ilustris.motiv.foundation.model.Radio
-import com.ilustris.motiv.foundation.model.User
+import com.ilustris.motiv.foundation.data.model.Icon
+import com.ilustris.motiv.foundation.data.model.Radio
+import com.ilustris.motiv.foundation.data.model.User
 import com.ilustris.motiv.foundation.service.IconService
 import com.ilustris.motiv.foundation.service.UserService
 import com.silent.ilustriscore.core.model.BaseViewModel

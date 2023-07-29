@@ -37,8 +37,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ilustris.motiv.foundation.model.Cover
-import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.data.model.Cover
+import com.ilustris.motiv.foundation.data.model.Icon
 import com.ilustris.motiv.foundation.ui.presentation.CoversViewModel
 import com.ilustris.motiv.foundation.ui.presentation.IconsViewModel
 import com.ilustris.motiv.foundation.ui.theme.gradientAnimation

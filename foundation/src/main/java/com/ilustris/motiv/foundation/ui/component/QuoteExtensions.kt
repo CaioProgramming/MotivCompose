@@ -49,6 +49,7 @@ fun CardBackground(
     modifier: Modifier,
     backgroundImage: String?,
     colorFilter: Color? = Color.Transparent,
+    loadAsGif: Boolean = true,
     loadedBitmap: (ImageBitmap) -> Unit
 ) {
 
@@ -59,7 +60,7 @@ fun CardBackground(
 
     AnimatedContent(targetState = backgroundImage, transitionSpec = {
         fadeIn(tween(1000)) with fadeOut(tween(500))
-    }) {
+    }, label = "") { image ->
         val imageBlur by animateDpAsState(
             targetValue = if (imageLoaded) 0.dp else defaultRadius,
             tween(1500)
@@ -70,7 +71,7 @@ fun CardBackground(
             tween(1500)
         )
         GlideImage(
-            imageModel = { it },
+            imageModel = { image },
             imageOptions = ImageOptions(
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.Center,
@@ -79,7 +80,7 @@ fun CardBackground(
                     blendMode = BlendMode.SrcAtop
                 )
             ),
-            glideRequestType = GlideRequestType.GIF,
+            glideRequestType = if (loadAsGif) GlideRequestType.GIF else GlideRequestType.DRAWABLE,
             modifier = modifier
                 .alpha(imageAlpha)
                 .blur(imageBlur),

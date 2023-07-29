@@ -3,7 +3,7 @@ package com.ilustris.motiv.foundation.utils
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import com.ilustris.motiv.foundation.model.ShadowStyle
+import com.ilustris.motiv.foundation.data.model.ShadowStyle
 
 fun ShadowStyle.buildShadow() =
     Shadow(

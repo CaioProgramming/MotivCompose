@@ -82,7 +82,7 @@ import com.giphy.sdk.ui.themes.GPHTheme
 import com.giphy.sdk.ui.views.GiphyDialogFragment
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.radios.presentation.RadioManagerViewModel
-import com.ilustris.motiv.foundation.model.Radio
+import com.ilustris.motiv.foundation.data.model.Radio
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.ilustris.motiv.foundation.ui.theme.colorsFromPalette

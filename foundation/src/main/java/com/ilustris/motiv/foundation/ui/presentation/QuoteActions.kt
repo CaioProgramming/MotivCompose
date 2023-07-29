@@ -2,7 +2,7 @@ package com.ilustris.motiv.foundation.ui.presentation
 
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Rect
-import com.ilustris.motiv.foundation.model.QuoteDataModel
+import com.ilustris.motiv.foundation.data.model.QuoteDataModel
 
 interface QuoteActions {
 

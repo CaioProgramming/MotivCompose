@@ -6,9 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.ilustris.motiv.foundation.model.Cover
-import com.ilustris.motiv.foundation.model.Icon
-import com.ilustris.motiv.foundation.model.User
+import com.ilustris.motiv.foundation.data.model.Cover
+import com.ilustris.motiv.foundation.data.model.Icon
+import com.ilustris.motiv.foundation.data.model.User
 import com.ilustris.motiv.foundation.service.UserService
 import com.ilustris.motivcompose.features.settings.data.UserMetaData
 import com.silent.ilustriscore.core.model.BaseService

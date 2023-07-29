@@ -58,9 +58,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.palette.graphics.Palette
 import com.ilustris.motiv.foundation.R
-import com.ilustris.motiv.foundation.model.AnimationOptions
-import com.ilustris.motiv.foundation.model.AnimationTransition
-import com.ilustris.motiv.foundation.model.QuoteDataModel
+import com.ilustris.motiv.foundation.data.model.AnimationOptions
+import com.ilustris.motiv.foundation.data.model.AnimationTransition
+import com.ilustris.motiv.foundation.data.model.QuoteDataModel
 import com.ilustris.motiv.foundation.ui.presentation.QuoteActions
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
@@ -101,6 +101,9 @@ fun QuoteCard(
     }
 
     var animationCompleted by remember {
+        mutableStateOf(false)
+    }
+    var sharing by remember {
         mutableStateOf(false)
     }
 
@@ -288,10 +291,13 @@ fun QuoteCard(
         }
 
         Capturable(controller = captureController, onCaptured = { bitmap, error ->
-            bitmap?.let {
-                quoteActions?.onShare(quoteDataModel, it.asAndroidBitmap())
-
+            if (sharing) {
+                bitmap?.let {
+                    quoteActions?.onShare(quoteDataModel, it.asAndroidBitmap())
+                    sharing = false
+                }
             }
+
         }) {
             Column(
                 verticalArrangement = Arrangement.Center, modifier = Modifier
@@ -387,7 +393,10 @@ fun QuoteCard(
             }
 
             IconButton(
-                onClick = { captureController.capture() }, modifier = Modifier.padding(4.dp)
+                onClick = {
+                    sharing = true
+                    captureController.capture()
+                }, modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
                     painterResource(id = R.drawable.share),

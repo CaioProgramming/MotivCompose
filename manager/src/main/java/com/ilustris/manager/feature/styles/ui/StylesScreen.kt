@@ -43,9 +43,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.styles.presentation.StylesViewModel
-import com.ilustris.motiv.foundation.model.DEFAULT_USER_BACKGROUND
-import com.ilustris.motiv.foundation.model.NEW_STYLE_BACKGROUND
-import com.ilustris.motiv.foundation.model.Style
+import com.ilustris.motiv.foundation.data.model.DEFAULT_USER_BACKGROUND
+import com.ilustris.motiv.foundation.data.model.NEW_STYLE_BACKGROUND
+import com.ilustris.motiv.foundation.data.model.Style
 import com.ilustris.motiv.foundation.navigation.AppNavigation
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.silent.ilustriscore.core.model.ViewModelBaseState

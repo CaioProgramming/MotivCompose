@@ -45,7 +45,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.ilustris.motiv.foundation.R
-import com.ilustris.motiv.foundation.model.Quote
+import com.ilustris.motiv.foundation.data.model.Quote
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 
 @Composable

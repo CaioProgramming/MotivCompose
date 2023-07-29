@@ -1,4 +1,4 @@
-package com.ilustris.motiv.foundation.model
+package com.ilustris.motiv.foundation.data.model
 
 import com.google.firebase.Timestamp
 import com.silent.ilustriscore.core.bean.BaseBean
