@@ -206,12 +206,6 @@ class MainActivity : AppCompatActivity() {
                                 expanded = scaffoldState.bottomSheetState.isExpanded,
                                 isPlaying = playing,
                                 enabled = radioEnabled,
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .fillMaxWidth()
-                                    .clip(
-                                        RoundedCornerShape(defaultRadius)
-                                    ),
                                 onSelectRadio = {
                                     radioEnabled = false
                                     playing = false

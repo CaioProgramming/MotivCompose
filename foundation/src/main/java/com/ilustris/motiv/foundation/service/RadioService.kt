@@ -16,13 +16,15 @@ import javax.inject.Inject
 
 class RadioService @Inject constructor(
     private val preferencesService: PreferencesService,
-    val radioHelper: RadioHelper
+    private val radioHelper: RadioHelper
 ) : BaseService() {
     override val dataPath: String = "Radios"
     override var requireAuth = true
     private fun storageInstance() = FirebaseStorage.getInstance()
     private fun storageReference() = FirebaseStorage.getInstance().reference.child(dataPath)
-    private fun getRadioLocalFile(radioId: String) = preferencesService.getStringValue(radioId)
+
+    private fun getRadioLocalFile(radioId: String) =
+        radioHelper.getRadioFile(preferencesService.getStringValue(radioId))
 
 
     override fun deserializeDataSnapshot(dataSnapshot: DocumentSnapshot): BaseBean? =
@@ -33,13 +35,13 @@ class RadioService @Inject constructor(
             if (localRadioFile == null) {
                 saveRadioFile(this)
             } else {
-                url = localRadioFile
+                url = localRadioFile.absolutePath
                 savedLocal = true
             }
         }
 
     private fun saveRadioFile(radio: Radio) {
-        val radioFile = radioHelper.getRadioFile(radio.name)
+        val radioFile = radioHelper.createRadioFile(radio.name)
         val downloadReference = storageInstance().getReferenceFromUrl(radio.url)
         downloadReference.getFile(radioFile).addOnCompleteListener {
             if (it.isSuccessful) {

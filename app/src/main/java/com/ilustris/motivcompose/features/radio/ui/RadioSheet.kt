@@ -105,7 +105,6 @@ import kotlin.random.Random
 
 @Composable
 fun RadioSheet(
-    modifier: Modifier,
     playingRadio: Radio? = null,
     enabled: Boolean = true,
     expanded: Boolean = false,
@@ -158,12 +157,8 @@ fun RadioSheet(
         } else emptyList()
 
         val radioIndex = playingRadio?.let { radios.indexOf(playingRadio) } ?: 0
-        var visualizerBitmap by remember {
-            mutableStateOf<Bitmap?>(null)
-        }
 
-        val currentBitmapColors = visualizerBitmap?.paletteFromBitMap()?.colorsFromPalette()
-        val currentRadioBrush = gradientAnimation(currentBitmapColors ?: grayBrushes())
+
 
         AnimatedContent(
             targetState = playingRadio,
@@ -182,6 +177,15 @@ fun RadioSheet(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+                var visualizerBitmap by remember {
+                    mutableStateOf<Bitmap?>(null)
+                }
+
+                val currentBitmapColors = visualizerBitmap?.paletteFromBitMap()?.colorsFromPalette()
+                val currentRadioBrush = gradientAnimation(currentBitmapColors ?: grayBrushes())
+
+
                 val forwardButtonAlpha = animateFloatAsState(
                     targetValue = if (radioIndex == radios.size - 1) 0f else 1f,
                     tween(1500, easing = EaseInElastic),
@@ -208,7 +212,9 @@ fun RadioSheet(
                         ),
                     backgroundImage = targetRadio?.visualizer,
                     loadedBitmap = {
-                        visualizerBitmap = it.asAndroidBitmap()
+                        if (visualizerBitmap == null) {
+                            visualizerBitmap = it.asAndroidBitmap()
+                        }
                     }
                 )
                 Text(
