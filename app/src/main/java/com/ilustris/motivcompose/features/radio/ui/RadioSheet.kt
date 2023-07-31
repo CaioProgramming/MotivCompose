@@ -10,7 +10,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInElastic
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -60,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -142,202 +145,153 @@ fun RadioSheet(
     )
 
 
-    AnimatedContent(
-        targetState = expanded, transitionSpec = { fadeIn() togetherWith fadeOut() },
-        label = "Expand animation"
+
+    AnimatedVisibility(
+        visible = state is ViewModelBaseState.DataListRetrievedState,
+        enter = slideInVertically() + fadeIn(
+            tween(1000)
+        ),
+        exit = fadeOut(),
     ) {
+        val radios = if (state is ViewModelBaseState.DataListRetrievedState) {
+            state.dataList as List<Radio>
+        } else emptyList()
 
-        AnimatedVisibility(
-            visible = state is ViewModelBaseState.DataListRetrievedState,
-            enter = slideInVertically() + fadeIn(
-                tween(1000)
-            ),
-            exit = fadeOut(),
-        ) {
-            val radios = if (state is ViewModelBaseState.DataListRetrievedState) {
-                state.dataList as List<Radio>
-            } else emptyList()
+        val radioIndex = playingRadio?.let { radios.indexOf(playingRadio) } ?: 0
+        var visualizerBitmap by remember {
+            mutableStateOf<Bitmap?>(null)
+        }
 
-            val radioIndex = playingRadio?.let { radios.indexOf(playingRadio) } ?: 0
-            var visualizerBitmap by remember {
-                mutableStateOf<Bitmap?>(null)
-            }
+        val currentBitmapColors = visualizerBitmap?.paletteFromBitMap()?.colorsFromPalette()
+        val currentRadioBrush = gradientAnimation(currentBitmapColors ?: grayBrushes())
 
-            val currentBitmapColors = visualizerBitmap?.paletteFromBitMap()?.colorsFromPalette()
-            val currentRadioBrush = gradientAnimation(currentBitmapColors ?: grayBrushes())
-            val visualizerAlpha = animateFloatAsState(
-                targetValue = if (expanded) 1f else 0f, tween(1000),
-                label = "visualizer Alpha"
-            )
-
-            Box {
-                Box(
+        AnimatedContent(
+            targetState = playingRadio,
+            transitionSpec = {
+                fadeIn(tween(2500, easing = LinearOutSlowInEasing)) with fadeOut(
+                    tween(2000, easing = EaseIn)
+                )
+            },
+            label = "radioContent"
+        ) { targetRadio ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .animateContentSize(tween(1000)),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val forwardButtonAlpha = animateFloatAsState(
+                    targetValue = if (radioIndex == radios.size - 1) 0f else 1f,
+                    tween(1500, easing = EaseInElastic),
+                    label = "ForwardAlpha"
+                )
+                val reverseButtonAlpha = animateFloatAsState(
+                    targetValue = if (radioIndex == 0) 0f else 1f,
+                    tween(1500, easing = EaseInElastic),
+                    label = "ForwardAlpha"
+                )
+                if (!expanded) {
+                    WaveAnimation(brush = currentRadioBrush) {
+                        onExpand()
+                    }
+                }
+                CardBackground(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = currentBitmapColors?.first() ?: Color.Transparent)
+                        .padding(16.dp)
+                        .radioIconModifier(
+                            0f,
+                            200.dp,
+                            currentRadioBrush,
+                            5.dp
+                        ),
+                    backgroundImage = targetRadio?.visualizer,
+                    loadedBitmap = {
+                        visualizerBitmap = it.asAndroidBitmap()
+                    }
+                )
+                Text(
+                    text = targetRadio?.name ?: "",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.gradientFill(currentRadioBrush)
                 )
 
-                AnimatedContent(
-                    targetState = playingRadio,
-                    transitionSpec = { scaleIn(tween(1500)) with fadeOut() }, label = "radioContent"
-                ) { targetRadio ->
-                    if (it) {
-                        val forwardButtonAlpha = animateFloatAsState(
-                            targetValue = if (radioIndex == radios.size - 1) 0f else 1f,
-                            tween(1500, easing = EaseInElastic),
-                            label = "ForwardAlpha"
-                        )
-                        val reverseButtonAlpha = animateFloatAsState(
-                            targetValue = if (radioIndex == 0) 0f else 1f,
-                            tween(1500, easing = EaseInElastic),
-                            label = "ForwardAlpha"
-                        )
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(vertical = 16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CardBackground(
-                                modifier = Modifier.radioIconModifier(
-                                    0f,
-                                    300.dp,
-                                    currentRadioBrush,
-                                    4.dp
-                                ),
-                                backgroundImage = targetRadio?.visualizer,
-                                loadedBitmap = {}
-                            )
-                            Text(
-                                text = targetRadio?.name ?: "",
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                if (enabled) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .gradientFill(brush = currentRadioBrush),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
 
-                            LottieAnimation(
-                                wavesAnimation,
-                                waveProgress,
-                                contentScale = ContentScale.FillBounds,
+                        val iconSize = 64.dp
+
+                        IconButton(onClick = {
+                            visualizerBitmap = null
+                            onSelectRadio(radios[radioIndex - 1])
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_round_fast_rewind_24),
+                                contentDescription = "Voltar",
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(24.dp)
-                                    .gradientFill(brush = currentRadioBrush)
-                                    .clickable {
-                                        onExpand()
-                                    }
+                                    .size(iconSize / 2)
+                                    .graphicsLayer(alpha = reverseButtonAlpha.value)
                             )
-
-                            if (enabled) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .gradientFill(brush = textColorGradient()),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-
-                                    val iconSize = 64.dp
-
-
-                                    IconButton(onClick = {
-                                        onSelectRadio(radios[radioIndex - 1])
-                                    }) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_round_fast_rewind_24),
-                                            contentDescription = "Voltar",
-                                            modifier = Modifier
-                                                .size(iconSize / 2)
-                                                .graphicsLayer(alpha = reverseButtonAlpha.value)
-                                        )
-                                    }
-
-
-                                    IconButton(onClick = {
-                                        requestPlayOrPause(!isPlaying)
-                                    }) {
-                                        val currentIcon =
-                                            if (isPlaying) R.drawable.ic_round_play_arrow_24 else R.drawable.ic_round_pause_24
-                                        val description = if (isPlaying) "Play" else "Pause"
-                                        AnimatedContent(
-                                            targetState = currentIcon,
-                                            transitionSpec = {
-                                                scaleIn() with scaleOut()
-                                            },
-                                            label = "PauseAnimation"
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(id = it),
-                                                contentDescription = description,
-                                                modifier = Modifier
-                                                    .size(iconSize)
-                                            )
-                                        }
-                                    }
-
-
-                                    IconButton(onClick = { onSelectRadio(radios[radioIndex + 1]) }) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_round_fast_forward_24),
-                                            contentDescription = "Avançar",
-                                            modifier = Modifier
-                                                .size(iconSize / 2)
-                                                .graphicsLayer(alpha = forwardButtonAlpha.value)
-                                        )
-                                    }
-                                }
-                            } else {
-                                MotivLoader(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .size(64.dp)
-                                )
-                            }
-
                         }
 
-                    } else {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(radioRadius))
-                                .animateContentSize(tween(2000, easing = EaseInElastic))
-                        ) {
 
-                            var speed by remember {
-                                mutableFloatStateOf(0.5f)
+                        IconButton(onClick = {
+                            requestPlayOrPause(!isPlaying)
+                        }) {
+                            val currentIcon =
+                                if (!isPlaying) R.drawable.ic_round_play_arrow_24 else R.drawable.ic_round_pause_24
+                            val description = if (isPlaying) "Play" else "Pause"
+                            AnimatedContent(
+                                targetState = currentIcon,
+                                transitionSpec = {
+                                    scaleIn() with scaleOut()
+                                },
+                                label = "PauseAnimation"
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = it),
+                                    contentDescription = description,
+                                    modifier = Modifier
+                                        .size(iconSize)
+                                )
                             }
+                        }
 
-                            val wavesAnimation by rememberLottieComposition(
-                                LottieCompositionSpec.RawRes(R.raw.waves)
-                            )
 
-                            val waveProgress by animateLottieCompositionAsState(
-                                wavesAnimation,
-                                speed = speed * 0.5f,
-                                isPlaying = true,
-                                restartOnPlay = false,
-                                iterations = LottieConstants.IterateForever
-                            )
-
-                            LottieAnimation(
-                                wavesAnimation,
-                                waveProgress,
-                                contentScale = ContentScale.FillBounds,
+                        IconButton(onClick = {
+                            visualizerBitmap = null
+                            onSelectRadio(radios[radioIndex + 1])
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_round_fast_forward_24),
+                                contentDescription = "Avançar",
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(32.dp)
-                                    .gradientFill(brush = currentRadioBrush)
-                                    .clickable {
-                                        onExpand()
-                                    }
+                                    .size(iconSize / 2)
+                                    .graphicsLayer(alpha = forwardButtonAlpha.value)
                             )
                         }
                     }
+                } else {
+                    MotivLoader(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(64.dp)
+                    )
                 }
-
+                if (expanded) {
+                    WaveAnimation(brush = currentRadioBrush) {
+                        onExpand()
+                    }
+                }
             }
         }
     }
@@ -350,13 +304,43 @@ fun RadioSheet(
     LaunchedEffect(state) {
         if (state is ViewModelBaseState.DataListRetrievedState) {
             val radios = state.dataList as List<Radio>
-
             if (playingRadio == null) {
                 if (radios.isNotEmpty()) {
                     onSelectRadio(radios.random())
-
                 }
             }
         }
     }
+}
+
+@Composable
+fun WaveAnimation(brush: Brush, onClick: () -> Unit) {
+    var speed by remember {
+        mutableFloatStateOf(0.5f)
+    }
+
+    val wavesAnimation by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.waves)
+    )
+
+    val waveProgress by animateLottieCompositionAsState(
+        wavesAnimation,
+        speed = speed * 0.5f,
+        isPlaying = true,
+        restartOnPlay = false,
+        iterations = LottieConstants.IterateForever
+    )
+
+    LottieAnimation(
+        wavesAnimation,
+        waveProgress,
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(32.dp)
+            .gradientFill(brush = brush)
+            .clickable {
+                onClick()
+            }
+    )
 }

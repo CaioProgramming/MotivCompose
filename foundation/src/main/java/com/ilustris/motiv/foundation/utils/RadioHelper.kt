@@ -26,6 +26,12 @@ class RadioHelper @Inject constructor(
         return cachePath
     }
 
+
+    fun getRadioFile(radioId: String): File {
+        val cachePath = getCacheDir()
+        return File(cachePath, "$radioId.mp3")
+    }
+
     fun saveRadioAudio(radioId: String, url: String): ServiceResult<DataException, Boolean> {
         try {
             val uriData = getUrlConnection(url)

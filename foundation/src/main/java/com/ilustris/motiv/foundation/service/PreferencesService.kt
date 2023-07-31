@@ -15,7 +15,8 @@ class PreferencesService(context: Context) {
     fun editPreference(key: String, value: String): ServiceResult<DataException, String> {
         return try {
             getEditor().putString(key, value).commit()
-            ServiceResult.Success("Preferências atualizadas")
+            val message = "Preferências atualizadas, $key: $value"
+            ServiceResult.Success(message)
         } catch (e: Exception) {
             e.printStackTrace()
             Log.e(javaClass.simpleName, "editPreference: Error updating preferences ${e.message}")

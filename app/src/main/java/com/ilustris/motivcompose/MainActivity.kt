@@ -84,14 +84,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun startRadio(radio: Radio, onStartPlay: (Radio) -> Unit, onError: (Radio) -> Unit) {
         try {
-            Log.i(javaClass.simpleName, "startRadio: playing ${radio.name}")
+            Log.i(
+                javaClass.simpleName,
+                "startRadio: playing ${radio.name} with url => ${radio.url}"
+            )
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.stop()
             }
             mediaPlayer.reset()
             mediaPlayer.setDataSource(this, Uri.parse(radio.url))
             mediaPlayer.prepareAsync()
-            mediaPlayer.setVolume(0.5f, 0.5f)
+            mediaPlayer.setVolume(0.2f, 0.2f)
             mediaPlayer.setOnPreparedListener {
                 mediaPlayer.start()
                 onStartPlay(radio)
@@ -171,9 +174,12 @@ class MainActivity : AppCompatActivity() {
                         targetValue = viewBlur, tween(1500, easing = EaseIn),
                         label = "mainBlurAnimation"
                     )
-                    val sheetBackgroundAnimation = animateColorAsState(
-                        targetValue = if (scaffoldState.bottomSheetState.isExpanded) MaterialTheme.colorScheme.surface else Color.Transparent,
-                        tween(500), label = "scaffoldBackground"
+
+                    fun isScaffoldExpanded() = scaffoldState.bottomSheetState.isExpanded
+                    val sheetBackgroundAlpha = animateFloatAsState(
+                        targetValue = if (isScaffoldExpanded()) 0.95f else 0f,
+                        tween(1500),
+                        label = "scaffoldBackgroundAlpha"
                     )
                     val coroutineScope = rememberCoroutineScope()
                     var playing by remember { mutableStateOf(false) }
@@ -198,6 +204,7 @@ class MainActivity : AppCompatActivity() {
                             RadioSheet(
                                 playingRadio = playingRadio,
                                 expanded = scaffoldState.bottomSheetState.isExpanded,
+                                isPlaying = playing,
                                 enabled = radioEnabled,
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)
@@ -205,7 +212,6 @@ class MainActivity : AppCompatActivity() {
                                     .clip(
                                         RoundedCornerShape(defaultRadius)
                                     ),
-                                isPlaying = mediaPlayer.isPlaying,
                                 onSelectRadio = {
                                     radioEnabled = false
                                     playing = false
@@ -237,7 +243,7 @@ class MainActivity : AppCompatActivity() {
                         sheetShape = RoundedCornerShape(defaultRadius),
                         sheetGesturesEnabled = true,
                         sheetPeekHeight = 24.dp,
-                        sheetBackgroundColor = sheetBackgroundAnimation.value,
+                        sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = sheetBackgroundAlpha.value),
                     ) {
                         Scaffold(
                             modifier = Modifier
