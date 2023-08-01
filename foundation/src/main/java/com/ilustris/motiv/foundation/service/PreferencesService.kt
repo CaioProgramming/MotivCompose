@@ -2,13 +2,17 @@ package com.ilustris.motiv.foundation.service
 
 import android.content.Context
 import android.util.Log
+import com.ilustris.motiv.foundation.R
 import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ServiceResult
 
 
 class PreferencesService(context: Context) {
 
-    private val sharedPreferences = context.getSharedPreferences("Sparky", Context.MODE_PRIVATE)
+    private val sharedPreferences = context.getSharedPreferences(
+        context.getString(R.string.app_name).trim().lowercase(),
+        Context.MODE_PRIVATE
+    )
 
     private fun getEditor() = sharedPreferences.edit()
 
