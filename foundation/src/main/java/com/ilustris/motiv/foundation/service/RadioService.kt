@@ -45,16 +45,6 @@ class RadioService @Inject constructor(
             id = dataSnapshot.id
         }
 
-    private fun saveRadioFile(radio: Radio) {
-        val radioFile = radioHelper.createRadioFile(radio.name)
-        val downloadReference = storageInstance().getReferenceFromUrl(radio.url)
-        downloadReference.getFile(radioFile).addOnCompleteListener {
-            if (it.isSuccessful) {
-                preferencesService.editPreference(radio.id, radioFile.path)
-            }
-        }
-    }
-
 
     override suspend fun getAllData(
         limit: Long,
