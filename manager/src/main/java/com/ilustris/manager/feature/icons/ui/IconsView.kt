@@ -54,7 +54,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.icons.presentation.IconsManagerViewModel
-import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.data.model.Icon
 import com.ilustris.motiv.foundation.ui.component.IconView
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius

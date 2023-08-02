@@ -67,9 +67,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -362,8 +364,13 @@ fun SettingsView(navController: NavController) {
                                     Column() {
                                         Text(
                                             text = "Motiv +",
-                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                            style = MaterialTheme.typography.headlineSmall.copy(
                                                 fontWeight = FontWeight.SemiBold,
+                                                shadow = Shadow(
+                                                    MaterialTheme.colorScheme.onBackground,
+                                                    Offset(0f, 3f),
+                                                    10f
+                                                )
                                             ),
                                             textAlign = TextAlign.Start,
                                             modifier = Modifier.padding(horizontal = textPadding)
@@ -424,7 +431,7 @@ fun SettingsView(navController: NavController) {
                                     .padding(rowPadding)
                             ) {
                                 Icon(
-                                    Icons.Rounded.DateRange,
+                                    painter = painterResource(id = R.drawable.ic_calendar_24),
                                     contentDescription = null,
                                     modifier = iconModifier
                                 )
@@ -446,7 +453,7 @@ fun SettingsView(navController: NavController) {
                                 modifier = Modifier.padding(rowPadding)
                             ) {
                                 Icon(
-                                    Icons.Rounded.Lock,
+                                    painterResource(id = R.drawable.ic_lock),
                                     contentDescription = null,
                                     modifier = iconModifier
                                 )
@@ -469,9 +476,9 @@ fun SettingsView(navController: NavController) {
                                     .padding(16.dp)
                             ) {
                                 val icon = if (it.emailVerified) {
-                                    Icons.Rounded.Check
+                                    R.drawable.ic_check_badge
                                 } else {
-                                    Icons.Rounded.Warning
+                                    R.drawable.ic_warning_badge
                                 }
 
                                 val text = if (it.emailVerified) {
@@ -481,7 +488,7 @@ fun SettingsView(navController: NavController) {
                                 }
 
                                 Icon(
-                                    icon,
+                                    painterResource(id = icon),
                                     tint = MaterialColor.Blue400,
                                     contentDescription = null,
                                     modifier = iconModifier

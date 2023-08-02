@@ -33,7 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ilustris.motiv.foundation.model.Radio
+import com.ilustris.motiv.foundation.data.model.Radio
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.gradientOverlay

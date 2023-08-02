@@ -5,7 +5,7 @@ import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.storage.FirebaseStorage
-import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.data.model.Icon
 import com.silent.ilustriscore.core.bean.BaseBean
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.DataException

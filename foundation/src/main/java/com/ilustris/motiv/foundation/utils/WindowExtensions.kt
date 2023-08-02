@@ -35,8 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.R
-import com.ilustris.motiv.foundation.model.User
-import com.ilustris.motiv.foundation.model.Window
+import com.ilustris.motiv.foundation.data.model.User
+import com.ilustris.motiv.foundation.data.model.Window
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.gradientFill
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes

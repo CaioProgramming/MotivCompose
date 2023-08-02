@@ -43,8 +43,8 @@ import com.giphy.sdk.ui.themes.GPHTheme
 import com.giphy.sdk.ui.views.GiphyDialogFragment
 import com.ilustris.manager.R
 import com.ilustris.manager.feature.covers.presentation.CoversViewModel
-import com.ilustris.motiv.foundation.model.Cover
-import com.ilustris.motiv.foundation.model.DEFAULT_USER_BACKGROUND
+import com.ilustris.motiv.foundation.data.model.Cover
+import com.ilustris.motiv.foundation.data.model.DEFAULT_USER_BACKGROUND
 import com.ilustris.motiv.foundation.ui.component.CoverView
 import com.ilustris.motiv.foundation.ui.component.MotivLoader
 import com.silent.ilustriscore.core.model.ViewModelBaseState

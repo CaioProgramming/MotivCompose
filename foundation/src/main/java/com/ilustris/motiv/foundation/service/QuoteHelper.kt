@@ -6,17 +6,20 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
-import com.ilustris.motiv.foundation.model.AnimationProperties
-import com.ilustris.motiv.foundation.model.Quote
-import com.ilustris.motiv.foundation.model.QuoteDataModel
-import com.ilustris.motiv.foundation.model.ShadowStyle
-import com.ilustris.motiv.foundation.model.Style
-import com.ilustris.motiv.foundation.model.StyleProperties
-import com.ilustris.motiv.foundation.model.TextAlignment
-import com.ilustris.motiv.foundation.model.TextProperties
-import com.ilustris.motiv.foundation.model.User
-import com.ilustris.motiv.foundation.model.Window
-import com.ilustris.motiv.foundation.model.quoteList
+import com.ilustris.motiv.foundation.data.model.AnimationOptions
+import com.ilustris.motiv.foundation.data.model.AnimationProperties
+import com.ilustris.motiv.foundation.data.model.AnimationTransition
+import com.ilustris.motiv.foundation.data.model.FontStyle
+import com.ilustris.motiv.foundation.data.model.Quote
+import com.ilustris.motiv.foundation.data.model.QuoteDataModel
+import com.ilustris.motiv.foundation.data.model.ShadowStyle
+import com.ilustris.motiv.foundation.data.model.Style
+import com.ilustris.motiv.foundation.data.model.StyleProperties
+import com.ilustris.motiv.foundation.data.model.TextAlignment
+import com.ilustris.motiv.foundation.data.model.TextProperties
+import com.ilustris.motiv.foundation.data.model.User
+import com.ilustris.motiv.foundation.data.model.Window
+import com.ilustris.motiv.foundation.data.model.quoteList
 import com.silent.ilustriscore.core.model.DataException
 import com.silent.ilustriscore.core.model.ServiceResult
 import java.io.File
@@ -31,8 +34,8 @@ class QuoteHelper @Inject constructor(
     private val fallbackStyle = Style(
         backgroundURL = "https://media.giphy.com/media/5vgHoMiknf5iJl8FH1/giphy.gif",
         animationProperties = AnimationProperties(
-            animation = com.ilustris.motiv.foundation.model.AnimationOptions.TYPE,
-            transition = com.ilustris.motiv.foundation.model.AnimationTransition.LETTERS
+            animation = AnimationOptions.TYPE,
+            transition = AnimationTransition.LETTERS
         ),
         shadowStyle = ShadowStyle(
             radius = 0f,
@@ -43,7 +46,7 @@ class QuoteHelper @Inject constructor(
         textProperties = TextProperties(
             textColor = "#ffffff",
             textAlignment = TextAlignment.CENTER,
-            fontStyle = com.ilustris.motiv.foundation.model.FontStyle.REGULAR,
+            fontStyle = FontStyle.REGULAR,
             fontFamily = "Roboto"
         ),
         styleProperties = StyleProperties(

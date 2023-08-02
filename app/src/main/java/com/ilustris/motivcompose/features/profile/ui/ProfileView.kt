@@ -67,8 +67,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ilustris.motiv.foundation.R
-import com.ilustris.motiv.foundation.model.Quote
-import com.ilustris.motiv.foundation.model.QuoteDataModel
+import com.ilustris.motiv.foundation.data.model.Quote
+import com.ilustris.motiv.foundation.data.model.QuoteDataModel
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.QuoteCard
 import com.ilustris.motiv.foundation.ui.component.ReportDialog
@@ -222,6 +222,7 @@ fun ProfileView(userID: String? = null, navController: NavController) {
     Box {
         val avatarSize = 150.dp
         CardBackground(
+            loadAsGif = false,
             modifier = Modifier
                 .fillMaxSize()
                 .blur(50.dp, BlurredEdgeTreatment.Unbounded)

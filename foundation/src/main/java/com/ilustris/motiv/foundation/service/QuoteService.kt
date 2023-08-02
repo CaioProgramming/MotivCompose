@@ -3,7 +3,7 @@ package com.ilustris.motiv.foundation.service
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.ilustris.motiv.foundation.model.Quote
+import com.ilustris.motiv.foundation.data.model.Quote
 import com.silent.ilustriscore.core.bean.BaseBean
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.DataException

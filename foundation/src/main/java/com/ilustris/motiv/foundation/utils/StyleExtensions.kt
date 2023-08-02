@@ -43,12 +43,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ilustris.motiv.foundation.R
-import com.ilustris.motiv.foundation.model.BlendMode
-import com.ilustris.motiv.foundation.model.DEFAULT_FONT_FAMILY
-import com.ilustris.motiv.foundation.model.FontStyle
-import com.ilustris.motiv.foundation.model.Style
-import com.ilustris.motiv.foundation.model.TextAlignment
-import com.ilustris.motiv.foundation.model.Window
+import com.ilustris.motiv.foundation.data.model.BlendMode
+import com.ilustris.motiv.foundation.data.model.DEFAULT_FONT_FAMILY
+import com.ilustris.motiv.foundation.data.model.FontStyle
+import com.ilustris.motiv.foundation.data.model.Style
+import com.ilustris.motiv.foundation.data.model.TextAlignment
+import com.ilustris.motiv.foundation.data.model.Window
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.ilustris.motiv.foundation.ui.theme.motivBrushes
 
