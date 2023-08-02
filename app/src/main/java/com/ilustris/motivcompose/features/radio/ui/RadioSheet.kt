@@ -196,10 +196,18 @@ fun RadioSheet(
                     tween(1500, easing = EaseInElastic),
                     label = "ForwardAlpha"
                 )
-                if (!expanded) {
-                    WaveAnimation(brush = currentRadioBrush) {
-                        onExpand()
-                    }
+
+                var collapsedAlphaAnimation =
+                    animateFloatAsState(targetValue = if (!expanded) 1f else 0f, tween(1000))
+                var expandedAlphaAnimation =
+                    animateFloatAsState(targetValue = if (expanded) 1f else 0f, tween(1000))
+
+
+                WaveAnimation(
+                    brush = currentRadioBrush,
+                    modifier = Modifier.alpha(collapsedAlphaAnimation.value)
+                ) {
+                    onExpand()
                 }
                 CardBackground(
                     modifier = Modifier
@@ -291,12 +299,14 @@ fun RadioSheet(
                         modifier = Modifier
                             .padding(16.dp)
                             .size(64.dp)
+                            .gradientFill(currentRadioBrush)
                     )
                 }
-                if (expanded) {
-                    WaveAnimation(brush = currentRadioBrush) {
-                        onExpand()
-                    }
+                WaveAnimation(
+                    brush = currentRadioBrush,
+                    Modifier.alpha(expandedAlphaAnimation.value)
+                ) {
+                    onExpand()
                 }
             }
         }
@@ -320,10 +330,8 @@ fun RadioSheet(
 }
 
 @Composable
-fun WaveAnimation(brush: Brush, onClick: () -> Unit) {
-    var speed by remember {
-        mutableFloatStateOf(0.5f)
-    }
+fun WaveAnimation(brush: Brush, modifier: Modifier, onClick: () -> Unit) {
+
 
     val wavesAnimation by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.waves)
@@ -331,7 +339,7 @@ fun WaveAnimation(brush: Brush, onClick: () -> Unit) {
 
     val waveProgress by animateLottieCompositionAsState(
         wavesAnimation,
-        speed = speed * 0.5f,
+        speed = 1f,
         isPlaying = true,
         restartOnPlay = false,
         iterations = LottieConstants.IterateForever
@@ -341,7 +349,7 @@ fun WaveAnimation(brush: Brush, onClick: () -> Unit) {
         wavesAnimation,
         waveProgress,
         contentScale = ContentScale.FillBounds,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(32.dp)
             .gradientFill(brush = brush)

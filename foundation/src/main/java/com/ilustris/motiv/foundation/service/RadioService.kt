@@ -29,15 +29,20 @@ class RadioService @Inject constructor(
 
     override fun deserializeDataSnapshot(dataSnapshot: DocumentSnapshot): BaseBean? =
         dataSnapshot.toObject(Radio::class.java)?.apply {
-            id = dataSnapshot.id
-            val localRadioFile = getRadioLocalFile(dataSnapshot.id)
-            savedLocal = localRadioFile != null
-            if (localRadioFile == null) {
-                saveRadioFile(this)
-            } else {
-                url = localRadioFile.absolutePath
-                savedLocal = true
+            preferencesService.getStringValue(dataSnapshot.id)?.let {
+                url = it
+            } ?: kotlin.run {
             }
+            id = dataSnapshot.id
+        }
+
+    override fun deserializeDataSnapshot(dataSnapshot: QueryDocumentSnapshot): BaseBean =
+        dataSnapshot.toObject(Radio::class.java).apply {
+            preferencesService.getStringValue(dataSnapshot.id)?.let {
+                url = it
+            } ?: kotlin.run {
+            }
+            id = dataSnapshot.id
         }
 
     private fun saveRadioFile(radio: Radio) {
@@ -50,16 +55,6 @@ class RadioService @Inject constructor(
         }
     }
 
-    override fun deserializeDataSnapshot(dataSnapshot: QueryDocumentSnapshot): BaseBean =
-        dataSnapshot.toObject(Radio::class.java).apply {
-            preferencesService.getStringValue(dataSnapshot.id)?.let {
-                url = it
-                savedLocal = true
-            } ?: kotlin.run {
-                savedLocal = false
-            }
-            id = dataSnapshot.id
-        }
 
     override suspend fun getAllData(
         limit: Long,

@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 
                     fun isScaffoldExpanded() = scaffoldState.bottomSheetState.isExpanded
                     val sheetBackgroundAlpha = animateFloatAsState(
-                        targetValue = if (isScaffoldExpanded()) 0.95f else 0f,
+                        targetValue = if (isScaffoldExpanded()) 0.75f else 0f,
                         tween(1500),
                         label = "scaffoldBackgroundAlpha"
                     )
@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity() {
                         sheetShape = RoundedCornerShape(defaultRadius),
                         sheetGesturesEnabled = true,
                         sheetPeekHeight = 24.dp,
-                        sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = sheetBackgroundAlpha.value),
+                        sheetBackgroundColor = MaterialTheme.colorScheme.background.copy(alpha = sheetBackgroundAlpha.value),
                     ) {
                         Scaffold(
                             modifier = Modifier

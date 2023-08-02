@@ -80,6 +80,9 @@ fun CardBackground(
                     blendMode = BlendMode.SrcAtop
                 )
             ),
+            loading = {
+                MotivLoader(modifier = Modifier.align(Alignment.Center))
+            },
             glideRequestType = if (loadAsGif) GlideRequestType.GIF else GlideRequestType.DRAWABLE,
             modifier = modifier
                 .alpha(imageAlpha)
