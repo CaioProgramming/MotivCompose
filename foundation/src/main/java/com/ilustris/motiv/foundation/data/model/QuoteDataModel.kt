@@ -1,4 +1,4 @@
-package com.ilustris.motiv.foundation.model
+package com.ilustris.motiv.foundation.data.model
 
 import android.graphics.Typeface
 

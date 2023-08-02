@@ -1,7 +1,7 @@
 package com.ilustris.manager.feature.styles.presentation
 
 import android.app.Application
-import com.ilustris.motiv.foundation.model.Style
+import com.ilustris.motiv.foundation.data.model.Style
 import com.ilustris.motiv.foundation.service.StyleService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel

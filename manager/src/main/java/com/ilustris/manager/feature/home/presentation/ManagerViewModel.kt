@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.ilustris.motiv.foundation.model.Quote
-import com.ilustris.motiv.foundation.model.QuoteDataModel
-import com.ilustris.motiv.foundation.model.Report
+import com.ilustris.motiv.foundation.data.model.Quote
+import com.ilustris.motiv.foundation.data.model.QuoteDataModel
+import com.ilustris.motiv.foundation.data.model.Report
 import com.ilustris.motiv.foundation.service.QuoteHelper
 import com.ilustris.motiv.foundation.service.QuoteService
 import com.silent.ilustriscore.core.model.BaseService

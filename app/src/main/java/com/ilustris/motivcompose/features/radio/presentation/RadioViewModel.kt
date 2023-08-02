@@ -3,7 +3,7 @@ package com.ilustris.motivcompose.features.radio.presentation
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.ilustris.motiv.foundation.model.Radio
+import com.ilustris.motiv.foundation.data.model.Radio
 import com.ilustris.motiv.foundation.service.RadioService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel

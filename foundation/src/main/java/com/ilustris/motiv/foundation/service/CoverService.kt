@@ -2,7 +2,7 @@ package com.ilustris.motiv.foundation.service
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.ilustris.motiv.foundation.model.Cover
+import com.ilustris.motiv.foundation.data.model.Cover
 import com.silent.ilustriscore.core.model.BaseService
 
 class CoverService : BaseService() {

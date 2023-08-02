@@ -8,6 +8,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import com.ilustris.motiv.foundation.model.AnimationOptions
-import com.ilustris.motiv.foundation.model.AnimationTransition
+import com.ilustris.motiv.foundation.data.model.AnimationOptions
+import com.ilustris.motiv.foundation.data.model.AnimationTransition
 import com.ilustris.motiv.foundation.utils.getDelay
 import com.ilustris.motiv.foundation.utils.getEnterAnimation
 import com.ilustris.motiv.foundation.utils.getExitAnimation
@@ -53,11 +54,11 @@ fun AnimatedText(
             }
 
             AnimationTransition.WORDS -> {
-                text.split(" ").mapIndexed { index, s -> index }
+                text.split("\\s+".toRegex()).mapIndexed { index, s -> index }
             }
 
             AnimationTransition.LINES -> {
-                text.split("\n").mapIndexed { index, s -> index }
+                text.split("\r?\n|\r".toRegex()).mapIndexed { index, s -> index }
             }
         }.plus(text.length)
     }
@@ -106,24 +107,16 @@ fun AnimatedText(
         }
     }
 
-    AnimatedContent(
-        targetState = textPart,
-        transitionSpec = { EnterTransition.None with ExitTransition.None }, label = "AnimatedText"
-    ) { targetText ->
         Text(
-            text = targetText,
+            text = textPart,
             style = textStyle,
-            modifier = modifier.animateEnterExit(
-                enter = animation.getEnterAnimation(),
-                exit = animation.getExitAnimation()
-            ),
+            modifier = modifier.animateContentSize(tween(1000, easing = EaseIn)),
             onTextLayout = { textLayoutResult ->
                 if (textLayoutResult.didOverflowHeight && isAnimationComplete()) {
                     style = textStyle.copy(fontSize = textStyle.fontSize * 0.7)
                 }
             }
         )
-    }
 
     LaunchedEffect(text) {
         if (animationEnabled) {

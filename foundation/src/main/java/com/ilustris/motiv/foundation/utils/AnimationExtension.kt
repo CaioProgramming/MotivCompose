@@ -10,29 +10,29 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.with
-import com.ilustris.motiv.foundation.model.AnimationOptions
+import com.ilustris.motiv.foundation.data.model.AnimationOptions
 
 
 fun AnimationOptions.getEnterAnimation(): EnterTransition {
     return when (this) {
-        AnimationOptions.TYPE -> fadeIn(tween(50))
-        AnimationOptions.FADE -> fadeIn(tween(1500))
+        AnimationOptions.TYPE -> fadeIn(tween(1000))
+        AnimationOptions.FADE -> fadeIn(tween(500))
         AnimationOptions.SCALE -> scaleIn(tween(1000))
     }
 }
 
 fun AnimationOptions.getExitAnimation(): ExitTransition {
     return when (this) {
-        AnimationOptions.TYPE -> fadeOut(tween(5))
-        AnimationOptions.FADE -> fadeOut(tween(5))
-        AnimationOptions.SCALE -> fadeOut(tween(5))
+        AnimationOptions.TYPE -> fadeOut(tween(1200))
+        AnimationOptions.FADE -> fadeOut(tween(1300))
+        AnimationOptions.SCALE -> fadeOut(tween(1400))
     }
 }
 
 fun AnimationOptions.getDelay(): Float {
     return when (this) {
-        AnimationOptions.TYPE -> 100f
-        AnimationOptions.FADE -> 500f
-        AnimationOptions.SCALE -> 900f
+        AnimationOptions.TYPE -> 25f
+        AnimationOptions.FADE -> 100f
+        AnimationOptions.SCALE -> 300f
     }
 }

@@ -67,7 +67,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
-import com.ilustris.motiv.foundation.model.Quote
+import com.ilustris.motiv.foundation.data.model.Quote
 import com.ilustris.motiv.foundation.ui.component.CardBackground
 import com.ilustris.motiv.foundation.ui.component.StyleIcon
 import com.ilustris.motiv.foundation.ui.theme.brushsFromPalette

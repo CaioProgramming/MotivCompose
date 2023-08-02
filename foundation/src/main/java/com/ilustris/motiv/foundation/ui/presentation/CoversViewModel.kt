@@ -1,7 +1,7 @@
 package com.ilustris.motiv.foundation.ui.presentation
 
 import android.app.Application
-import com.ilustris.motiv.foundation.model.Icon
+import com.ilustris.motiv.foundation.data.model.Icon
 import com.ilustris.motiv.foundation.service.CoverService
 import com.ilustris.motiv.foundation.service.IconService
 import com.silent.ilustriscore.core.model.BaseService

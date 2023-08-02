@@ -6,8 +6,8 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
-import com.ilustris.motiv.foundation.model.Quote
-import com.ilustris.motiv.foundation.model.Style
+import com.ilustris.motiv.foundation.data.model.Quote
+import com.ilustris.motiv.foundation.data.model.Style
 import com.ilustris.motiv.foundation.service.QuoteService
 import com.ilustris.motiv.foundation.service.StyleService
 import com.silent.ilustriscore.core.model.BaseService

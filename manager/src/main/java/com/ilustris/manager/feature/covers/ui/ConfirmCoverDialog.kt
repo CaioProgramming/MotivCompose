@@ -29,8 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.ilustris.manager.R
-import com.ilustris.motiv.foundation.model.Cover
-import com.ilustris.motiv.foundation.model.DEFAULT_USER_BACKGROUND
+import com.ilustris.motiv.foundation.data.model.Cover
+import com.ilustris.motiv.foundation.data.model.DEFAULT_USER_BACKGROUND
 import com.ilustris.motiv.foundation.ui.theme.defaultRadius
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.glide.GlideRequestType

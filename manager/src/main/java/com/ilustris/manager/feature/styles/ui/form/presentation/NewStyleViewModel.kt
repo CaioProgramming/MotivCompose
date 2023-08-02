@@ -2,11 +2,11 @@ package com.ilustris.manager.feature.styles.ui.form.presentation
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import com.ilustris.motiv.foundation.model.AnimationProperties
-import com.ilustris.motiv.foundation.model.ShadowStyle
-import com.ilustris.motiv.foundation.model.Style
-import com.ilustris.motiv.foundation.model.StyleProperties
-import com.ilustris.motiv.foundation.model.TextProperties
+import com.ilustris.motiv.foundation.data.model.AnimationProperties
+import com.ilustris.motiv.foundation.data.model.ShadowStyle
+import com.ilustris.motiv.foundation.data.model.Style
+import com.ilustris.motiv.foundation.data.model.StyleProperties
+import com.ilustris.motiv.foundation.data.model.TextProperties
 import com.ilustris.motiv.foundation.service.StyleService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel

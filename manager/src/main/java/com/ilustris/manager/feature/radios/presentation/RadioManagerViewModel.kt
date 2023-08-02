@@ -1,7 +1,7 @@
 package com.ilustris.manager.feature.radios.presentation
 
 import android.app.Application
-import com.ilustris.motiv.foundation.model.Radio
+import com.ilustris.motiv.foundation.data.model.Radio
 import com.ilustris.motiv.foundation.service.RadioService
 import com.silent.ilustriscore.core.model.BaseService
 import com.silent.ilustriscore.core.model.BaseViewModel
